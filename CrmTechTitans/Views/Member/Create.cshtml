@@ -1,0 +1,115 @@
+﻿@model CrmTechTitans.Models.Member
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="main-content">
+    <!-- Page Header -->
+    <div class="page-header text-center">
+        <h1>Create Member</h1>
+        <p class="text-muted">Fill in the details below to add a new member to the database.</p>
+    </div>
+
+    <!-- Form Section -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-sm-12">
+            <form asp-action="Create" class="form-horizontal shadow-lg p-5 bg-white rounded">
+                <!-- Validation Summary -->
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+
+                <!-- Member Name -->
+                <div class="form-group mb-4">
+                    <label asp-for="MemberName" class="control-label fw-bold">Member Name</label>
+                    <input asp-for="MemberName" class="form-control" placeholder="Enter member name" />
+                    <span asp-validation-for="MemberName" class="text-danger"></span>
+                </div>
+
+                <!-- Membership Type -->
+                <div class="form-group mb-4">
+                    <label asp-for="MembershipType" class="control-label fw-bold">Membership Type</label>
+                    <select asp-for="MembershipType" class="form-select">
+                        <option value="">-- Select Membership Type --</option>
+                        <!-- Add dynamic options here -->
+                    </select>
+                    <span asp-validation-for="MembershipType" class="text-danger"></span>
+                </div>
+
+                <!-- Contacted By -->
+                <div class="form-group mb-4">
+                    <label asp-for="ContactedBy" class="control-label fw-bold">Contacted By</label>
+                    <input asp-for="ContactedBy" class="form-control" placeholder="Enter contact person" />
+                    <span asp-validation-for="ContactedBy" class="text-danger"></span>
+                </div>
+
+                <!-- Company Size -->
+                <div class="form-group mb-4">
+                    <label asp-for="CompanySize" class="control-label fw-bold">Company Size</label>
+                    <select asp-for="CompanySize" class="form-select">
+                        <option value="">-- Select Company Size --</option>
+                    </select>
+                    <span asp-validation-for="CompanySize" class="text-danger"></span>
+                </div>
+
+                <!-- Company Website -->
+                <div class="form-group mb-4">
+                    <label asp-for="CompanyWebsite" class="control-label fw-bold">Company Website</label>
+                    <input asp-for="CompanyWebsite" class="form-control" placeholder="Enter company website" />
+                    <span asp-validation-for="CompanyWebsite" class="text-danger"></span>
+                </div>
+
+                <!-- Member Since -->
+                <div class="form-group mb-4">
+                    <label asp-for="MemberSince" class="control-label fw-bold">Member Since</label>
+                    <input asp-for="MemberSince" class="form-control" type="date" />
+                    <span asp-validation-for="MemberSince" class="text-danger"></span>
+                </div>
+
+                <!-- Last Contact Date -->
+                <div class="form-group mb-4">
+                    <label asp-for="LastContactDate" class="control-label fw-bold">Last Contact Date</label>
+                    <input asp-for="LastContactDate" class="form-control" type="date" />
+                    <span asp-validation-for="LastContactDate" class="text-danger"></span>
+                </div>
+
+                <!-- Notes -->
+                <div class="form-group mb-4">
+                    <label asp-for="Notes" class="control-label fw-bold">Notes</label>
+                    <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Enter any additional notes"></textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+
+                <!-- Membership Status -->
+                <div class="form-group mb-4">
+                    <label asp-for="MembershipStatus" class="control-label fw-bold">Membership Status</label>
+                    <select asp-for="MembershipStatus" class="form-select">
+                        <option value="">-- Select Membership Status --</option>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                    <span asp-validation-for="MembershipStatus" class="text-danger"></span>
+                </div>
+
+                <!-- Submit and Cancel Buttons -->
+                <div class="form-group text-end mt-4">
+                    <input type="submit" value="Create" class="btn btn-primary me-3 px-4 py-2" />
+                    <a asp-action="Index" class="btn btn-secondary px-4 py-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Back to List Button -->
+    <div class="text-center mt-4">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

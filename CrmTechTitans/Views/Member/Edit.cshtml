@@ -1,0 +1,110 @@
+﻿@model CrmTechTitans.Models.Member
+
+@{
+    ViewData["Title"] = "Edit Member";
+}
+
+<div class="main-content">
+    <!-- Page Header -->
+    <div class="page-header text-center">
+        <h1>Edit Member</h1>
+        <p class="text-muted">Modify the details of the selected member. Ensure all details are correct before saving.</p>
+    </div>
+
+    <!-- Edit Form Section -->
+    <div class="details-section bg-white p-4 rounded shadow-sm mx-auto" style="max-width: 800px;">
+        <h4 class="text-danger mb-4 text-center">Edit Member Information</h4>
+        <form asp-action="Edit" class="form-horizontal">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="ID" />
+
+            <table class="table table-borderless table-sm">
+                <tbody>
+                    <tr>
+                        <th class="col-sm-3 text-end text-danger fw-bold">Name:</th>
+                        <td class="col-sm-9">
+                            <input asp-for="MemberName" class="form-control" placeholder="Enter Member Name" />
+                            <span asp-validation-for="MemberName" class="text-danger"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="col-sm-3 text-end text-danger fw-bold">Membership Type:</th>
+                        <td class="col-sm-9">
+                            <select asp-for="MembershipType" class="form-control">
+                            </select>
+                            <span asp-validation-for="MembershipType" class="text-danger"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="col-sm-3 text-end text-danger fw-bold">Contacted By:</th>
+                        <td class="col-sm-9">
+                            <input asp-for="ContactedBy" class="form-control" placeholder="Enter Contact Person" />
+                            <span asp-validation-for="ContactedBy" class="text-danger"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="col-sm-3 text-end text-danger fw-bold">Company Size:</th>
+                        <td class="col-sm-9">
+                            <select asp-for="CompanySize" class="form-control">
+                                <!-- Populate dynamically -->
+                            </select>
+                            <span asp-validation-for="CompanySize" class="text-danger"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-end text-danger fw-bold pe-3">Website:</th>
+                        <td>
+                            <a href="@Model.CompanyWebsite" target="_blank" rel="noopener noreferrer" class="web-link">
+                                <i class="fas fa-external-link-alt me-1"></i>@Html.DisplayFor(model => model.CompanyWebsite)
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="col-sm-3 text-end text-danger fw-bold">Member Since:</th>
+                        <td class="col-sm-9">
+                            <input asp-for="MemberSince" class="form-control" type="date" />
+                            <span asp-validation-for="MemberSince" class="text-danger"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="col-sm-3 text-end text-danger fw-bold">Last Contact Date:</th>
+                        <td class="col-sm-9">
+                            <input asp-for="LastContactDate" class="form-control" type="date" />
+                            <span asp-validation-for="LastContactDate" class="text-danger"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="col-sm-3 text-end text-danger fw-bold">Notes:</th>
+                        <td class="col-sm-9">
+                            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Enter any additional notes"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="col-sm-3 text-end text-danger fw-bold">Membership Status:</th>
+                        <td class="col-sm-9">
+                            <select asp-for="MembershipStatus" class="form-control">
+                                <!-- Populate dynamically -->
+                            </select>
+                            <span asp-validation-for="MembershipStatus" class="text-danger"></span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Button Section -->
+            <div class="button-container mt-4 text-end">
+                <input type="submit" value="Save" class="btn btn-danger btn-edit me-2" />
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

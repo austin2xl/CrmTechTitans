@@ -1,0 +1,367 @@
+/* Main Content Styling */
+.main-content {
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Page Header Styling */
+.page-header {
+    border-bottom: 2px solid #d42d27;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+
+    .page-header h1 {
+        font-size: 28px;
+        font-weight: bold;
+        color: #d42d27;
+        margin-bottom: 5px;
+    }
+
+    .page-header p {
+        font-size: 16px;
+        color: #555;
+    }
+
+    .page-header .btn-primary {
+        display: inline-block;
+        background-color: #d42d27;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: bold;
+        text-transform: uppercase;
+        text-decoration: none;
+        border: none;
+        border-radius: 5px;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+    }
+
+        .page-header .btn-primary:hover {
+            background-color: #b02421;
+            box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.15);
+        }
+
+/* Table Section Styling */
+.table-section {
+    overflow-x: auto;
+}
+
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 16px;
+    min-width: 800px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+    .styled-table th, .styled-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .styled-table th {
+        background-color: #d42d27;
+        color: white;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .styled-table tr:nth-of-type(even) {
+        background-color: #f8f9fa;
+    }
+
+    .styled-table tr:hover {
+        background-color: #ddd;
+    }
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* Secondary Button Styling */
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #6c757d;
+    color: #fff;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+    .btn-secondary i {
+        margin-right: 5px;
+        font-size: 16px;
+    }
+
+    .btn-secondary:hover {
+        background-color: #565e64;
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+/* Danger Button Styling */
+.btn-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #d42d27;
+    color: #fff;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+    .btn-danger i {
+        margin-right: 5px;
+        font-size: 16px;
+    }
+
+    .btn-danger:hover {
+        background-color: #b02421;
+        box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.15);
+    }
+
+/* Centering Form Containers */
+.col-md-6 {
+    margin: 0 auto;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Styling Labels */
+label.control-label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* Inputs Styling */
+input, select, textarea {
+    margin-bottom: 10px;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #d42d27;
+    border: none;
+    padding: 10px 20px;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 20px;
+}
+
+.btn-link {
+    text-decoration: none;
+    font-size: 16px;
+}
+
+    .btn-link:hover {
+        color: #d42d27;
+        text-decoration: underline;
+    }
+
+/* Button Container for Delete and Cancel */
+.button-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+    .button-container .btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 120px;
+        height: 40px;
+        font-size: 14px;
+        font-weight: bold;
+        text-transform: uppercase;
+        border-radius: 5px;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .button-container .btn-danger {
+        background-color: #d42d27;
+        color: #fff;
+    }
+
+        .button-container .btn-danger:hover {
+            background-color: #b02421;
+            box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.15);
+        }
+
+    .button-container .btn-secondary {
+        background-color: #6c757d;
+        color: #fff;
+    }
+
+        .button-container .btn-secondary:hover {
+            background-color: #565e64;
+            box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.15);
+        }
+
+/* Details Section Styling */
+.details-section {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Website Link Styling */
+.web-link {
+    color: #d42d27; /* Project-specific red */
+    text-decoration: none; /* No underline */
+    font-weight: 600; /* Slightly bold */
+    font-size: 15px; 
+    display: inline-flex; /* Align icon and text */
+    align-items: center; /* Vertical alignment */
+    gap: 6px; /* Space between icon and text */
+    transition: color 0.3s ease, text-decoration 0.3s ease; /* Smooth transition */
+}
+
+    .web-link i {
+        font-size: 14px; /* Icon size */
+        color: #b02421; /* Slightly darker shade for the icon */
+    }
+
+    .web-link:hover {
+        color: #b02421; /* Darker red on hover */
+        text-decoration: underline; /* Add underline on hover */
+    }
+
+/* Action Section Styling */
+.action-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Filter Section Styling */
+.filter-section {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Add space between filters */
+}
+
+/* Search Bar Styling */
+.search-bar {
+    width: 200px; /* Adjust width of the search bar */
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    transition: border-color 0.3s ease;
+}
+
+    .search-bar:focus {
+        border-color: #d42d27; /* Red border on focus */
+        outline: none;
+        box-shadow: 0 0 5px rgba(212, 45, 39, 0.3);
+    }
+
+/* Filter and Sort Dropdown Styling */
+.filter-dropdown, .sort-dropdown {
+    width: 200px; /* Uniform width for dropdowns */
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    transition: border-color 0.3s ease;
+}
+
+    .filter-dropdown:focus, .sort-dropdown:focus {
+        border-color: #d42d27;
+        outline: none;
+        box-shadow: 0 0 5px rgba(212, 45, 39, 0.3);
+    }
+
+/* Apply Button Styling */
+.apply-btn {
+    font-size: 14px;
+    padding: 8px 16px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px; /* Add space between icon and text */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+    .apply-btn:hover {
+        background-color: #565e64;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+/* Create Button Styling */
+.create-btn {
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    background-color: #d42d27;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px; /* Add space between icon and text */
+}
+
+    .create-btn:hover {
+        background-color: #b02421;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    }
+
+/* Table Row Hover Effect */
+.styled-table tbody tr:hover {
+    background-color: #f1f1f1;
+    transition: background-color 0.3s ease;
+}
+
+
+.custom-btn-spacing {
+    margin-top: 30px; 
+}

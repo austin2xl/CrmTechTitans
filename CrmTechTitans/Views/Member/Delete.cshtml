@@ -1,0 +1,76 @@
+﻿@model CrmTechTitans.Models.Member
+
+@{
+    ViewData["Title"] = "Delete Member";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="main-content">
+    <!-- Page Header -->
+    <div class="page-header text-center">
+        <h1>Delete Member</h1>
+        <p class="text-muted">Are you sure you want to delete this member? This action cannot be undone.</p>
+    </div>
+
+    <!-- Member Details Section -->
+    <div class="details-section bg-white p-4 rounded shadow-sm mx-auto" style="max-width: 800px;">
+        <h4 class="text-danger mb-4 text-center">Member Details</h4>
+        <table class="table table-borderless table-sm align-middle">
+            <tbody>
+                <tr>
+                    <th class="text-end text-danger fw-bold pe-3" style="width: 30%;">Member:</th>
+                    <td>@Html.DisplayFor(model => model.MemberName)</td>
+                </tr>
+                <tr>
+                    <th class="text-end text-danger fw-bold pe-3">Membership Type:</th>
+                    <td>@Html.DisplayFor(model => model.MembershipType)</td>
+                </tr>
+                <tr>
+                    <th class="text-end text-danger fw-bold pe-3">Contacted By:</th>
+                    <td>@Html.DisplayFor(model => model.ContactedBy)</td>
+                </tr>
+                <tr>
+                    <th class="text-end text-danger fw-bold pe-3">Company Size:</th>
+                    <td>@Html.DisplayFor(model => model.CompanySize)</td>
+                </tr>
+                <tr>
+                    <th class="text-end text-danger fw-bold pe-3">Website:</th>
+                    <td>
+                        <a href="@Model.CompanyWebsite" target="_blank" rel="noopener noreferrer" class="web-link">
+                            <i class="fas fa-external-link-alt me-1"></i>@Html.DisplayFor(model => model.CompanyWebsite)
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-end text-danger fw-bold pe-3">Member Since:</th>
+                    <td>@Html.DisplayFor(model => model.MemberSince)</td>
+                </tr>
+                <tr>
+                    <th class="text-end text-danger fw-bold pe-3">Last Contact Date:</th>
+                    <td>@Html.DisplayFor(model => model.LastContactDate)</td>
+                </tr>
+                <tr>
+                    <th class="text-end text-danger fw-bold pe-3">Notes:</th>
+                    <td>@Html.DisplayFor(model => model.Notes)</td>
+                </tr>
+                <tr>
+                    <th class="text-end text-danger fw-bold pe-3">Membership Status:</th>
+                    <td>@Html.DisplayFor(model => model.MembershipStatus)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Button Section -->
+    <div class="button-container mt-4 text-end">
+        <form asp-action="Delete" class="d-inline">
+            <input type="hidden" asp-for="ID" />
+            <button type="submit" class="btn btn-danger btn-edit me-2">
+                <i class="fas fa-trash-alt"></i> Delete
+            </button>
+        </form>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Cancel
+        </a>
+    </div>
+</div>

@@ -1,0 +1,50 @@
+﻿@model CrmTechTitans.Models.Address
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<div class="main-content">
+    <div class="page-header">
+        <h1>Address Details</h1>
+        <p>View the details of the selected address below.</p>
+    </div>
+
+    <div class="details-section">
+        <h4>Address</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Street)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Street)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.City)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.City)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Province)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Province)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.PostalCode)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.PostalCode)
+            </dd>
+        </dl>
+    </div>
+
+    <div class="button-container mt-3">
+        <a asp-action="Edit" asp-route-id="@Model?.ID" class="btn btn-primary">Edit</a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>

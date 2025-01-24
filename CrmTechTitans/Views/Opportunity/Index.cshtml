@@ -1,0 +1,67 @@
+﻿@model IEnumerable<CrmTechTitans.Models.Opportunity>
+
+@{
+    ViewData["Title"] = "Opportunities";
+}
+
+<div class="main-content">
+    <!-- Header Section -->
+    <div class="page-header">
+        <h1>Opportunity Management</h1>
+        <p>Manage your opportunities efficiently. Use the "Create New" button to add a new opportunity.</p>
+        <a asp-action="Create" class="btn-primary">Create New</a>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-section">
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>@Html.DisplayNameFor(model => model.Title)</th>
+                    <th>@Html.DisplayNameFor(model => model.Status)</th>
+                    <th>@Html.DisplayNameFor(model => model.Description)</th>
+                    <th>@Html.DisplayNameFor(model => model.Priority)</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center">No opportunities found. Click "Create New" to add an opportunity.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @if (item.MemberOpportunities.Any())
+                                {
+                                    @string.Join(", ", item.MemberOpportunities
+                                             .Where(mc => mc.Member != null)
+                                             .Select(mc => mc.Member.MemberName))
+                                }
+                                else
+                                {
+                                    <span>No Member associated</span>
+                                }
+                            </td>
+                            <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Status)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Priority)</td>
+                            <td class="action-buttons">
+                                <a asp-action="Edit" asp-route-id="@item.ID" class="btn-secondary">Edit</a>
+                                <a asp-action="Details" asp-route-id="@item.ID" class="btn-secondary">Details</a>
+                                <a asp-action="Delete" asp-route-id="@item.ID" class="btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
