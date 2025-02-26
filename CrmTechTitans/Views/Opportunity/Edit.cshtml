@@ -21,7 +21,7 @@
                 <h2 class="member-name">Edit Opportunity</h2>
             </div>
         </div>
-        <form asp-action="Edit">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
             <div class="member-card-content">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" asp-for="ID" />

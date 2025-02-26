@@ -49,14 +49,17 @@ namespace CrmTechTitans.Controllers
             }
 
             var member = await _context.Members
-                .Include(m => m.MemberPhoto)
-                .Include(m => m.MemberContacts)
-                .ThenInclude(mc => mc.Contact)
-                .Include(m => m.MemberAddresses)
-                    .ThenInclude(ma => ma.Address)
-                .Include(m => m.IndustryMembers)
-                    .ThenInclude(im => im.Industry)
-                .FirstOrDefaultAsync(m => m.ID == id);
+                 .Include(m => m.MemberPhoto)
+                 .Include(m => m.MemberContacts)
+                     .ThenInclude(mc => mc.Contact)
+                 .Include(m => m.MemberAddresses)
+                     .ThenInclude(ma => ma.Address)
+                 .Include(m => m.IndustryMembers)
+                     .ThenInclude(im => im.Industry)
+                 .Include(m => m.MemberMembershipTypes)  
+                     .ThenInclude(mmt => mmt.MembershipType)  
+                 .FirstOrDefaultAsync(m => m.ID == id);
+
 
             if (member == null)
             {
@@ -232,12 +235,13 @@ namespace CrmTechTitans.Controllers
                 .Include(m => m.MemberPhoto)
                 .Include(m => m.MemberThumbnail)
                 .Include(m => m.MemberContacts)
-                .ThenInclude(mc => mc.Contact)
-                .Include(m => m.MemberAddresses)
-                    .ThenInclude(ma => ma.Address)
+                    .ThenInclude(mc => mc.Contact)
+                .Include(m => m.MemberAddresses) // Ensure we include addresses
+                    .ThenInclude(ma => ma.Address) // Include the Address entity
                 .Include(m => m.IndustryMembers)
                     .ThenInclude(im => im.Industry)
                 .FirstOrDefaultAsync(m => m.ID == id);
+
 
             if (member == null)
             {
@@ -249,6 +253,13 @@ namespace CrmTechTitans.Controllers
             {
                 ID = member.ID,
                 MemberName = member.MemberName,
+                ContactedBy = member.ContactedBy,
+                CompanySize = member.CompanySize,
+                CompanyWebsite = member.CompanyWebsite,
+                MemberSince = member.MemberSince,
+                LastContactDate = member.LastContactDate,
+                Notes = member.Notes,
+                MembershipStatus = member.MembershipStatus,
                 MemberPhoto = member.MemberPhoto,
                 MemberThumbnail = member.MemberThumbnail,
                 // Map other member properties...
@@ -262,11 +273,14 @@ namespace CrmTechTitans.Controllers
                 }).ToList(),
                 Contacts = member.MemberContacts.Select(mc => new ContactViewModel
                 {
+                    ID = mc.Contact.ID, // Ensure ID is included
                     FirstName = mc.Contact.FirstName,
                     LastName = mc.Contact.LastName,
                     Email = mc.Contact.Email,
                     Phone = mc.Contact.Phone,
-                    ContactType = mc.ContactType
+                    ContactType = mc.ContactType,
+                    ContactPhoto = mc.Contact.ContactPhoto,
+                    ContactThumbnail = mc.Contact.ContactThumbnail
                 }).ToList(),
                 SelectedIndustryIds = member.IndustryMembers.Select(im => im.IndustryID).ToList(), // Selected industry IDs
                 AvailableIndustries = _context.Industries
@@ -295,7 +309,6 @@ namespace CrmTechTitans.Controllers
             {
                 try
                 {
-                   
                     // Fetch the existing member from the database
                     var member = await _context.Members
                         .Include(m => m.MemberPhoto)
@@ -309,114 +322,118 @@ namespace CrmTechTitans.Controllers
                     {
                         return NotFound();
                     }
+
                     // Update Member properties
                     member.MemberName = model.MemberName;
+                    member.ContactedBy = model.ContactedBy;
+                    member.CompanySize = model.CompanySize;
+                    member.CompanyWebsite = model.CompanyWebsite;
+                    member.MemberSince = model.MemberSince;
+                    member.LastContactDate = model.LastContactDate;
+                    member.Notes = model.Notes;
+                    member.MembershipStatus = model.MembershipStatus;
 
-                    // Update other member properties...
-
-                    //For image
+                    // Handle Image Updates
                     if (chkRemoveMemberImage != null)
                     {
-                        var existingPhoto = await _context.MemberPhotos
-                                                           .Where(c => c.MemberID == member.ID)
-                                                           .FirstOrDefaultAsync();
-                        if (existingPhoto != null)
-                        {
-                            _context.MemberPhotos.Remove(existingPhoto);
-                        }
-
-                        var existingThumbnail = await _context.MemberThumbnails
-                                                              .Where(c => c.MemberID == member.ID)
-                                                              .FirstOrDefaultAsync();
-                        if (existingThumbnail != null)
-                        {
-                            _context.MemberThumbnails.Remove(existingThumbnail);
-                        }
-                        //Then, setting them to null will cause them to be deleted from the database.
+                        if (member.MemberPhoto != null)
+                            _context.MemberPhotos.Remove(member.MemberPhoto);
+                        if (member.MemberThumbnail != null)
+                            _context.MemberThumbnails.Remove(member.MemberThumbnail);
                         member.MemberPhoto = null;
                         member.MemberThumbnail = null;
                     }
                     else
                     {
                         await AddMemberPicture(model, memberPicture);
-                        member.MemberPhoto = model.MemberPhoto;
-                        member.MemberThumbnail = model.MemberThumbnail;
+                        if (model.MemberPhoto != null) member.MemberPhoto = model.MemberPhoto;
+                        if (model.MemberThumbnail != null) member.MemberThumbnail = model.MemberThumbnail;
                     }
 
-                    
-                   
-
-                    // Update Addresses
-                    member.MemberAddresses.Clear();
+                    // Update Addresses: Instead of clearing, update existing addresses
                     foreach (var addressModel in model.Addresses)
                     {
-                        var address = new Address
+                        // Ensure Address ID is valid before searching
+                        if (addressModel.ID > 0)
                         {
-                            Street = addressModel.Street,
-                            City = addressModel.City,
-                            Province = addressModel.Province,
-                            PostalCode = addressModel.PostalCode
-                        };
-                        member.MemberAddresses.Add(new MemberAddress { Address = address, AddressType = addressModel.AddressType });
+                            var existingAddress = member.MemberAddresses
+                                .FirstOrDefault(a => a.Address != null && a.Address.ID == addressModel.ID);
+
+                            if (existingAddress != null)
+                            {
+                                // Update existing address
+                                existingAddress.Address.Street = addressModel.Street;
+                                existingAddress.Address.City = addressModel.City;
+                                existingAddress.Address.Province = addressModel.Province;
+                                existingAddress.Address.PostalCode = addressModel.PostalCode;
+                                existingAddress.AddressType = addressModel.AddressType;
+                            }
+                            else
+                            {
+                                // Add a new address if it doesn't exist
+                                member.MemberAddresses.Add(new MemberAddress
+                                {
+                                    Address = new Address
+                                    {
+                                        Street = addressModel.Street,
+                                        City = addressModel.City,
+                                        Province = addressModel.Province,
+                                        PostalCode = addressModel.PostalCode
+                                    },
+                                    AddressType = addressModel.AddressType
+                                });
+                            }
+                        }
                     }
 
-                    // Update Contacts
-                    member.MemberContacts.Clear();
+
+                    // Update Contacts: Instead of clearing, update existing contacts
                     foreach (var contactModel in model.Contacts)
                     {
-                        
-                        var contact = new Contact
+                        var existingContact = member.MemberContacts.FirstOrDefault(c => c.Contact.ID == contactModel.ID);
+                        if (existingContact != null)
                         {
-                            FirstName = contactModel.FirstName,
-                            LastName = contactModel.LastName,
-                            Email = contactModel.Email,
-                            Phone = contactModel.Phone,
-                            ContactPhoto = contactModel.ContactPhoto,
-                            ContactThumbnail = contactModel.ContactThumbnail
-                        };
-                        member.MemberContacts.Add(new MemberContact { Contact = contact, ContactType = contactModel.ContactType });
+                            existingContact.Contact.FirstName = contactModel.FirstName;
+                            existingContact.Contact.LastName = contactModel.LastName;
+                            existingContact.Contact.Email = contactModel.Email;
+                            existingContact.Contact.Phone = contactModel.Phone;
+                            existingContact.ContactType = contactModel.ContactType;
+                        }
+                        else
+                        {
+                            member.MemberContacts.Add(new MemberContact
+                            {
+                                Contact = new Contact
+                                {
+                                    FirstName = contactModel.FirstName,
+                                    LastName = contactModel.LastName,
+                                    Email = contactModel.Email,
+                                    Phone = contactModel.Phone
+                                },
+                                ContactType = contactModel.ContactType
+                            });
+                        }
                     }
 
                     // Update Industries
-                    member.IndustryMembers.Clear();
-                    foreach (var industryId in model.SelectedIndustryIds)
-                    {
-                        var industry = await _context.Industries.FindAsync(industryId);
-                        if (industry != null)
-                        {
-                            member.IndustryMembers.Add(new MemberIndustry { Industry = industry });
-                        }
-                    }
+                    member.IndustryMembers = model.SelectedIndustryIds
+                        .Select(industryId => new MemberIndustry { IndustryID = industryId })
+                        .ToList();
 
                     // Save changes
                     _context.Update(member);
                     await _context.SaveChangesAsync();
-                    TempData["message"] = "Member edited successfully";
 
+                    TempData["message"] = "Member edited successfully";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    TempData["errMessage"] = "An error occured. Failed to edit the member.";
-                    if (!MemberExists(id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    TempData["errMessage"] = "An error occurred. Failed to edit the member.";
+                    return NotFound();
                 }
-                return RedirectToAction(nameof(Index), new {model.ID});
+                return RedirectToAction(nameof(Index));
             }
 
-            // If the model is invalid, repopulate available industries
-            model.AvailableIndustries = _context.Industries
-            .Select(industry => new IndustryViewModel
-            {
-                ID = industry.ID,
-                Name = industry.Name,
-                NAICS = industry.NAICS
-            }).ToList(); // Convert Industry entities to IndustryViewModels
             return View(model);
         }
 

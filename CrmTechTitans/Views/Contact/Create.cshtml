@@ -26,7 +26,7 @@
                 <h2 class="member-name">New Contact Information</h2>
             </div>
         </div>
-        <form asp-action="Create">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
             <div class="member-card-content">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <p class="text-muted"><span class="required-asterisk">*</span> Indicates a required field.</p>
@@ -76,6 +76,13 @@
                         <label asp-for="Linkedin" class="control-label">LinkedIn</label>
                         <input asp-for="Linkedin" class="form-control" placeholder="Enter LinkedIn profile URL" />
                         <span asp-validation-for="Linkedin" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="member-detail">
+                    <i class="fas fa-user"></i>
+                    <div class="form-group">
+                        <label>Upload Picture</label>
+                        <input type="file" name="contactPicture" class="form-control" />
                     </div>
                 </div>
             </div>

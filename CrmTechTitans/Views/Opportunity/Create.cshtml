@@ -27,7 +27,7 @@
                 <h2 class="member-name">New Opportunity</h2>
             </div>
         </div>
-        <form asp-action="Create">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
             <div class="member-card-content">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <p class="text-muted"><span class="required-asterisk">*</span> Indicates a required field.</p>
