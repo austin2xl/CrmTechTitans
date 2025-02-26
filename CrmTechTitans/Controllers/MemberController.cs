@@ -7,8 +7,11 @@ using CrmTechTitans.Utilities;
 using CrmTechTitans.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using SkiaSharp;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -564,6 +567,227 @@ namespace CrmTechTitans.Controllers
                 }
             }
         }
+
+        public IActionResult ExportMembers()
+        {
+            var model = new MemberExportViewModel
+            {
+                Members = _context.Members.ToList() // Fetch members from the database
+            };
+            return View(model); // Returns the ExportMembers.cshtml view
+        }
+
+        [HttpPost]
+        public IActionResult DownloadMembers([FromForm] MemberExportOptions options)
+        {
+            if (options.SelectedFields == null || !options.SelectedFields.Any())
+            {
+                return BadRequest("Please select at least one field to export.");
+            }
+
+            IQueryable<Member> membersQuery = _context.Members.AsQueryable();
+
+            // If "Download All" is selected, fetch all members
+            if (!options.DownloadAll)
+            {
+                // Otherwise, filter by selected members
+                if (options.SelectedMemberIds != null && options.SelectedMemberIds.Any())
+                {
+                    membersQuery = membersQuery.Where(m => options.SelectedMemberIds.Contains(m.ID));
+                }
+                else
+                {
+                    return BadRequest("No members selected.");
+                }
+            }
+
+            var members = membersQuery.ToList();
+
+            using (ExcelPackage excel = new ExcelPackage())
+            {
+                var workSheet = excel.Workbook.Worksheets.Add("Members");
+
+                int column = 1;
+                Dictionary<string, int> fieldMapping = new Dictionary<string, int>();
+
+                // Add headers dynamically
+                foreach (var field in options.SelectedFields)
+                {
+                    workSheet.Cells[1, column].Value = field;
+                    fieldMapping[field] = column;
+                    column++;
+                }
+
+                int row = 2;
+                foreach (var member in members)
+                {
+                    column = 1;
+                    foreach (var field in options.SelectedFields)
+                    {
+                        switch (field)
+                        {
+                            case "MemberName":
+                                workSheet.Cells[row, column].Value = member.MemberName;
+                                break;
+                            case "CompanySize":
+                                workSheet.Cells[row, column].Value = member.CompanySize.ToString();
+                                break;
+                            case "Website":
+                                workSheet.Cells[row, column].Value = member.CompanyWebsite;
+                                break;
+                            case "MembershipStatus":
+                                workSheet.Cells[row, column].Value = member.MembershipStatus.ToString();
+                                break;
+                            case "MemberSince":
+                                workSheet.Cells[row, column].Value = member.MemberSince.ToShortDateString();
+                                workSheet.Column(column).Style.Numberformat.Format = "yyyy-mm-dd";
+                                break;
+                            case "Notes":
+                                workSheet.Cells[row, column].Value = member.Notes;
+                                break;
+                        }
+                        column++;
+                    }
+                    row++;
+                }
+
+                workSheet.Cells.AutoFitColumns();
+
+                // Add a title and timestamp at the top of the report
+                workSheet.Cells[1, 1].Value = "Member Report";
+                using (ExcelRange Rng = workSheet.Cells[1, 1, 1, options.SelectedFields.Count])
+                {
+                    Rng.Merge = true;
+                    Rng.Style.Font.Bold = true;
+                    Rng.Style.Font.Size = 18;
+                    Rng.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                }
+
+                // Convert to local timezone
+                DateTime utcDate = DateTime.UtcNow;
+                TimeZoneInfo esTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+                DateTime localDate = TimeZoneInfo.ConvertTimeFromUtc(utcDate, esTimeZone);
+                using (ExcelRange Rng = workSheet.Cells[2, options.SelectedFields.Count])
+                {
+                    Rng.Value = "Created: " + localDate.ToShortTimeString() + " on " +
+                                localDate.ToShortDateString();
+                    Rng.Style.Font.Bold = true;
+                    Rng.Style.Font.Size = 12;
+                    Rng.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                }
+
+                // Ok, time to download the Excel
+                try
+                {
+                    Byte[] fileBytes = excel.GetAsByteArray();
+                    string filename = "Members.xlsx";
+                    string mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    return File(fileBytes, mimeType, filename);
+                }
+                catch (Exception)
+                {
+                    return BadRequest("Could not generate the file.");
+                }
+            }
+        }
+
+
+
+
+        //public IActionResult DownloadMembers([FromForm] MemberExportOptions options)
+        //{
+        //    // Get the members
+        //    var members = from m in _context.Members
+        //                  .Include(m => m.MemberMembershipTypes)
+        //                  .Include(m => m.IndustryMembers)
+        //                  .Include(m => m.MemberAddresses)
+        //                  .Include(m => m.MemberContacts)
+        //                  .Include(m => m.MemberOpportunities)
+        //                  .OrderByDescending(m => m.MemberSince)
+        //                  select new
+        //                  {
+        //                      Name = m.MemberName,
+        //                      ContactedBy = m.ContactedBy,
+        //                      CompanySize = m.CompanySize.ToString(),
+        //                      Website = m.CompanyWebsite,
+        //                      MemberSince = m.MemberSince.ToShortDateString(),
+        //                      LastContactDate = m.LastContactDate.HasValue ? m.LastContactDate.Value.ToShortDateString() : "N/A",
+        //                      MembershipStatus = m.MembershipStatus.ToString(),
+        //                      Notes = m.Notes
+        //                  };
+
+        //    // How many rows?
+        //    int numRows = members.Count();
+
+        //    if (numRows > 0) // We have data
+        //    {
+        //        // Create a new spreadsheet from scratch
+        //        using (ExcelPackage excel = new ExcelPackage())
+        //        {
+        //            var workSheet = excel.Workbook.Worksheets.Add("Members");
+
+        //            // Note: Cells[row, column]
+        //            workSheet.Cells[3, 1].LoadFromCollection(members, true);
+
+        //            // Style first column for dates
+        //            workSheet.Column(5).Style.Numberformat.Format = "yyyy-mm-dd";
+        //            workSheet.Column(6).Style.Numberformat.Format = "yyyy-mm-dd";
+
+        //            // Make Name and Membership Status bold
+        //            workSheet.Cells[4, 1, numRows + 3, 2].Style.Font.Bold = true;
+
+        //            // Set style and background color of headings
+        //            using (ExcelRange headings = workSheet.Cells[3, 1, 3, 7])
+        //            {
+        //                headings.Style.Font.Bold = true;
+        //                var fill = headings.Style.Fill;
+        //                fill.PatternType = ExcelFillStyle.Solid;
+        //                fill.BackgroundColor.SetColor(Color.LightBlue);
+        //            }
+
+        //            // Autofit columns
+        //            workSheet.Cells.AutoFitColumns();
+
+        //            // Add a title and timestamp at the top of the report
+        //            workSheet.Cells[1, 1].Value = "Member Report";
+        //            using (ExcelRange Rng = workSheet.Cells[1, 1, 1, 6])
+        //            {
+        //                Rng.Merge = true; // Merge columns start and end range
+        //                Rng.Style.Font.Bold = true; // Font should be bold
+        //                Rng.Style.Font.Size = 18;
+        //                Rng.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        //            }
+
+        //            // Convert to local timezone
+        //            DateTime utcDate = DateTime.UtcNow;
+        //            TimeZoneInfo esTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+        //            DateTime localDate = TimeZoneInfo.ConvertTimeFromUtc(utcDate, esTimeZone);
+        //            using (ExcelRange Rng = workSheet.Cells[2, 6])
+        //            {
+        //                Rng.Value = "Created: " + localDate.ToShortTimeString() + " on " +
+        //                            localDate.ToShortDateString();
+        //                Rng.Style.Font.Bold = true;
+        //                Rng.Style.Font.Size = 12;
+        //                Rng.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+        //            }
+
+        //            // Ok, time to download the Excel
+        //            try
+        //            {
+        //                Byte[] theData = excel.GetAsByteArray();
+        //                string filename = "Members.xlsx";
+        //                string mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        //                return File(theData, mimeType, filename);
+        //            }
+        //            catch (Exception)
+        //            {
+        //                return BadRequest("Could not build and download the file.");
+        //            }
+        //        }
+        //    }
+        //    return NotFound("No data.");
+        //}
+
     }
 
 }

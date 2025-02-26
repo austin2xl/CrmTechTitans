@@ -13,6 +13,7 @@
             <a asp-action="Create" class="btn btn-primary" data-bs-toggle="tooltip" title="Add a new member to the system">
                 <i class="fas fa-user-plus"></i> Create New Member
             </a>
+
             <div class="view-toggle">
                 <button class="view-btn active" data-view="cards" data-bs-toggle="tooltip" title="Switch to Card View">
                     <i class="fas fa-th-large"></i>
@@ -23,6 +24,40 @@
             </div>
         </div>
     </header>
+
+    <form method="post" asp-action="DownloadMembers">
+        <label for="members">Select Members:</label>
+        <br />
+
+        <!-- Select All Checkbox -->
+        <input type="checkbox" name="DownloadAll" value="true" /> <strong>Select All Members</strong>
+        <br />
+        <div id="memberList">
+            @foreach (var member in Model)
+            {
+                <input type="checkbox" name="SelectedMemberIds" value="@member.ID" />
+                <label>@member.MemberName</label>
+
+                <br />
+            }
+        </div>
+
+        <label>Select Fields:</label>
+        <input type="checkbox" name="SelectedFields" value="MemberName" checked /> Member Name
+        <input type="checkbox" name="SelectedFields" value="CompanySize" /> Company Size
+        <input type="checkbox" name="SelectedFields" value="Website" /> Website
+        <input type="checkbox" name="SelectedFields" value="MembershipStatus" /> Membership Status
+        <input type="checkbox" name="SelectedFields" value="MemberSince" /> Member Since
+        <input type="checkbox" name="SelectedFields" value="Notes" /> Notes
+
+        <button type="submit">Download Excel</button>
+    </form>
+
+        @* <div class="d-flex justify-content-between align-items-center">
+            <h4>Select Members & Fields to Export:</h4>
+        <a asp-action="DownloadMembers" class="btn btn-success">
+                <i class="fa fa-download"></i> Download All Members
+            </a>  *@
 
     <section class="filter-container bg-light p-3 rounded mb-4">
         <div class="filter-row d-flex align-items-end gap-3">
@@ -39,7 +74,9 @@
                     <option value="Cancelled">Cancelled</option>
                 </select>
             </div>
+
         </div>
+               
     </section>
 
 
@@ -115,7 +152,7 @@
             </div>
         }
     </section>
-
+    
     <section class="table-responsive" id="table-view" style="display: none;">
         <table class="table custom-table" id="membersTable">
             <thead>
@@ -175,6 +212,9 @@
             </tbody>
         </table>
     </section>
+     
+
+
 </div>
 
 @section Scripts {
