@@ -56,44 +56,128 @@
                         }
                     </tbody>
                 </table>
+                <div class="col-md-4">
+                    <label for="recordsPerPage">Records per page:</label>
+                    <select id="recordsPerPage" class="form-control">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                        <option value="20">20</option>
+                    </select>
+                </div>
+
+                <div id="paginationControls" class="pagination">
+                    <button id="prevPage" class="btn btn-primary">Previous</button>
+                    <span id="pageInfo"></span>
+                    <button id="nextPage" class="btn btn-primary">Next</button>
+                </div>
+
             </section>
         </div>
     </div>
 
-
+</div>
 @section Scripts {
     <script>
         $(document).ready(function () {
-            // Sort the table by Industry Name (first column) in ascending order by default
-            sortTable(0, "asc");
+            var currentPage = 1;
+            var recordsPerPage = parseInt($('#recordsPerPage').val());
 
-            // Filter function
-            function filterTable() {
+            // Function to get visible rows (rows not hidden by filter)
+            function getVisibleRows() {
                 var nameFilter = $('#SearchString').val().toLowerCase();
                 var naicsFilter = $('#NAICSCode').val();
 
-                $('#industriesTable tbody tr').each(function () {
+                var visibleRows = $('#industriesTable tbody tr').filter(function () {
                     var nameText = $(this).find('td:nth-child(1)').text().toLowerCase();
-                    var naicsText = $(this).find('td:nth-child(2)').text(); // Updated to reflect the new column structure
+                    var naicsText = $(this).find('td:nth-child(2)').text();
 
                     var nameMatch = nameFilter === "" || nameText.includes(nameFilter);
                     var naicsMatch = naicsFilter === "" || naicsText === naicsFilter;
 
-                    $(this).toggle(nameMatch && naicsMatch);
+                    return nameMatch && naicsMatch;
                 });
+
+                return visibleRows;
+            }
+
+            // Function to show the current page
+            function showPage(page) {
+                var visibleRows = getVisibleRows();
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+
+                // Ensure currentPage is within valid range
+                if (page < 1) page = 1;
+                if (page > totalPages) page = totalPages;
+
+                var startIndex = (page - 1) * recordsPerPage;
+                var endIndex = startIndex + recordsPerPage;
+
+                // Hide all rows first
+                $('#industriesTable tbody tr').hide();
+
+                // Show only the rows for the current page
+                visibleRows.slice(startIndex, endIndex).show();
+
+                // Update page info
+                $('#pageInfo').text(`Page ${page} of ${totalPages}`);
+
+                // Enable/disable pagination buttons
+                $('#prevPage').prop('disabled', page === 1);
+                $('#nextPage').prop('disabled', page === totalPages);
+            }
+
+            // Function to update pagination
+            function updatePagination() {
+                var visibleRows = getVisibleRows();
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+
+                if (currentPage > totalPages) {
+                    currentPage = totalPages > 0 ? totalPages : 1;
+                }
+
+                showPage(currentPage);
+            }
+
+            // Event listener for records per page dropdown
+            $('#recordsPerPage').on('change', function () {
+                recordsPerPage = parseInt($(this).val());
+                currentPage = 1; // Reset to the first page
+                updatePagination();
+            });
+
+            // Event listener for previous page button
+            $('#prevPage').on('click', function () {
+                if (currentPage > 1) {
+                    currentPage--;
+                    showPage(currentPage);
+                }
+            });
+
+            // Event listener for next page button
+            $('#nextPage').on('click', function () {
+                var visibleRows = getVisibleRows();
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    showPage(currentPage);
+                }
+            });
+
+            // Filter function
+            function filterTable() {
+                currentPage = 1; // Reset to the first page
+                updatePagination();
             }
 
             // Attach filter function to input events
             $('#SearchString, #NAICSCode').on('input change', filterTable);
 
-            // Reset filters
-            $('#resetFilters').on('click', function (e) {
-                e.preventDefault();
-                $('#SearchString').val('');
-                $('#NAICSCode').val('');
-                filterTable();
-            });
+            // Initial page load
+            updatePagination();
         });
+         sortTable(0, "asc");
 
         // Sorting function
         function sortTable(columnIndex, initialDirection = "asc") {
@@ -154,17 +238,32 @@
         }
     </script>
 
-    <style>
-        th {
-            cursor: pointer;
-        }
+   
+} <style>
+      th {
+          cursor: pointer;
+      }
 
-            th.sorted-asc::after {
-                content: " ▲";
-            }
+          th.sorted-asc::after {
+              content: " ▲";
+          }
 
-            th.sorted-desc::after {
-                content: " ▼";
-            }
-    </style>
-}
+          th.sorted-desc::after {
+              content: " ▼";
+          }
+
+      .pagination {
+          display: flex;
+          justify-content: center;
+          margin-top: 20px;
+      }
+
+          .pagination button {
+              margin: 0 5px;
+          }
+
+      #pageInfo {
+          margin: 0 10px;
+          line-height: 2;
+      }
+</style>

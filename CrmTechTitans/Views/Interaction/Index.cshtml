@@ -1,179 +1,267 @@
 ﻿@model IEnumerable<CrmTechTitans.Models.Interaction>
 
 @{
-	ViewData["Title"] = "All Interactions";
-	Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "All Interactions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <partial name="_Notification" />
 
-
 <div class="crm-container">
-	<!-- Main Content -->
-	<div class="main-content">
-		<header class="page-header">
-
-			<h1>All Interactions</h1>
-			<div class="d-flex align-items-center gap-3">
-				<!--  <a asp-action="Create" class="btn btn-danger" data-bs-toggle="tooltip" title="Add a new member to the system">
-						<i class="fas fa-user-plus"></i> Create New Interaction
-					</a>
-				</div>-->
-		</header>
-
+    <!-- Main Content -->
+    <div class="main-content">
+        <header class="page-header">
+            <h1>All Interactions</h1>
             <div class="d-flex align-items-center gap-3">
-              <!--  <a asp-action="Create" class="btn btn-danger" data-bs-toggle="tooltip" title="Add a new member to the system">
+                <!-- Create New Interaction Button (if needed) -->
+                <!-- <a asp-action="Create" class="btn btn-danger" data-bs-toggle="tooltip" title="Add a new member to the system">
                     <i class="fas fa-user-plus"></i> Create New Interaction
-                </a>
-            </div>-->
+                </a> -->
+            </div>
         </header>
-        <p></p>
 
-	<!-- Search Input -->
-<div class="filter-container">
-    <label for="memberNameFilter" class="filter-label">Filter interactions by member name:</label>
-    <input type="text" id="memberNameFilter" class="form-control search-input" placeholder="Search by Member Name..." onkeyup="filterTable()">
-</div>
-<p></p>
-		<section class="members-table-container">
-			<table class="table custom-table" id="interactionTable">
-				<thead>
-					<tr>
-						<th onclick="sortTable(0)">Associated Members</th>
-						<th onclick="sortTable(1)">Interaction</th>
-						<th onclick="sortTable(2)">Date</th>
-						<th onclick="sortTable(3)">Person</th>
-						<th class="text-center">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					@foreach (var item in Model)
-					{
-						<tr>
-							<td class="member-name">
-								@(item.InteractionMembers.Any()
-															? string.Join(", ", item.InteractionMembers
-															.Where(im => im.Member != null)
-															.Select(im => im.Member.MemberName))
-															: "No Member Associated")
-							</td>
-							<td>@item.interaction</td>
-							<td>@item.Date.ToString("yyyy-MM-dd")</td>
-							<td>@item.Person</td>
-							<td class="text-center action-buttons">
-								<a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-edit">
-									Edit
-								</a>
-								<a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-details">
-									Details
-								</a>
-							</td>
-						</tr>
-					}
-				</tbody>
-			</table>
-		</section>
-	</div>
+        <!-- Search Input -->
+        <div class="filter-container">
+            <label for="memberNameFilter" class="filter-label">Filter interactions by member name:</label>
+            <input type="text" id="memberNameFilter" class="form-control search-input" placeholder="Search by Member Name...">
+        </div>
+
+        <!-- Interactions Table -->
+        <section class="members-table-container">
+            <table class="table custom-table" id="interactionTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">Associated Members</th>
+                        <th onclick="sortTable(1)">Interaction</th>
+                        <th onclick="sortTable(2)">Date</th>
+                        <th onclick="sortTable(3)">Person</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="member-name">
+                                @(item.InteractionMembers.Any()
+                                    ? string.Join(", ", item.InteractionMembers
+                                    .Where(im => im.Member != null)
+                                    .Select(im => im.Member.MemberName))
+                                    : "No Member Associated")
+                            </td>
+                            <td>@item.interaction</td>
+                            <td>@item.Date.ToString("yyyy-MM-dd")</td>
+                            <td>@item.Person</td>
+                            <td class="text-center action-buttons">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-edit">Edit</a>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-details">Details</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Records per page -->
+        <div class="col-md-4">
+            <label for="recordsPerPage">Records per page:</label>
+            <select id="recordsPerPage" class="form-control">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+            </select>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div id="paginationControls" class="pagination">
+            <button id="prevPage" class="btn btn-primary">Previous</button>
+            <span id="pageInfo"></span>
+            <button id="nextPage" class="btn btn-primary">Next</button>
+        </div>
+    </div>
 </div>
 
-<!-- JavaScript for Client-Side Filtering -->
 @section Scripts {
-	<script>
-		// Sort table function
-		 function sortTable(columnIndex, initialDirection = "asc") {
-			 var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-			 table = document.getElementById("interactionTable");
-			 switching = true;
-			 dir = initialDirection; ;
+    <script>
+        $(document).ready(function () {
+            var currentPage = 1;
+            var recordsPerPage = parseInt($('#recordsPerPage').val());
 
-			 // Determine the current sorting direction
-			 if (table.rows[0].getElementsByTagName("th")[columnIndex].classList.contains("sorted-asc")) {
-				 dir = "desc";
-			 } else if (table.rows[0].getElementsByTagName("th")[columnIndex].classList.contains("sorted-desc")) {
-				 dir = "asc";
-			 }
+            // Function to get visible rows (rows not hidden by filter)
+            function getVisibleRows() {
+                var memberNameFilter = $('#memberNameFilter').val().toLowerCase();
 
-			 // Remove sorting classes from all headers
-			 for (i = 0; i < table.rows[0].getElementsByTagName("th").length; i++) {
-				 table.rows[0].getElementsByTagName("th")[i].classList.remove("sorted-asc", "sorted-desc");
-			 }
+                var visibleRows = $('#interactionTable tbody tr').filter(function () {
+                    var memberName = $(this).find('td:nth-child(1)').text().toLowerCase();
+                    return memberName.includes(memberNameFilter);
+                });
 
-			 // Add sorting class to the clicked header
-			 table.rows[0].getElementsByTagName("th")[columnIndex].classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
+                return visibleRows;
+            }
 
-			 // Perform sorting
-			 while (switching) {
-				 switching = false;
-				 rows = table.rows;
-				 for (i = 1; i < (rows.length - 1); i++) {
-					 shouldSwitch = false;
-					 x = rows[i].getElementsByTagName("td")[columnIndex];
-					 y = rows[i + 1].getElementsByTagName("td")[columnIndex];
+            // Function to show the current page
+            function showPage(page) {
+                var visibleRows = getVisibleRows();
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
 
-					 if (dir === "asc") {
-						 if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-							 shouldSwitch = true;
-							 break;
-						 }
-					 } else if (dir === "desc") {
-						 if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-							 shouldSwitch = true;
-							 break;
-						 }
-					 }
-				 }
+                // Ensure currentPage is within valid range
+                if (page < 1) page = 1;
+                if (page > totalPages) page = totalPages;
 
-				 if (shouldSwitch) {
-					 rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-					 switching = true;
-					 switchcount++;
-				 } else if (switchcount === 0 && dir === "asc") {
-					 dir = "desc";
-					 switching = true;
-				 }
-			 }
-		 }
+                var startIndex = (page - 1) * recordsPerPage;
+                var endIndex = startIndex + recordsPerPage;
 
-		 $(document).ready(function () {
-			// Filter table based on input values
-			function filterTable() {
-				var searchFilter = $('#searchFilter').val().toLowerCase();
+                // Hide all rows first
+                $('#interactionTable tbody tr').hide();
 
-				console.log("search Filter:", searchFilter);
+                // Show only the rows for the current page
+                visibleRows.slice(startIndex, endIndex).show();
 
-				$('#interactionTable tbody tr').each(function () {
-					var searchText = $(this).find('td:nth-child(1)').text().toLowerCase();
+                // Update page info
+                $('#pageInfo').text(`Page ${page} of ${totalPages}`);
 
-					var searchMatch = searchFilter === "" || searchText.includes(searchFilter);
+                // Enable/disable pagination buttons
+                $('#prevPage').prop('disabled', page === 1);
+                $('#nextPage').prop('disabled', page === totalPages);
+            }
 
-					$(this).toggle(searchMatch);
-				});
-			}
+            // Function to update pagination
+            function updatePagination() {
+                var visibleRows = getVisibleRows();
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
 
-			// Attach filter function to input events
-			$('#searchFilter').on('input', filterTable);
+                if (currentPage > totalPages) {
+                    currentPage = totalPages > 0 ? totalPages : 1;
+                }
 
-			// Initialize Bootstrap Tooltips
-			var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-			var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-				return new bootstrap.Tooltip(tooltipTriggerEl);
-			});
+                showPage(currentPage);
+            }
 
+            // Event listener for records per page dropdown
+            $('#recordsPerPage').on('change', function () {
+                recordsPerPage = parseInt($(this).val());
+                currentPage = 1; // Reset to the first page
+                updatePagination();
+            });
 
+            // Event listener for previous page button
+            $('#prevPage').on('click', function () {
+                if (currentPage > 1) {
+                    currentPage--;
+                    showPage(currentPage);
+                }
+            });
 
+            // Event listener for next page button
+            $('#nextPage').on('click', function () {
+                var visibleRows = getVisibleRows();
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
 
-		});
-	</script>
-	<style>
-		th {
-			cursor: pointer;
-		}
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    showPage(currentPage);
+                }
+            });
 
-			th.sorted-asc::after {
-				content: " ▲";
-			}
+            // Filter function
+            function filterTable() {
+                currentPage = 1; // Reset to the first page
+                updatePagination();
+            }
 
-			th.sorted-desc::after {
-				content: " ▼";
-			}
-	</style>
+            // Attach filter function to input events
+            $('#memberNameFilter').on('input', filterTable);
+
+            // Initial page load
+            updatePagination();
+        });
+         sortTable(2, "asc");
+        // Sorting function
+        function sortTable(columnIndex, initialDirection = "asc") {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("interactionTable");
+            switching = true;
+            dir = initialDirection; // Default sorting direction
+
+            // Determine the current sorting direction
+            if (table.rows[0].getElementsByTagName("th")[columnIndex].classList.contains("sorted-asc")) {
+                dir = "desc";
+            } else if (table.rows[0].getElementsByTagName("th")[columnIndex].classList.contains("sorted-desc")) {
+                dir = "asc";
+            }
+
+            // Remove sorting classes from all headers
+            for (i = 0; i < table.rows[0].getElementsByTagName("th").length; i++) {
+                table.rows[0].getElementsByTagName("th")[i].classList.remove("sorted-asc", "sorted-desc");
+            }
+
+            // Add sorting class to the clicked header
+            table.rows[0].getElementsByTagName("th")[columnIndex].classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
+
+            // Perform sorting
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("td")[columnIndex];
+                    y = rows[i + 1].getElementsByTagName("td")[columnIndex];
+
+                    if (dir === "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir === "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount === 0 && dir === "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        th {
+            cursor: pointer;
+        }
+
+            th.sorted-asc::after {
+                content: " ▲";
+            }
+
+            th.sorted-desc::after {
+                content: " ▼";
+            }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+            .pagination button {
+                margin: 0 5px;
+            }
+
+        #pageInfo {
+            margin: 0 10px;
+            line-height: 2;
+        }
+    </style>
 }

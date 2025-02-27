@@ -88,11 +88,12 @@ namespace CrmTechTitans.Data
                         context.MembershipTypes.AddRange(
 
                             new MembershipType { ID = 1, Name = "Associate" },
-                            new MembershipType { ID = 2, Name = "Local Industrial" },
-                            new MembershipType { ID = 3, Name = "Chamber Associate" },
-                            new MembershipType { ID = 4, Name = "Government Education Associate" },
-                            new MembershipType { ID = 5, Name = "Non-Local Industrial" },
-                            new MembershipType { ID = 6, Name = "Other"}
+                            new MembershipType { ID = 2, Name = "Local" },
+                            new MembershipType { ID = 3, Name = "Chamber" },
+                            new MembershipType { ID = 4, Name = "Government Education" },
+                            new MembershipType { ID = 5, Name = "Non-Local" },
+                             new MembershipType { ID = 6, Name = "Industrial" },
+                            new MembershipType { ID = 7, Name = "Other"}
                             );
                         context.SaveChanges();
 
@@ -264,19 +265,19 @@ namespace CrmTechTitans.Data
 						// Assign multiple Membership Types to each member
 						var memberMembershipTypes = new List<MemberMembershipType>();
 
-						memberMembershipTypes.AddRange(AssignMembershipTypes(members[0], "Associate", "ChamberAssociate"));
-						memberMembershipTypes.AddRange(AssignMembershipTypes(members[1], "Localindustrial", "NonLocalIndustrial"));
-						memberMembershipTypes.AddRange(AssignMembershipTypes(members[2], "ChamberAssociate", "GovernmentEducationAssociate"));
-						memberMembershipTypes.AddRange(AssignMembershipTypes(members[3], "Localindustrial"));
-						memberMembershipTypes.AddRange(AssignMembershipTypes(members[4], "GovernmentEducationAssociate", "Other"));
-						memberMembershipTypes.AddRange(AssignMembershipTypes(members[5], "Associate", "Localindustrial"));
-						memberMembershipTypes.AddRange(AssignMembershipTypes(members[6], "ChamberAssociate", "NonLocalIndustrial"));
-						memberMembershipTypes.AddRange(AssignMembershipTypes(members[7], "GovernmentEducationAssociate", "Other"));
-						memberMembershipTypes.AddRange(AssignMembershipTypes(members[8], "Localindustrial", "ChamberAssociate"));
-						memberMembershipTypes.AddRange(AssignMembershipTypes(members[9], "Associate", "NonLocalIndustrial"));
+                        memberMembershipTypes.AddRange(AssignMembershipTypes(members[0], "Associate", "Chamber"));
+                        memberMembershipTypes.AddRange(AssignMembershipTypes(members[1], "Local", "Industrial"));
+                        memberMembershipTypes.AddRange(AssignMembershipTypes(members[2], "Chamber", "Associate"));
+                        memberMembershipTypes.AddRange(AssignMembershipTypes(members[3], "Industrial"));
+                        memberMembershipTypes.AddRange(AssignMembershipTypes(members[4], "Government Education", "Other"));
+                        memberMembershipTypes.AddRange(AssignMembershipTypes(members[5], "Associate", "Local"));
+                        memberMembershipTypes.AddRange(AssignMembershipTypes(members[6], "Chamber", "Non-Local"));
+                        memberMembershipTypes.AddRange(AssignMembershipTypes(members[7], "Government Education", "Other"));
+                        memberMembershipTypes.AddRange(AssignMembershipTypes(members[8], "Local", "Associate"));
+                        memberMembershipTypes.AddRange(AssignMembershipTypes(members[9], "Associate", "Non-Local"));
 
-						// Add the many-to-many relationships
-						context.MemberMembershipTypes.AddRange(memberMembershipTypes);
+                        // Add the many-to-many relationships
+                        context.MemberMembershipTypes.AddRange(memberMembershipTypes);
 						context.SaveChanges();
 
 					}

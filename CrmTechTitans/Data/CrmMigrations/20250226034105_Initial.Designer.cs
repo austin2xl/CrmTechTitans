@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrmTechTitans.Data.CrmMigrations
 {
     [DbContext(typeof(CrmContext))]
-    [Migration("20250210221704_Initial")]
+    [Migration("20250226034105_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

@@ -46,7 +46,6 @@
             </div>
         </div>
 
-
         <!-- Opportunities Table -->
         <table class="table custom-table" id="opportunitiesTable">
             <thead>
@@ -72,14 +71,109 @@
                 }
             </tbody>
         </table>
+
+        <!-- Records per page -->
+        <div class="col-md-4">
+            <label for="recordsPerPage">Records per page:</label>
+            <select id="recordsPerPage" class="form-control">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+            </select>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div id="paginationControls" class="pagination">
+            <button id="prevPage" class="btn btn-primary">Previous</button>
+            <span id="pageInfo"></span>
+            <button id="nextPage" class="btn btn-primary">Next</button>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            // Sort the table by Title (first column) by default
-            sortTable(0, "asc");
+               $(document).ready(function () {
+            var currentPage = 1;
+            var recordsPerPage = parseInt($('#recordsPerPage').val());
+            var totalRecords = $('#opportunitiesTable tbody tr').length;
+            var totalPages = Math.ceil(totalRecords / recordsPerPage);
+
+            // Function to get visible rows (rows not hidden by filter)
+            function getVisibleRows() {
+                var visibleRows = $('#opportunitiesTable tbody tr').filter(function () {
+                    return $(this).css('display') !== 'none';
+                });
+
+                // If no filters are applied, return all rows
+                var statusFilter = $('#statusFilter').val().toLowerCase();
+                var priorityFilter = $('#priorityFilter').val().toLowerCase();
+
+                if (statusFilter === "" && priorityFilter === "") {
+                    return $('#opportunitiesTable tbody tr');
+                }
+
+                return visibleRows;
+            }
+
+            // Function to show the current page
+            function showPage(page) {
+                var visibleRows = getVisibleRows();
+                var startIndex = (page - 1) * recordsPerPage;
+                var endIndex = startIndex + recordsPerPage;
+
+                // Hide all rows first
+                $('#opportunitiesTable tbody tr').hide();
+
+                // Show only the rows for the current page
+                visibleRows.slice(startIndex, endIndex).show();
+
+                // Update page info
+                $('#pageInfo').text(`Page ${page} of ${totalPages}`);
+
+                // Enable/disable pagination buttons
+                $('#prevPage').prop('disabled', page === 1);
+                $('#nextPage').prop('disabled', page === totalPages);
+            }
+
+            // Function to update pagination
+            function updatePagination() {
+                var visibleRows = getVisibleRows();
+                totalRecords = visibleRows.length;
+                totalPages = Math.ceil(totalRecords / recordsPerPage);
+
+                if (currentPage > totalPages) {
+                    currentPage = totalPages > 0 ? totalPages : 1;
+                }
+
+                showPage(currentPage);
+            }
+
+            // Event listener for records per page dropdown
+            $('#recordsPerPage').on('change', function () {
+                recordsPerPage = parseInt($(this).val());
+                currentPage = 1; // Reset to the first page
+                updatePagination();
+            });
+
+            // Event listener for previous page button
+            $('#prevPage').on('click', function () {
+                if (currentPage > 1) {
+                    currentPage--;
+                    console.log("Previous Page:", currentPage); // Debugging
+                    showPage(currentPage);
+                }
+            });
+
+            // Event listener for next page button
+            $('#nextPage').on('click', function () {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    console.log("Next Page:", currentPage); // Debugging
+                    showPage(currentPage);
+                }
+            });
 
             // Filter function
             function filterTable() {
@@ -99,19 +193,19 @@
                         $(this).hide();
                     }
                 });
+
+                // Reset pagination after filtering
+                currentPage = 1;
+                updatePagination();
             }
 
             // Attach filter function to input events
             $('#statusFilter, #priorityFilter').on('change', filterTable);
 
-            // Reset filters
-            $('#resetFilters').on('click', function (e) {
-                e.preventDefault(); // Prevent form submission
-                $('#statusFilter, #priorityFilter').val(''); // Clear filter values
-                filterTable(); // Reapply filtering to show all rows
-            });
+            // Initial page load
+            updatePagination();
         });
-
+         sortTable(0, "asc");
         // Sorting function
         function sortTable(columnIndex, initialDirection = "asc") {
             var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
@@ -183,5 +277,20 @@
             th.sorted-desc::after {
                 content: " ▼";
             }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+            .pagination button {
+                margin: 0 5px;
+            }
+
+        #pageInfo {
+            margin: 0 10px;
+            line-height: 2;
+        }
     </style>
 }

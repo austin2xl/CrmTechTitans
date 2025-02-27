@@ -21,7 +21,7 @@ namespace CrmTechTitans.Controllers
         }
 
         // GET: Industry
-        public async Task<IActionResult> Index(string? SearchString, string? NAICSCode)
+        public async Task<IActionResult> Index(string? SearchString, string? NAICSCode, int? page)
         {
             // Count the number of filters applied
             ViewData["Filtering"] = "btn-outline-secondary";
