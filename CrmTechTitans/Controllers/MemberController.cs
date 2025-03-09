@@ -615,12 +615,7 @@ namespace CrmTechTitans.Controllers
                 return BadRequest("Please select at least one field to export.");
             }
 
-            //IQueryable<Member> membersQuery = _context.Members.AsQueryable();
-            IQueryable<Member> membersQuery = _context.Members
-             .Include(m => m.MemberContacts)
-             .Include(m => m.IndustryMembers).ThenInclude(im => im.Industry)
-             .Include(m => m.MemberAddresses).ThenInclude(a => a.Address)
-             .AsQueryable();
+            IQueryable<Member> membersQuery = _context.Members.AsQueryable();
 
             // If "Download All" is selected, fetch all members
             if (!options.DownloadAll)
@@ -648,16 +643,15 @@ namespace CrmTechTitans.Controllers
                 int column = 1;
                 Dictionary<string, int> fieldMapping = new Dictionary<string, int>();
 
-                // Add headers properly
+                // Add headers dynamically
                 foreach (var field in options.SelectedFields)
                 {
-                    workSheet.Cells[3, column].Value = field;  // <-- Row 3 for column headings
-                    workSheet.Cells[3, column].Style.Font.Bold = true;
+                    workSheet.Cells[1, column].Value = field;
                     fieldMapping[field] = column;
                     column++;
                 }
 
-                int row = 4; // Data starts from row 4
+                int row = 2;
                 foreach (var member in members)
                 {
                     column = 1;
@@ -677,23 +671,12 @@ namespace CrmTechTitans.Controllers
                             case "MembershipStatus":
                                 workSheet.Cells[row, column].Value = member.MembershipStatus.ToString();
                                 break;
-                            case "ContactedBy":
-                                workSheet.Cells[row, column].Value = member.ContactedBy.ToString();
-                                break;
                             case "MemberSince":
                                 workSheet.Cells[row, column].Value = member.MemberSince.ToShortDateString();
                                 workSheet.Column(column).Style.Numberformat.Format = "yyyy-mm-dd";
                                 break;
                             case "Notes":
                                 workSheet.Cells[row, column].Value = member.Notes;
-                                break;
-                            case "Industries":
-                                workSheet.Cells[row, column].Value = string.Join(", ",
-                                    member.IndustryMembers.Select(im => im.Industry.NAICS)); // List industries
-                                break;
-                            case "Address":
-                                workSheet.Cells[row, column].Value = member.MemberAddresses
-                                    .FirstOrDefault()?.Address?.Summary ?? "N/A"; // Fetch address
                                 break;
                         }
                         column++;
@@ -703,24 +686,30 @@ namespace CrmTechTitans.Controllers
 
                 workSheet.Cells.AutoFitColumns();
 
-                // Fix title and timestamp formatting
+                // Add a title and timestamp at the top of the report
                 workSheet.Cells[1, 1].Value = "Member Report";
-                using (ExcelRange title = workSheet.Cells[1, 1, 1, options.SelectedFields.Count])
+                using (ExcelRange Rng = workSheet.Cells[1, 1, 1, options.SelectedFields.Count])
                 {
-                    title.Merge = true;
-                    title.Style.Font.Bold = true;
-                    title.Style.Font.Size = 18;
-                    title.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    Rng.Merge = true;
+                    Rng.Style.Font.Bold = true;
+                    Rng.Style.Font.Size = 18;
+                    Rng.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                 }
 
-                // Fix "Created Date" placement (move it below title)
+                // Convert to local timezone
                 DateTime utcDate = DateTime.UtcNow;
                 TimeZoneInfo esTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
                 DateTime localDate = TimeZoneInfo.ConvertTimeFromUtc(utcDate, esTimeZone);
-                workSheet.Cells[2, 1].Value = "Created: " + localDate.ToShortTimeString() + " on " + localDate.ToShortDateString();
-                workSheet.Cells[2, 1].Style.Font.Bold = true;
-                workSheet.Cells[2, 1].Style.Font.Size = 12;
+                using (ExcelRange Rng = workSheet.Cells[2, options.SelectedFields.Count])
+                {
+                    Rng.Value = "Created: " + localDate.ToShortTimeString() + " on " +
+                                localDate.ToShortDateString();
+                    Rng.Style.Font.Bold = true;
+                    Rng.Style.Font.Size = 12;
+                    Rng.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                }
 
+                // Ok, time to download the Excel
                 try
                 {
                     Byte[] fileBytes = excel.GetAsByteArray();
