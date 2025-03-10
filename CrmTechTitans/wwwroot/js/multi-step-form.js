@@ -399,4 +399,73 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 });
+document.addEventListener("DOMContentLoaded", () => {
+    // Auto-fill button functionality
+    document.querySelectorAll(".auto-fill").forEach((button) => {
+        button.addEventListener("click", () => {
+            const currentStep = document.querySelector(".form-step.active").id.replace("step", ""); // Get current step number
+            autoFillStep(currentStep);
+        });
+    });
 
+    // Function to auto-fill fields based on the current step
+    const autoFillStep = (step) => {
+        switch (step) {
+            case "1": // Step 1: Member Details
+                document.querySelector('input[name="MemberName"]').value = "Tech Giants Inc.";
+                document.querySelector('select[name="CompanySize"]').value = "2"; // Medium
+                document.querySelector('input[name="CompanyWebsite"]').value = "https://www.techgiants.com";
+                document.querySelector('input[name="ContactedBy"]').value = "John Doe";
+
+                // Hardcode selection of 1st and 4th membership types
+                const membershipCheckboxes = document.querySelectorAll('.membership-type');
+                if (membershipCheckboxes.length >= 4) {
+                    membershipCheckboxes[0].checked = true; // 1st membership type
+                    membershipCheckboxes[3].checked = true; // 4th membership type
+                }
+                break;
+
+            case "2": // Step 2: Dates and Notes
+                document.querySelector('input[name="MemberSince"]').value = "2020-01-01";
+                document.querySelector('input[name="LastContactDate"]').value = "2023-10-15";
+                document.querySelector('textarea[name="Notes"]').value = "This is a sample note for testing purposes.";
+                break;
+
+            case "3": // Step 3: Addresses
+                const addressFields = document.querySelectorAll('.address-form');
+                addressFields.forEach((address, index) => {
+                    address.querySelector('input[name$="Street"]').value = `${index + 1} Main St`;
+                    address.querySelector('input[name$="City"]').value = "Toronto";
+                    address.querySelector('input[name$="PostalCode"]').value = "M1M 1M1";
+                    // Do not fill Province or AddressType
+                });
+                break;
+
+            case "4": // Step 4: Contacts and Industries
+                const contactFields = document.querySelectorAll('.contact-form');
+                contactFields.forEach((contact, index) => {
+                    contact.querySelector('input[name$="FirstName"]').value = "John";
+                    contact.querySelector('input[name$="LastName"]').value = "Doe";
+                    contact.querySelector('input[name$="Email"]').value = "JohnDoe@example.com";
+                    contact.querySelector('input[name$="Phone"]').value = "1234567890";
+                    // Do not fill ContactType
+                });
+
+                // Randomly select 2 industries
+                const industrySelect = document.querySelector('select[name="SelectedIndustryIds"]');
+                const industryOptions = Array.from(industrySelect.options);
+                const randomIndustries = getRandomItems(industryOptions, 2);
+                randomIndustries.forEach((option) => option.selected = true);
+                break;
+
+            default:
+                console.warn("Invalid step for auto-fill.");
+        }
+    };
+
+    // Helper function to get random items from an array
+    const getRandomItems = (array, count) => {
+        const shuffled = array.sort(() => 0.5 - Math.random()); // Shuffle the array
+        return shuffled.slice(0, count); // Return the first `count` items
+    };
+});

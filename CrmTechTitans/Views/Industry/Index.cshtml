@@ -20,6 +20,11 @@
                 </div>
             </header>
 
+            <!-- Helper text for sorting -->
+            <div class="alert alert-info mb-3">
+                <i class="fas fa-info-circle"></i> Click on column headers to sort the table.
+            </div>
+
             <!-- Filter Section -->
             <div class="filter-container">
                 <div class="col-md-4">
@@ -37,8 +42,8 @@
                 <table class="table custom-table" id="industriesTable">
                     <thead>
                         <tr>
-                            <th onclick="sortTable(0)">Industry Name</th>
-                            <th onclick="sortTable(1)">NAICS Code</th>
+                            <th onclick="sortTable(0)" class="sortable">Industry Name <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(1)" class="sortable">NAICS Code <i class="fas fa-sort"></i></th>
                             <th class="text-center">Actions</th>
                         </tr>
                     </thead>
@@ -176,8 +181,10 @@
 
             // Initial page load
             updatePagination();
+
+            // Initial sort on page load
+            sortTable(0, "asc");
         });
-         sortTable(0, "asc");
 
         // Sorting function
         function sortTable(columnIndex, initialDirection = "asc") {
@@ -200,6 +207,22 @@
 
             // Add sorting class to the clicked header
             table.rows[0].getElementsByTagName("th")[columnIndex].classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
+
+            // Update sort icon for all headers
+            for (i = 0; i < 2; i++) { // Only for sortable columns (0-1)
+                if (i !== columnIndex) {
+                    var iconElement = table.rows[0].getElementsByTagName("th")[i].querySelector(".fas");
+                    if (iconElement) {
+                        iconElement.className = "fas fa-sort";
+                    }
+                }
+            }
+
+            // Update the icon for the sorted column
+            var sortedIconElement = table.rows[0].getElementsByTagName("th")[columnIndex].querySelector(".fas");
+            if (sortedIconElement) {
+                sortedIconElement.className = dir === "asc" ? "fas fa-sort-up" : "fas fa-sort-down";
+            }
 
             // Perform sorting
             while (switching) {
@@ -238,32 +261,53 @@
         }
     </script>
 
+    <style>
+        /* Styling for sortable columns */
+        .sortable {
+            position: relative;
+            cursor: pointer;
+        }
 
-} <style>
-      th {
-          cursor: pointer;
-      }
+            .sortable:hover {
+                background-color: #f5f5f5;
+            }
 
-          th.sorted-asc::after {
-              content: " ▲";
-          }
+            .sortable .fas {
+                margin-left: 5px;
+                color: #aaa;
+            }
 
-          th.sorted-desc::after {
-              content: " ▼";
-          }
+        .sorted-asc .fa-sort-up,
+        .sorted-desc .fa-sort-down {
+            color: #333;
+        }
 
-      .pagination {
-          display: flex;
-          justify-content: center;
-          margin-top: 20px;
-      }
+        /* Original styles */
+        th {
+            cursor: pointer;
+        }
 
-          .pagination button {
-              margin: 0 5px;
-          }
+            th.sorted-asc::after {
+                content: ""; /* Removed as we're using Font Awesome icons now */
+            }
 
-      #pageInfo {
-          margin: 0 10px;
-          line-height: 2;
-      }
-</style>
+            th.sorted-desc::after {
+                content: ""; /* Removed as we're using Font Awesome icons now */
+            }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+            .pagination button {
+                margin: 0 5px;
+            }
+
+        #pageInfo {
+            margin: 0 10px;
+            line-height: 2;
+        }
+    </style>
+}

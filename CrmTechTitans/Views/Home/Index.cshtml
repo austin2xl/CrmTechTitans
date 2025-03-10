@@ -1,261 +1,798 @@
 ﻿@model CrmTechTitans.ViewModels.DashboardVM
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
-
-    <!-- Ensures the chart container takes the full width and has a set height -->
+    <!-- Custom dashboard styles -->
     <style>
-        .chart-container {
-            width: 100%;
-            height: 400px; /* Adjust as needed */
-            position: relative; /* Required for Chart.js responsiveness */
-            margin-top: 1rem; /* Optional spacing */
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-400: #ced4da;
+            --gray-500: #adb5bd;
+            --gray-600: #6c757d;
+            --gray-700: #495057;
+            --gray-800: #343a40;
+            --gray-900: #212529;
         }
+
+        body {
+            background-color: var(--gray-100);
+            color: var(--gray-800);
+        }
+
+        .dashboard-container {
+            padding: 1.5rem;
+        }
+
+        .dashboard-header {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dashboard-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .company-logo {
+            height: 3rem;
+            width: auto;
+        }
+
+        .dashboard-title h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .nav-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: transform 0.2s, box-shadow 0.2s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            text-decoration: none;
+            color: var(--gray-800);
+        }
+
+            .nav-card:hover {
+                transform: translateY(-0.25rem);
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+                color: var(--accent);
+            }
+
+        .nav-icon {
+            background-color: var(--light);
+            color: var(--primary);
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .nav-card:hover .nav-icon {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .nav-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-card p {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin: 0;
+        }
+
+        .dashboard-tabs {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-tabs .nav-link {
+            color: var(--gray-600);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            border-radius: 0.25rem;
+        }
+
+            .nav-tabs .nav-link.active {
+                color: var(--primary);
+                background-color: var(--light);
+                border: none;
+            }
+
+            .nav-tabs .nav-link:hover:not(.active) {
+                color: var(--primary);
+                background-color: var(--gray-100);
+            }
+
+        .metric-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            padding: 1.5rem;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .metric-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .metric-info {
+            flex-grow: 1;
+        }
+
+            .metric-info h3 {
+                font-size: 0.875rem;
+                font-weight: 600;
+                color: var(--gray-600);
+                margin: 0 0 0.5rem 0;
+            }
+
+            .metric-info span {
+                font-size: 1.75rem;
+                font-weight: 700;
+                color: var(--gray-800);
+                display: block;
+            }
+
+        .accent-blue .metric-icon {
+            background-color: var(--accent);
+        }
+
+        .accent-green .metric-icon {
+            background-color: var(--success);
+        }
+
+        .accent-red .metric-icon {
+            background-color: var(--danger);
+        }
+
+        .accent-yellow .metric-icon {
+            background-color: var(--warning);
+        }
+
+        .chart-container {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            position: relative;
+            height: 250px; /* Fixed height */
+            overflow: hidden; /* Prevent stretching */
+        }
+
+            .chart-container h3 {
+                font-size: 1rem;
+                font-weight: 600;
+                color: var(--gray-800);
+                margin: 0 0 0.5rem 0;
+            }
+
+        .chart-canvas {
+            width: 100%;
+            height: 180px !important; /* Fixed height with !important to override Chart.js */
+            max-height: 180px !important; /* Maximum height */
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+            .tab-pane.active {
+                display: block;
+            }
+
+       
     </style>
-}
-
-@section Scripts {
-    <!-- Include Chart.js, date-fns, and the date adapter -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0"></script>
-
-    <!-- Your custom JS file that will actually build the chart -->
-    <script src="~/js/dashboard.js" asp-append-version="true"></script>
 }
 
 @{
     ViewData["Title"] = "Dashboard Overview";
 }
 
-<div class="main-content">
-    <header class="page-header d-flex align-items-center">
-        <img src="~/images/Logo.png" alt="Company Logo" class="company-logo">
-        <h1>Member Management Dashboard</h1>
-    </header>
-
-    <div class="links-grid">
-        <!-- Link to Members -->
-        <a href="/Member/Index" class="link-card">
-            <div class="link-icon">
-                <i class="fas fa-users"></i>
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="dashboard-title">
+            <h1>Member Management Dashboard</h1>
+        </div>
+        <div class="d-flex align-items-center">
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dashboardActions" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-cog me-1"></i> Actions
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dashboardActions">
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-file-export me-2"></i> Export Data</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-print me-2"></i> Print Dashboard</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-sync-alt me-2"></i> Refresh Data</a></li>
+                </ul>
             </div>
-            <div class="link-info">
-                <h3>Members</h3>
-                <p>View and manage all members</p>
-            </div>
-        </a>
-
-        <!-- Link to Municipalities -->
-        <a href="/Address/Index" class="link-card">
-            <div class="link-icon">
-                <i class="fas fa-id-card"></i>
-            </div>
-            <div class="link-info">
-                <h3>Municipalities</h3>
-                <p>View and manage Members By Municipalities</p>
-            </div>
-        </a>
-
-        <!-- Link to Opportunities -->
-        <a href="/Opportunity/Index" class="link-card">
-            <div class="link-icon">
-                <i class="fas fa-handshake"></i>
-            </div>
-            <div class="link-info">
-                <h3>Opportunities</h3>
-                <p>View and manage opportunities</p>
-            </div>
-        </a>
-
-        <!-- Link to Reports -->
-        <a href="/Home/Privacy" class="link-card">
-            <div class="link-icon">
-                <i class="fas fa-chart-line"></i>
-            </div>
-            <div class="link-info">
-                <h3>Reports</h3>
-                <p>View and generate reports</p>
-            </div>
-        </a>
+        </div>
     </div>
 
-    <!-- If you really need two .main-content divs, keep both; if not, remove one. -->
-    <div class="main-content">
-        <header class="page-header">
-            <h1>Member Admin Center</h1>
-            <div class="dashboard-tabs" id="dashboardTabs">
-                <button class="tab-btn active" data-tab="overview">Overview</button>
-                <button class="tab-btn" data-tab="membership">Membership Types</button>
-                <button class="tab-btn" data-tab="opportunities">Opportunities</button>
+    <!-- Navigation Cards -->
+    <div class="row g-3 mb-4">
+        <!-- Link to Members -->
+        <div class="col-md-6 col-lg-3">
+            <a href="/Member/Index" class="nav-card">
+                <div class="nav-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>Members</h3>
+                <p>View and manage all members</p>
+            </a>
+        </div>
+
+        <!-- Link to Municipalities -->
+        <div class="col-md-6 col-lg-3">
+            <a href="/Address/Index" class="nav-card">
+                <div class="nav-icon">
+                    <i class="fas fa-id-card"></i>
+                </div>
+                <h3>Municipalities</h3>
+                <p>View members by municipalities</p>
+            </a>
+        </div>
+
+        <!-- Link to Opportunities -->
+        <div class="col-md-6 col-lg-3">
+            <a href="/Opportunity/Index" class="nav-card">
+                <div class="nav-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <h3>Opportunities</h3>
+                <p>Manage business opportunities</p>
+            </a>
+        </div>
+
+        <!-- Link to Reports -->
+        <div class="col-md-6 col-lg-3">
+            <a href="/Home/Privacy" class="nav-card">
+                <div class="nav-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Reports</h3>
+                <p>Generate and view reports</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- Metrics Cards -->
+    <div class="row g-3 mb-4">
+        <!-- Total Members Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="metric-card accent-blue">
+                <div class="metric-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="metric-info">
+                    <h3>Total Members</h3>
+                    <span>@(Model.MemberCountSummary?.TotalMembers ?? 0)</span>
+                </div>
             </div>
-        </header>
+        </div>
 
-        <section class="tab-content active" id="overview">
-            <div class="metrics-grid">
-                <!-- Total Members Card -->
-                <div class="metric-card accent-blue">
-                    <div class="metric-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Total Members</h3>
-                        <span>@(Model.MemberCountSummary?.TotalMembers ?? 0)</span>
-                    </div>
+        <!-- GoodStanding Members Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="metric-card accent-green">
+                <div class="metric-icon">
+                    <i class="fas fa-user-check"></i>
                 </div>
-
-                <!-- GoodStanding Members Card -->
-                <div class="metric-card accent-green">
-                    <div class="metric-icon">
-                        <i class="fas fa-user-check"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>GoodStanding Members</h3>
-                        <span>@(Model.MemberCountSummary?.GoodStanding ?? 0)</span>
-                    </div>
-                </div>
-
-                <!-- Outstanding Members Card -->
-                <div class="metric-card accent-red">
-                    <div class="metric-icon">
-                        <i class="fas fa-user-times"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>OutStanding Members</h3>
-                        <span>@(Model.MemberCountSummary?.OutStanding ?? 0)</span>
-                    </div>
-                </div>
-
-                <!-- Cancelled Members Card -->
-                <div class="metric-card accent-red">
-                    <div class="metric-icon">
-                        <i class="fas fa-user-times"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Cancelled Members</h3>
-                        <span>@(Model.MemberCountSummary?.Cancelled ?? 0)</span>
-                    </div>
+                <div class="metric-info">
+                    <h3>Good Standing</h3>
+                    <span>@(Model.MemberCountSummary?.GoodStanding ?? 0)</span>
                 </div>
             </div>
+        </div>
 
-            <!-- The Chart Container -->
+        <!-- Outstanding Members Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="metric-card accent-yellow">
+                <div class="metric-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="metric-info">
+                    <h3>Outstanding</h3>
+                    <span>@(Model.MemberCountSummary?.OutStanding ?? 0)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cancelled Members Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="metric-card accent-red">
+                <div class="metric-icon">
+                    <i class="fas fa-user-times"></i>
+                </div>
+                <div class="metric-info">
+                    <h3>Cancelled</h3>
+                    <span>@(Model.MemberCountSummary?.Cancelled ?? 0)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Charts -->
+    <div class="row g-3">
+        <!-- Member Growth Chart -->
+        <div class="col-md-12 col-lg-4">
             <div class="chart-container">
-                <canvas id="membersPerMonthChart"></canvas>
+                <h3>Member Growth</h3>
+                <canvas id="memberGrowthChart" class="chart-canvas"></canvas>
             </div>
-        </section>
+        </div>
 
-        <section class="tab-content" id="membership">
-            <div class="metrics-grid">
+        <!-- Membership Distribution Chart -->
+        <div class="col-md-12 col-lg-4">
+            <div class="chart-container">
+                <h3>Membership Distribution</h3>
+                <canvas id="membershipDistributionChart" class="chart-canvas"></canvas>
+            </div>
+        </div>
+
+        <!-- Opportunity Status Chart -->
+        <div class="col-md-12 col-lg-4">
+            <div class="chart-container">
+                <h3>Opportunity Status</h3>
+                <canvas id="opportunityStatusChart" class="chart-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Tabs -->
+    <div class="dashboard-tabs">
+        <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">
+                    <i class="fas fa-th-large me-2"></i> Overview
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="membership-tab" data-bs-toggle="tab" data-bs-target="#membership" type="button" role="tab" aria-controls="membership" aria-selected="false">
+                    <i class="fas fa-id-badge me-2"></i> Membership Types
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="opportunities-tab" data-bs-toggle="tab" data-bs-target="#opportunities" type="button" role="tab" aria-controls="opportunities" aria-selected="false">
+                    <i class="fas fa-handshake me-2"></i> Opportunities
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="dashboardTabsContent">
+        <!-- Overview Tab -->
+        <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+            <div class="row">
+                <div class="col-12">
+                    <div class="chart-container">
+                        <h3>Monthly Activity Summary</h3>
+                        <p>This section provides additional details about monthly activities and trends.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Membership Tab -->
+        <div class="tab-pane fade" id="membership" role="tabpanel" aria-labelledby="membership-tab">
+            <div class="row g-3">
                 <!-- Membership Type Cards -->
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-user-tie"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Associate</h3>
-                        <span>@Model.MembershipTypeSummary.AssociateCount</span>
-                    </div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-building"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Chamber Associate</h3>
-                        <span>@Model.MembershipTypeSummary.ChamberAssociateCount</span>
+                <div class="col-md-6 col-lg-4">
+                    <div class="metric-card accent-blue">
+                        <div class="metric-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Associate</h3>
+                            <span>@Model.MembershipTypeSummary.AssociateCount</span>
+                        </div>
                     </div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-industry"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Non-Local Industrial</h3>
-                        <span>@Model.MembershipTypeSummary.NonLocalIndustrialCount</span>
-                    </div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-landmark"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Government Association</h3>
-                        <span>@Model.MembershipTypeSummary.GovernmentAssociationCount</span>
+                <div class="col-md-6 col-lg-4">
+                    <div class="metric-card accent-blue">
+                        <div class="metric-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Chamber Associate</h3>
+                            <span>@Model.MembershipTypeSummary.ChamberAssociateCount</span>
+                        </div>
                     </div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-map-marker-alt"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Local</h3>
-                        <span>@Model.MembershipTypeSummary.LocalCount</span>
+                <div class="col-md-6 col-lg-4">
+                    <div class="metric-card accent-blue">
+                        <div class="metric-icon">
+                            <i class="fas fa-industry"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Non-Local Industrial</h3>
+                            <span>@Model.MembershipTypeSummary.NonLocalIndustrialCount</span>
+                        </div>
                     </div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-ellipsis-h"></i>
+                <div class="col-md-6 col-lg-4">
+                    <div class="metric-card accent-blue">
+                        <div class="metric-icon">
+                            <i class="fas fa-landmark"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Government Association</h3>
+                            <span>@Model.MembershipTypeSummary.GovernmentAssociationCount</span>
+                        </div>
                     </div>
-                    <div class="metric-info">
-                        <h3>Others</h3>
-                        <span>@Model.MembershipTypeSummary.OtherCount</span>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="metric-card accent-blue">
+                        <div class="metric-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Local</h3>
+                            <span>@Model.MembershipTypeSummary.LocalCount</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="metric-card accent-blue">
+                        <div class="metric-icon">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Others</h3>
+                            <span>@Model.MembershipTypeSummary.OtherCount</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <section class="tab-content" id="opportunities">
-            <div class="metrics-grid">
+        <!-- Opportunities Tab -->
+        <div class="tab-pane fade" id="opportunities" role="tabpanel" aria-labelledby="opportunities-tab">
+            <div class="row g-3">
                 <!-- Opportunity Status Cards -->
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-clipboard-check"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Qualification</h3>
-                        <span>@Model.OpportunityCountSummary.QualificationCount</span>
-                    </div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-handshake"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Negotiating</h3>
-                        <span>@Model.OpportunityCountSummary.NegotiationCount</span>
+                <div class="col-md-6 col-lg-3">
+                    <div class="metric-card accent-blue">
+                        <div class="metric-icon">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Qualification</h3>
+                            <span>@Model.OpportunityCountSummary.QualificationCount</span>
+                        </div>
                     </div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-user-plus"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Closed - New Members</h3>
-                        <span>@Model.OpportunityCountSummary.ClosedNewMembersCount</span>
+                <div class="col-md-6 col-lg-3">
+                    <div class="metric-card accent-yellow">
+                        <div class="metric-icon">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Negotiating</h3>
+                            <span>@Model.OpportunityCountSummary.NegotiationCount</span>
+                        </div>
                     </div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-user-slash"></i>
+                <div class="col-md-6 col-lg-3">
+                    <div class="metric-card accent-green">
+                        <div class="metric-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Closed - New Members</h3>
+                            <span>@Model.OpportunityCountSummary.ClosedNewMembersCount</span>
+                        </div>
                     </div>
-                    <div class="metric-info">
-                        <h3>Closed - Not Interested</h3>
-                        <span>@Model.OpportunityCountSummary.ClosedNotInterestedCount</span>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="metric-card accent-red">
+                        <div class="metric-icon">
+                            <i class="fas fa-user-slash"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Closed - Not Interested</h3>
+                            <span>@Model.OpportunityCountSummary.ClosedNotInterestedCount</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
     </div>
 </div>
 
-<!-- Pass the data to JavaScript with ISO date strings -->
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<!-- Initialize Charts -->
 <script>
-    window.memberCountOverTime = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-        Model.MemberCountOverTime.Select(m => new
-        {
-            Date = m.Date.ToString("yyyy-MM-dd"),
-            m.Count
+    // Wait for the DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Bootstrap tabs
+        var triggerTabList = [].slice.call(document.querySelectorAll('#dashboardTabs button'))
+        triggerTabList.forEach(function (triggerEl) {
+            var tabTrigger = new bootstrap.Tab(triggerEl)
+            triggerEl.addEventListener('click', function (event) {
+                event.preventDefault()
+                tabTrigger.show()
+            })
         })
-    ));
-    console.log("Member Count Over Time Data:", window.memberCountOverTime);
+
+        // Parse the data from the model
+        const memberChartData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            Model.MemberCountOverTime.Select(m => new
+            {
+                Date = m.Date.ToString("yyyy-MM-dd"),
+                m.Count
+            })
+        )) || [];
+
+        // Format the data for Chart.js
+        const memberLabels = memberChartData.map(item => item.Date);
+        const memberData = memberChartData.map(item => item.Count);
+
+        // Member Growth Chart
+        const memberGrowthCtx = document.getElementById('memberGrowthChart').getContext('2d');
+        const memberGrowthChart = new Chart(memberGrowthCtx, {
+            type: 'line',
+            data: {
+                labels: memberLabels,
+                datasets: [{
+                    label: 'Member Count',
+                    data: memberData,
+                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                    borderColor: 'rgba(52, 152, 219, 1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    pointBackgroundColor: 'rgba(52, 152, 219, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            boxWidth: 12,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    tooltip: {
+                        titleFont: {
+                            size: 11
+                        },
+                        bodyFont: {
+                            size: 11
+                        },
+                        padding: 8
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            font: {
+                                size: 10
+                            }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            font: {
+                                size: 10
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Membership Distribution Chart
+        const membershipDistributionCtx = document.getElementById('membershipDistributionChart').getContext('2d');
+        const membershipDistributionChart = new Chart(membershipDistributionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Associate', 'Chamber', 'Non-Local', 'Gov Assoc', 'Local', 'Others'],
+                datasets: [{
+                    data: [
+    @Model.MembershipTypeSummary.AssociateCount,
+    @Model.MembershipTypeSummary.ChamberAssociateCount,
+    @Model.MembershipTypeSummary.NonLocalIndustrialCount,
+    @Model.MembershipTypeSummary.GovernmentAssociationCount,
+    @Model.MembershipTypeSummary.LocalCount,
+    @Model.MembershipTypeSummary.OtherCount
+                    ],
+                    backgroundColor: [
+                        'rgba(52, 152, 219, 0.8)',
+                        'rgba(155, 89, 182, 0.8)',
+                        'rgba(52, 73, 94, 0.8)',
+                        'rgba(22, 160, 133, 0.8)',
+                        'rgba(243, 156, 18, 0.8)',
+                        'rgba(189, 195, 199, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(52, 152, 219, 1)',
+                        'rgba(155, 89, 182, 1)',
+                        'rgba(52, 73, 94, 1)',
+                        'rgba(22, 160, 133, 1)',
+                        'rgba(243, 156, 18, 1)',
+                        'rgba(189, 195, 199, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            padding: 10,
+                            boxWidth: 10,
+                            font: {
+                                size: 10
+                            }
+                        }
+                    },
+                    tooltip: {
+                        titleFont: {
+                            size: 11
+                        },
+                        bodyFont: {
+                            size: 11
+                        },
+                        padding: 8,
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${percentage}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Opportunity Status Chart
+        const opportunityStatusCtx = document.getElementById('opportunityStatusChart').getContext('2d');
+        const opportunityStatusChart = new Chart(opportunityStatusCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Qualification', 'Negotiating', 'Closed - New', 'Closed - Not Int.'],
+                datasets: [{
+                    label: 'Opportunities',
+                    data: [
+    @Model.OpportunityCountSummary.QualificationCount,
+    @Model.OpportunityCountSummary.NegotiationCount,
+    @Model.OpportunityCountSummary.ClosedNewMembersCount,
+    @Model.OpportunityCountSummary.ClosedNotInterestedCount
+                    ],
+                    backgroundColor: [
+                        'rgba(52, 152, 219, 0.8)',
+                        'rgba(243, 156, 18, 0.8)',
+                        'rgba(46, 204, 113, 0.8)',
+                        'rgba(231, 76, 60, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(52, 152, 219, 1)',
+                        'rgba(243, 156, 18, 1)',
+                        'rgba(46, 204, 113, 1)',
+                        'rgba(231, 76, 60, 1)'
+                    ],
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    barPercentage: 0.7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        titleFont: {
+                            size: 11
+                        },
+                        bodyFont: {
+                            size: 11
+                        },
+                        padding: 8
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            font: {
+                                size: 10
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            font: {
+                                size: 10
+                            }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Log to console for debugging
+        console.log("Charts initialized");
+    });
 </script>

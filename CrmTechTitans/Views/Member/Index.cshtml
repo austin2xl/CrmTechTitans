@@ -118,16 +118,22 @@
         }
     </section>
 
-    <section class="table-responsive" id="table-view" style="display: none;">
+    <!-- Helper text for sorting in table view - Now visible -->
+    <div class="alert alert-info mb-3" id="table-sort-info">
+        <i class="fas fa-info-circle"></i> Click on column headers to sort the table.
+    </div>
+
+    <!-- Table view - Now visible -->
+    <section class="table-responsive" id="table-view">
         <table class="table custom-table" id="membersTable">
             <thead>
                 <tr>
                     <th>Logo</th>
-                    <th onclick="sortTable(1)">Name</th>
-                    <th onclick="sortTable(2)">Type</th>
-                    <th onclick="sortTable(3)">Company Size</th>
-                    <th onclick="sortTable(4)">Member Since</th>
-                    <th onclick="sortTable(5)">Status</th>
+                    <th onclick="sortTable(1)" class="sortable">Name <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(2)" class="sortable">Type <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(3)" class="sortable">Company Size <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(4)" class="sortable">Member Since <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(5)" class="sortable">Status <i class="fas fa-sort"></i></th>
                     <th class="text-center">Actions</th>
                 </tr>
             </thead>
@@ -162,6 +168,7 @@
                         <td>@item.MemberSince.ToShortDateString()</td>
                         <td><span class="status-badge status-@item.MembershipStatus.ToString().ToLower()">@item.MembershipStatus</span></td>
                         <td class="text-center">
+                            <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="View member edit page">Edit</a>
                             <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="View member details">Details</a>
                             <a href="javascript:void(0);"
                                class="btn btn-sm archive-btn @(item.MembershipStatus == MembershipStatus.Cancelled ? "btn-success" : "btn-danger")"
@@ -279,18 +286,132 @@
 @section Scripts {
     <script src="~/js/excel.js"></script>
     <script src="~/js/member.js"></script>
-    <style>
+    <script>
+        $(document).ready(function() {
+            // Modified to handle view toggling if needed in the future
+            $('[data-view="table"]').on('click', function() {
+                $('#cards-view').hide();
+                $('#table-view').show();
+                $('#table-sort-info').show();
+            });
 
+            $('[data-view="cards"]').on('click', function() {
+                $('#table-view').hide();
+                $('#table-sort-info').hide();
+                $('#cards-view').show();
+            });
+
+            // Initial sort on page load
+            sortTable(1, "asc");
+        });
+
+        // Sorting function
+        function sortTable(columnIndex, initialDirection = "asc") {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("membersTable");
+            switching = true;
+            dir = initialDirection; // Default sorting direction
+
+            // Determine the current sorting direction
+            if (table.rows[0].getElementsByTagName("th")[columnIndex].classList.contains("sorted-asc")) {
+                dir = "desc";
+            } else if (table.rows[0].getElementsByTagName("th")[columnIndex].classList.contains("sorted-desc")) {
+                dir = "asc";
+            }
+
+            // Remove sorting classes from all headers
+            for (i = 0; i < table.rows[0].getElementsByTagName("th").length; i++) {
+                table.rows[0].getElementsByTagName("th")[i].classList.remove("sorted-asc", "sorted-desc");
+            }
+
+            // Add sorting class to the clicked header
+            table.rows[0].getElementsByTagName("th")[columnIndex].classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
+
+            // Update sort icon for the clicked header
+            for (i = 1; i < 6; i++) { // Only for sortable columns (1-5)
+                if (i !== columnIndex) {
+                    var iconElement = table.rows[0].getElementsByTagName("th")[i].querySelector(".fas");
+                    if (iconElement) {
+                        iconElement.className = "fas fa-sort";
+                    }
+                }
+            }
+
+            // Update the icon for the sorted column
+            var sortedIconElement = table.rows[0].getElementsByTagName("th")[columnIndex].querySelector(".fas");
+            if (sortedIconElement) {
+                sortedIconElement.className = dir === "asc" ? "fas fa-sort-up" : "fas fa-sort-down";
+            }
+
+            // Perform sorting
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("td")[columnIndex];
+                    y = rows[i + 1].getElementsByTagName("td")[columnIndex];
+
+                    if (dir === "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir === "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount === 0 && dir === "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Styling for sortable columns */
+        .sortable {
+            position: relative;
+            cursor: pointer;
+        }
+
+            .sortable:hover {
+                background-color: #f5f5f5;
+            }
+
+            .sortable .fas {
+                margin-left: 5px;
+                color: #aaa;
+            }
+
+        .sorted-asc .fa-sort-up,
+        .sorted-desc .fa-sort-down {
+            color: #333;
+        }
+
+        /* Original styles */
         th {
             cursor: pointer;
         }
 
             th.sorted-asc::after {
-                content: " ▲";
+                content: ""; /* Removed as we're using Font Awesome icons now */
             }
 
             th.sorted-desc::after {
-                content: " ▼";
+                content: ""; /* Removed as we're using Font Awesome icons now */
             }
 
         .pagination {

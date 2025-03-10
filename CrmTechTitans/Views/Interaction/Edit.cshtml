@@ -5,67 +5,71 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="main-content">
-    <header class="page-header">
-        <h1>Edit Interaction</h1>
-        <p class="text-muted">Modify the details of the selected interaction. Ensure all information is correct before saving.</p>
-    </header>
-
-    <div class="member-card">
-        <div class="member-card-header">
-            <div class="member-avatar">
-                <i class="fas fa-comments"></i>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Page Header -->
+            <div class="mb-4">
+                <h1 class="h3 mb-2">Edit Interaction</h1>
+                <p class="text-muted">Modify the details of the selected interaction. Ensure all information is correct before saving.</p>
             </div>
-            <div class="member-info">
-                <h2 class="member-name">Edit Interaction</h2>
+
+            <!-- Interaction Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <form asp-action="Edit" method="post" id="multiStepForm" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        <input type="hidden" asp-for="Id" />
+
+                        <!-- Interaction Details Section -->
+                        <div class="row g-3 mb-4">
+                            <!-- Interaction Details -->
+                            <div class="col-12">
+                                <div class="form-group mb-3">
+                                    <label asp-for="InteractionDetails" class="form-label">Interaction</label>
+                                    <textarea asp-for="InteractionDetails" class="form-control" rows="4" placeholder="Enter interaction details"></textarea>
+                                    <span asp-validation-for="InteractionDetails" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Interaction Date -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Date" class="form-label">Interaction Date</label>
+                                    <input asp-for="Date" class="form-control" type="datetime-local" />
+                                    <span asp-validation-for="Date" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Contacted Person -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="ContactId" class="form-label">Contacted Person</label>
+                                    <input type="text" id="contactFilter" class="form-control mb-2" placeholder="Type to filter contacts..." onkeyup="filterContacts()">
+                                    <select asp-for="ContactId" class="form-select" id="contactSelect">
+                                        <option value="">Select a person</option>
+                                        @foreach (var contact in ViewBag.Contacts as List<CrmTechTitans.Models.Contact>)
+                                        {
+                                            <option value="@contact.ID">@contact.FullFormalName</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="ContactId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                Back to List
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
-        <div class="member-card-content">
-            <form asp-action="Edit" method="post" id="multiStepForm" enctype="multipart/form-data">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="Id" />
-
-                <div class="member-detail">
-                    <i class="fas fa-comment"></i>
-                    <div class="form-group">
-                        <label asp-for="InteractionDetails" class="control-label">Interaction</label>
-                        <textarea asp-for="InteractionDetails" class="form-control" rows="4" placeholder="Enter interaction details"></textarea>
-                        <span asp-validation-for="InteractionDetails" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="member-detail">
-                    <i class="fas fa-calendar-alt"></i>
-                    <div class="form-group">
-                        <label asp-for="Date" class="control-label">Interaction Date</label>
-                        <input asp-for="Date" class="form-control" type="datetime-local" />
-                        <span asp-validation-for="Date" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="member-detail">
-                    <i class="fas fa-user-tie"></i>
-                    <div class="form-group">
-                        <label asp-for="ContactId" class="control-label">Contacted Person</label>
-                        <input type="text" id="contactFilter" class="form-control mb-2" placeholder="Type to filter contacts..." onkeyup="filterContacts()">
-                        <select asp-for="ContactId" class="form-control" id="contactSelect">
-                            <option value="">Select a person</option>
-                            @foreach (var contact in ViewBag.Contacts as List<CrmTechTitans.Models.Contact>)
-                            {
-                                <option value="@contact.ID">@contact.FullFormalName</option>
-                            }
-                        </select>
-                        <span asp-validation-for="ContactId" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="member-card-footer">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save"></i> Save Changes
-                    </button>
-                    <a asp-action="Index" class="button-2">
-                        <i class="fas fa-arrow-left"></i> Back to List
-                    </a>
-                </div>
-            </form>
         </div>
     </div>
 </div>

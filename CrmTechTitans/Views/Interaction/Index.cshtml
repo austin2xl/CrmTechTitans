@@ -17,7 +17,11 @@
                 </a>
             </div>
         </header>
-        <p></p>
+
+        <!-- Helper text for sorting -->
+        <div class="alert alert-info mb-3">
+            <i class="fas fa-info-circle"></i> Click on column headers to sort the table.
+        </div>
 
         <!-- Search Input -->
         <div class="filter-container">
@@ -29,10 +33,10 @@
             <table class="table custom-table" id="interactionTable">
                 <thead>
                     <tr>
-                        <th onclick="sortTable(0)">Associated Members</th>
-                        <th onclick="sortTable(1)">Interaction</th>
-                        <th onclick="sortTable(2)">Date</th>
-                        <th onclick="sortTable(3)">Contact</th>
+                        <th onclick="sortTable(0)" class="sortable">Associated Members <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(1)" class="sortable">Interaction <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(2)" class="sortable">Date <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(3)" class="sortable">Contact <i class="fas fa-sort"></i></th>
                         <th class="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -62,19 +66,133 @@
                     }
                 </tbody>
             </table>
+
         </section>
+        <!-- Records per page -->
+        <div class="col-md-4">
+            <label for="recordsPerPage">Records per page:</label>
+            <select id="recordsPerPage" class="form-control">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+            </select>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div id="paginationControls" class="pagination">
+            <button id="prevPage" class="btn btn-primary">Previous</button>
+            <span id="pageInfo"></span>
+            <button id="nextPage" class="btn btn-primary">Next</button>
+        </div>
     </div>
 </div>
 
 <!-- JavaScript for Client-Side Filtering -->
 @section Scripts {
     <script>
-        // Sort table function
+        $(document).ready(function () {
+            var currentPage = 1;
+            var recordsPerPage = parseInt($('#recordsPerPage').val());
+
+            // Function to get visible rows (rows not hidden by filter)
+            function getVisibleRows() {
+                var memberNameFilter = $('#memberNameFilter').val().toLowerCase();
+
+                var visibleRows = $('#interactionTable tbody tr').filter(function () {
+                    var memberName = $(this).find('td:nth-child(1)').text().toLowerCase();
+                    return memberName.includes(memberNameFilter);
+                });
+
+                return visibleRows;
+            }
+
+            // Function to show the current page
+            function showPage(page) {
+                var visibleRows = getVisibleRows();
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+
+                // Ensure currentPage is within valid range
+                if (page < 1) page = 1;
+                if (page > totalPages) page = totalPages;
+
+                var startIndex = (page - 1) * recordsPerPage;
+                var endIndex = startIndex + recordsPerPage;
+
+                // Hide all rows first
+                $('#interactionTable tbody tr').hide();
+
+                // Show only the rows for the current page
+                visibleRows.slice(startIndex, endIndex).show();
+
+                // Update page info
+                $('#pageInfo').text(`Page ${page} of ${totalPages}`);
+
+                // Enable/disable pagination buttons
+                $('#prevPage').prop('disabled', page === 1);
+                $('#nextPage').prop('disabled', page === totalPages);
+            }
+
+            // Function to update pagination
+            function updatePagination() {
+                var visibleRows = getVisibleRows();
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+
+                if (currentPage > totalPages) {
+                    currentPage = totalPages > 0 ? totalPages : 1;
+                }
+
+                showPage(currentPage);
+            }
+
+            // Event listener for records per page dropdown
+            $('#recordsPerPage').on('change', function () {
+                recordsPerPage = parseInt($(this).val());
+                currentPage = 1; // Reset to the first page
+                updatePagination();
+            });
+
+            // Event listener for previous page button
+            $('#prevPage').on('click', function () {
+                if (currentPage > 1) {
+                    currentPage--;
+                    showPage(currentPage);
+                }
+            });
+
+            // Event listener for next page button
+            $('#nextPage').on('click', function () {
+                var visibleRows = getVisibleRows();
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    showPage(currentPage);
+                }
+            });
+
+            // Filter function
+            function filterTable() {
+                currentPage = 1; // Reset to the first page
+                updatePagination();
+            }
+
+            // Attach filter function to input events
+            $('#memberNameFilter').on('input', filterTable);
+
+            // Initial page load
+            updatePagination();
+
+            // Initial sort on page load
+            sortTable(2, "asc");
+        });
+
+        // Sorting function
         function sortTable(columnIndex, initialDirection = "asc") {
             var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
             table = document.getElementById("interactionTable");
             switching = true;
-            dir = initialDirection;
+            dir = initialDirection; // Default sorting direction
 
             // Determine the current sorting direction
             if (table.rows[0].getElementsByTagName("th")[columnIndex].classList.contains("sorted-asc")) {
@@ -91,10 +209,27 @@
             // Add sorting class to the clicked header
             table.rows[0].getElementsByTagName("th")[columnIndex].classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
 
+            // Update sort icon for all headers
+            for (i = 0; i < 4; i++) { // Only for sortable columns (0-3)
+                if (i !== columnIndex) {
+                    var iconElement = table.rows[0].getElementsByTagName("th")[i].querySelector(".fas");
+                    if (iconElement) {
+                        iconElement.className = "fas fa-sort";
+                    }
+                }
+            }
+
+            // Update the icon for the sorted column
+            var sortedIconElement = table.rows[0].getElementsByTagName("th")[columnIndex].querySelector(".fas");
+            if (sortedIconElement) {
+                sortedIconElement.className = dir === "asc" ? "fas fa-sort-up" : "fas fa-sort-down";
+            }
+
             // Perform sorting
             while (switching) {
                 switching = false;
                 rows = table.rows;
+
                 for (i = 1; i < (rows.length - 1); i++) {
                     shouldSwitch = false;
                     x = rows[i].getElementsByTagName("td")[columnIndex];
@@ -117,52 +252,68 @@
                     rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
                     switching = true;
                     switchcount++;
-                } else if (switchcount === 0 && dir === "asc") {
-                    dir = "desc";
-                    switching = true;
-                }
-            }
-        }
-
-        // Filter table function
-        function filterTable() {
-            var searchFilter = document.getElementById('memberNameFilter').value.toLowerCase();
-
-            var table = document.getElementById("interactionTable");
-            var tr = table.getElementsByTagName("tr");
-
-            for (var i = 1; i < tr.length; i++) {
-                var td = tr[i].getElementsByTagName("td")[0]; // Associated Members column
-                if (td) {
-                    var txtValue = td.textContent || td.innerText;
-                    if (txtValue.toLowerCase().includes(searchFilter)) {
-                        tr[i].style.display = "";
-                    } else {
-                        tr[i].style.display = "none";
+                } else {
+                    if (switchcount === 0 && dir === "asc") {
+                        dir = "desc";
+                        switching = true;
                     }
                 }
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            // Initialize Bootstrap Tooltips
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        });
+        // Make the global filterTable function available
+        function filterTable() {
+            $('#memberNameFilter').trigger('input');
+        }
     </script>
+
     <style>
+        /* Styling for sortable columns */
+        .sortable {
+            position: relative;
+            cursor: pointer;
+        }
+
+            .sortable:hover {
+                background-color: #f5f5f5;
+            }
+
+            .sortable .fas {
+                margin-left: 5px;
+                color: #aaa;
+            }
+
+        .sorted-asc .fa-sort-up,
+        .sorted-desc .fa-sort-down {
+            color: #333;
+        }
+
+        /* Original styles */
         th {
             cursor: pointer;
         }
 
             th.sorted-asc::after {
-                content: " ▲";
+                content: ""; /* Removed as we're using Font Awesome icons now */
             }
 
             th.sorted-desc::after {
-                content: " ▼";
+                content: ""; /* Removed as we're using Font Awesome icons now */
             }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+            .pagination button {
+                margin: 0 5px;
+            }
+
+        #pageInfo {
+            margin: 0 10px;
+            line-height: 2;
+        }
     </style>
 }

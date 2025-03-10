@@ -403,6 +403,13 @@ namespace CrmTechTitans.Controllers
                         var existingContact = member.MemberContacts.FirstOrDefault(c => c.Contact.ID == contactModel.ID);
                         if (existingContact != null)
                         {
+                            // Check for duplicate contact info excluding the current contact
+                            if (ContactExists(contactModel.Email, contactModel.Phone, contactModel.ID))
+                            {
+                                ModelState.AddModelError("", "A contact with the same email or phone number already exists.");
+                                return View(model);
+                            }
+
                             existingContact.Contact.FirstName = contactModel.FirstName;
                             existingContact.Contact.LastName = contactModel.LastName;
                             existingContact.Contact.Email = contactModel.Email;
@@ -411,6 +418,13 @@ namespace CrmTechTitans.Controllers
                         }
                         else
                         {
+                            // Check for duplicate contact info for new contacts
+                            if (ContactExists(contactModel.Email, contactModel.Phone))
+                            {
+                                ModelState.AddModelError("", "A contact with the same email or phone number already exists.");
+                                return View(model);
+                            }
+
                             member.MemberContacts.Add(new MemberContact
                             {
                                 Contact = new Contact
@@ -491,6 +505,18 @@ namespace CrmTechTitans.Controllers
         private bool MemberExists(int id)
         {
             return _context.Members.Any(e => e.ID == id);
+        }
+
+        private bool ContactExists(string email, string phone, int? excludeContactId = null)
+        {
+            var query = _context.Contacts.AsQueryable();
+
+            if (excludeContactId.HasValue)
+            {
+                query = query.Where(c => c.ID != excludeContactId.Value);
+            }
+
+            return query.Any(c => c.Email == email || c.Phone == phone);
         }
 
         private async Task AddMemberPicture(MemberCreateViewModel member, IFormFile thePicture)
