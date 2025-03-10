@@ -5,51 +5,120 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="main-content">
-    <header class="page-header-details">
-        <h1>Opportunity Details</h1>
-        <p class="text-muted">Detailed information about the selected opportunity.</p>
-    </header>
-
-    <div class="member-card-details">
-        <div class="member-card-header-details">
-            <div class="member-avatar">
-                <i class="fas fa-lightbulb"></i>
-            </div>
-            <div class="member-info">
-                <h2 class="member-name">@Model.Title</h2>
+<div class="container py-3">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header text-white p-3" style="background-color: #6c757d;">
+            <div class="d-flex align-items-center">
+                <div class="me-3 rounded-circle p-2" style="background-color: rgba(108, 117, 125, 0.25);">
+                    <i class="fas fa-lightbulb fa-2x"></i>
+                </div>
+                <div>
+                    <h1 class="h3 mb-1">Opportunity Details</h1>
+                    <p class="mb-0">Detailed information about the selected opportunity.</p>
+                </div>
             </div>
         </div>
-        <div class="member-card-content">
-            <div class="member-detail">
-                <i class="fas fa-tasks"></i>
-                <span>
-                    <strong>Status:</strong>
-                    @Html.DisplayFor(model => model.Status)
-                </span>
+        
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="text-center mb-3">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px;">
+                            <i class="fas fa-lightbulb fa-4x text-secondary"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-center mb-3">@Model.Title</h3>
+                    
+                    <div class="d-grid gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model.ID" class="btn btn-primary">
+                            <i class="fas fa-edit me-2"></i>Edit
+                        </a>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to List
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="col-md-8">
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Opportunity Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-4 fw-bold">Title</div>
+                                <div class="col-md-8">@Model.Title</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4 fw-bold">Description</div>
+                                <div class="col-md-8">
+                                    @if (!string.IsNullOrEmpty(Model.Description))
+                                    {
+                                        <p class="mb-0">@Model.Description</p>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No description provided</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4 fw-bold">Status</div>
+                                <div class="col-md-8">
+                                    <span class="badge @(Model.Status == CrmTechTitans.Models.Enumerations.Status.Qualification ? "bg-primary" : 
+                                                        Model.Status == CrmTechTitans.Models.Enumerations.Status.Negotiating ? "bg-warning" : 
+                                                        Model.Status == CrmTechTitans.Models.Enumerations.Status.ClosedNewMember ? "bg-success" : "bg-danger")">
+                                        @Model.Status
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 fw-bold">Priority</div>
+                                <div class="col-md-8">
+                                    <span class="badge @(Model.Priority == CrmTechTitans.Models.Enumerations.PriorityType.High ? "bg-danger" : 
+                                                        Model.Priority == CrmTechTitans.Models.Enumerations.PriorityType.Medium ? "bg-warning" : "bg-success")">
+                                        @Model.Priority
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    @if (Model.MemberOpportunities != null && Model.MemberOpportunities.Any())
+                    {
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-building me-2"></i>Associated Members</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Member Name</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var memberOpportunity in Model.MemberOpportunities)
+                                            {
+                                                <tr>
+                                                    <td>@memberOpportunity.Member.MemberName</td>
+                                                    <td>
+                                                        <a asp-controller="Member" asp-action="Details" asp-route-id="@memberOpportunity.MemberID" class="btn btn-sm btn-outline-primary">
+                                                            <i class="fas fa-eye"></i> View
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
-            <div class="member-detail">
-                <i class="fas fa-align-left"></i>
-                <span>
-                    <strong>Description:</strong>
-                    @Html.DisplayFor(model => model.Description)
-                </span>
-            </div>
-            <div class="member-detail">
-                <i class="fas fa-flag"></i>
-                <span>
-                    <strong>Priority:</strong>
-                    @Html.DisplayFor(model => model.Priority)
-                </span>
-            </div>
-        </div>
-        <div class="member-card-footer">
-            <a asp-action="Edit" asp-route-id="@Model?.ID" class="button-1">
-                <i class="fas fa-edit"></i> Edit
-            </a>
-            <a asp-action="Index" class="button-2">
-                <i class="fas fa-arrow-left"></i> Back to Opportunities
-            </a>
         </div>
     </div>
 </div>

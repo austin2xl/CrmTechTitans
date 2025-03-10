@@ -4,196 +4,460 @@
     ViewData["Title"] = "Member Details";
 }
 
-<div class="main-content">
-    <header class="page-header-details">
-        <h1>Member Details</h1>
-        <p class="text-muted">Below is the detailed information of the selected member.</p>
-    </header>
-
-    <div class="member-card-details">
-        <div class="member-card-header-details">
-            <div class="member-avatar">
-                @{
-                    if (Model.MemberPhoto?.Content != null)
-                    {
-                        @:<div class="member-photo">
-                            string imageBase64 = Convert.ToBase64String(Model.MemberPhoto.Content);
-                            string imageSrc = string.Format("data:" + Model.MemberPhoto.MimeType + ";base64,{0}", imageBase64);
-                            <img src="@imageSrc" alt="Profile Picture of @Model.MemberName" title="Profile Picture of @Model.MemberName" class="img-fluid rounded" />
-                        @:</div><hr />
-                    }
-                    else
-                    {
-                        <i class="fas fa-user"></i>
-                    }
-                }
-            </div>
-            
-            <div class="member-info">
-                <h2 class="member-name">@Model.MemberName</h2>
-         
-                <p class="member-type">
-                    Membership Types: 
-                    @if (Model.MemberMembershipTypes.Any())
-                    {
-                        @string.Join(", ", Model.MemberMembershipTypes.Select(mmt => mmt.MembershipType.Name))
-                    }
-                    else
-                    {
-                        <span>No Membership Type Assigned</span>
-                    }
-                </p>
+<div class="container py-3">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header text-white p-3" style="background-color: #6c757d;">
+            <div class="d-flex align-items-center">
+                <div class="me-3 rounded-circle p-2" style="background-color: rgba(108, 117, 125, 0.25);">
+                    <i class="fas fa-building fa-2x"></i>
+                </div>
+                <div>
+                    <h1 class="h3 mb-1">Member Details</h1>
+                    <p class="mb-0">Below is the detailed information of the selected member.</p>
+                </div>
             </div>
         </div>
-        <div class="member-card-content">
-            <!-- Existing member details -->
-            <div class="member-detail">
-                <i class="fas fa-user-tie"></i>
-                <span>
-                    <strong>Contact Person:</strong>
-                    @Html.DisplayFor(model => model.ContactedBy)
-                </span>
-            </div>
-            <!-- Industries Section -->
-            <div class="member-detail">
-                <i class="fas fa-industry"></i>
-                <span>
-                    <strong>Industries:</strong>
-                    @if (Model.IndustryMembers.Any())
-                    {
-                        <ul>
-                            @foreach (var memberIndustry in Model.IndustryMembers)
+
+        <div class="card-body p-4">
+            <div class="row mb-4">
+                <div class="col-md-2 col-sm-3 text-center mb-3 mb-md-0">
+                    <div class="member-avatar rounded-circle bg-light border d-flex align-items-center justify-content-center mx-auto" style="width: 100px; height: 100px; overflow: hidden;">
+                        @{
+                            if (Model.MemberPhoto?.Content != null)
                             {
-                                if (memberIndustry.Industry != null)
-                                {
-                                    <li>
-                                        @memberIndustry.Industry.Name (NAICS: @memberIndustry.Industry.NAICS)
-                                    </li>
-                                }
+                                string imageBase64 = Convert.ToBase64String(Model.MemberPhoto.Content);
+                                string imageSrc = string.Format("data:" + Model.MemberPhoto.MimeType + ";base64,{0}", imageBase64);
+                                <img src="@imageSrc" alt="Profile Picture of @Model.MemberName" title="Profile Picture of @Model.MemberName" class="img-fluid rounded-circle" style="width: 100%; height: 100%; object-fit: cover;" />
                             }
-                        </ul>
-                    }
-                    else
-                    {
-                        <span>No industries associated</span>
-                    }
-                </span>
-            </div>
-            <div class="member-detail">
-                <i class="fas fa-building"></i>
-                <span>
-                    <strong>Company Size:</strong>
-                    @Html.DisplayFor(model => model.CompanySize)
-                </span>
-            </div>
-            <div class="member-detail">
-                <i class="fas fa-globe"></i>
-                <span>
-                    <strong>Website:</strong>
-                    <a href="@Model.CompanyWebsite" target="_blank" rel="noopener noreferrer" class="web-link">
-                        @Html.DisplayFor(model => model.CompanyWebsite)
-                    </a>
-                </span>
-            </div>
-            <div class="member-detail">
-                <i class="fas fa-calendar-alt"></i>
-                <span>
-                    <strong>Member Since:</strong>
-                    @Model.MemberSince.ToString("yyyy-MM-dd")
-                </span>
-            </div>
-            <div class="member-detail">
-                <i class="fas fa-phone"></i>
-                <span>
-                    <strong>Last Contact Date:</strong>
-                    @(Model.LastContactDate.HasValue ? Model.LastContactDate.Value.ToString("yyyy-MM-dd") : "N/A")
-                </span>
-            </div>
-
-            <div class="member-detail">
-                <i class="fas fa-sticky-note"></i>
-                <span>
-                    <strong>Notes:</strong>
-                    @Html.DisplayFor(model => model.Notes)
-                </span>
-            </div>
-            <div class="member-detail">
-                <i class="fas fa-check-circle"></i>
-                <span>
-                    <strong>Membership Status:</strong>
-                    @Html.DisplayFor(model => model.MembershipStatus)
-                </span>
-            </div>
-            <div class="member-detail">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>
-                    <strong>Address:</strong>
-                    @if (Model.MemberAddresses.Any())
-                    {
-                        <ul>
-                            @foreach (var memberAddress in Model.MemberAddresses)
+                            else
                             {
-                                if (memberAddress.Address != null)
-                                {
-                                    <li>@memberAddress.Address.Summary</li>
-                                }
+                                <i class="fas fa-building fa-3x text-secondary"></i>
                             }
-                        </ul>
-                    }
-                    else
-                    {
-                        <span>No address associated</span>
-                    }
-                </span>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-10 col-sm-9">
+                    <h2 class="h4 mb-2">@Model.MemberName</h2>
+                    <div class="mb-2">
+                        @if (Model.MemberMembershipTypes.Any())
+                        {
+                            <span class="badge bg-secondary me-2">@string.Join("</span><span class='badge bg-secondary me-2'>", Model.MemberMembershipTypes.Select(mmt => mmt.MembershipType.Name))</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-light text-dark border">No Membership Type</span>
+                        }
+                        <span class="badge bg-@(Model.MembershipStatus.ToString().ToLower() == "active" ? "success" : Model.MembershipStatus.ToString().ToLower() == "inactive" ? "danger" : "warning") ms-2">@Model.MembershipStatus</span>
+                    </div>
+                </div>
             </div>
 
-			<!-- Contacts Section -->
-			<div class="member-detail">
-				<i class="fas fa-address-book"></i>
-				<span>
-					<strong>Contacts:</strong>
-					@if (Model.MemberContacts.Any())
-					{
-						<ul>
-							@foreach (var memberContact in Model.MemberContacts)
-							{
-								if (memberContact.Contact != null)
-								{
-									<li>
-										<strong>@memberContact.ContactType:</strong>
-										@memberContact.Contact.FullFormalName
-										@if (!string.IsNullOrEmpty(memberContact.Contact.Email))
-										{
-											<span> | <a href="mailto:@memberContact.Contact.Email">@memberContact.Contact.Email</a></span>
-										}
-										@if (!string.IsNullOrEmpty(memberContact.Contact.Phone))
-										{
-											<span> | <a href="tel:@memberContact.Contact.Phone">@memberContact.Contact.Phone</a></span>
-										}
-									</li>
-								}
-							}
-						</ul>
-					}
-					else
-					{
-						<span>No contacts associated</span>
-					}
-				</span>
-			</div>
-		</div>
+            <div class="row g-4">
+                <!-- Company Information Section -->
+                <div class="col-lg-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h3 class="h5 mb-0"><i class="fas fa-building text-primary me-2"></i>Company Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 me-3">
+                                            <i class="fas fa-industry text-secondary"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Industries</strong>
+                                            @if (Model.IndustryMembers.Any())
+                                            {
+                                                <ul class="list-unstyled mt-1 mb-0">
+                                                    @foreach (var memberIndustry in Model.IndustryMembers)
+                                                    {
+                                                        if (memberIndustry.Industry != null)
+                                                        {
+                                                            <li class="mb-1">
+                                                                @memberIndustry.Industry.Name 
+                                                                <small class="text-muted d-block">NAICS: @memberIndustry.Industry.NAICS</small>
+                                                            </li>
+                                                        }
+                                                    }
+                                                </ul>
+                                            }
+                                            else
+                                            {
+                                                <p class="text-muted mb-0 mt-1">No industries associated</p>
+                                            }
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 me-3">
+                                            <i class="fas fa-users text-secondary"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Company Size</strong>
+                                            <p class="mb-0 mt-1">@Html.DisplayFor(model => model.CompanySize)</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 me-3">
+                                            <i class="fas fa-globe text-secondary"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Website</strong>
+                                            @if (!string.IsNullOrEmpty(Model.CompanyWebsite))
+                                            {
+                                                <p class="mb-0 mt-1">
+                                                    <a href="@Model.CompanyWebsite" target="_blank" rel="noopener noreferrer" class="text-primary">
+                                                        <i class="fas fa-external-link-alt me-1"></i>@Html.DisplayFor(model => model.CompanyWebsite)
+                                                    </a>
+                                                </p>
+                                            }
+                                            else
+                                            {
+                                                <p class="text-muted mb-0 mt-1">Not provided</p>
+                                            }
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
 
-<div class="member-card-footer">
-    <a class="button-1" href="/Member/Edit/8">
-    <i class="fas fa-edit"></i> Edit
-</a>
+                <!-- Membership Information Section -->
+                <div class="col-lg-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h3 class="h5 mb-0"><i class="fas fa-id-card text-primary me-2"></i>Membership Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 me-3">
+                                            <i class="fas fa-calendar-alt text-secondary"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Member Since</strong>
+                                            <p class="mb-0 mt-1">@Model.MemberSince.ToString("MMMM d, yyyy")</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 me-3">
+                                            <i class="fas fa-phone-alt text-secondary"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Last Contact Date</strong>
+                                            <p class="mb-0 mt-1">@(Model.LastContactDate.HasValue ? Model.LastContactDate.Value.ToString("MMMM d, yyyy") : "Not contacted yet")</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 me-3">
+                                            <i class="fas fa-user-tie text-secondary"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Contacted By</strong>
+                                            <p class="mb-0 mt-1">@(string.IsNullOrEmpty(Model.ContactedBy) ? "Not assigned" : Model.ContactedBy)</p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
 
-    <a asp-action="Index" class="button-2">
-        <i class="fas fa-arrow-left"></i> Back to Members
-    </a>
+                <!-- Contact Information Section -->
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h3 class="h5 mb-0"><i class="fas fa-address-book text-primary me-2"></i>Contact Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-4">
+                                <div class="col-lg-6">
+                                    <h4 class="h6 mb-3">Contacts</h4>
+                                    @if (Model.MemberContacts.Any())
+                                    {
+                                        <div class="row g-3">
+                                            @foreach (var memberContact in Model.MemberContacts)
+                                            {
+                                                if (memberContact.Contact != null)
+                                                {
+                                                    <div class="col-md-6">
+                                                        <a href="@Url.Action("Details", "Contact", new { id = memberContact.ContactID })" class="text-decoration-none">
+                                                            <div class="card h-100 border-start border-primary border-3 hover-shadow">
+                                                                <div class="card-body p-3">
+                                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                        <span class="badge bg-light text-dark">@memberContact.ContactType</span>
+                                                                    </div>
+                                                                    <h5 class="card-title h6 mb-2">@memberContact.Contact.FullFormalName</h5>
+                                                                    <div class="d-flex flex-column gap-1">
+                                                                        @if (!string.IsNullOrEmpty(memberContact.Contact.Email))
+                                                                        {
+                                                                            <span class="text-primary">
+                                                                                <i class="fas fa-envelope me-2"></i>@memberContact.Contact.Email
+                                                                            </span>
+                                                                        }
+                                                                        @if (!string.IsNullOrEmpty(memberContact.Contact.Phone))
+                                                                        {
+                                                                            <span class="text-primary">
+                                                                                <i class="fas fa-phone me-2"></i>@memberContact.Contact.Phone
+                                                                            </span>
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </a>
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">No contacts associated</p>
+                                    }
+                                </div>
+                                <div class="col-lg-6">
+                                    <h4 class="h6 mb-3">Addresses</h4>
+                                    @if (Model.MemberAddresses.Any())
+                                    {
+                                        <div class="row g-3">
+                                            @foreach (var memberAddress in Model.MemberAddresses)
+                                            {
+                                                if (memberAddress.Address != null)
+                                                {
+                                                    <div class="col-md-6">
+                                                        <a href="@Url.Action("Details", "Address", new { id = memberAddress.AddressID })" class="text-decoration-none">
+                                                            <div class="card h-100 border-start border-primary border-3 hover-shadow">
+                                                                <div class="card-body p-3">
+                                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                        <span class="badge bg-light text-dark">@memberAddress.AddressType</span>
+                                                                    </div>
+                                                                    <p class="card-text mb-0">@memberAddress.Address.Summary</p>
+                                                                </div>
+                                                            </div>
+                                                        </a>
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">No address associated</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes Section -->
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                {
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-light">
+                                <h3 class="h5 mb-0"><i class="fas fa-sticky-note text-primary me-2"></i>Notes</h3>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-0">@Html.DisplayFor(model => model.Notes)</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <a href="/Member/Edit/@Model.ID" class="btn btn-primary">
+                    <i class="fas fa-edit me-1"></i> Edit Member
+                </a>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Members
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
-
-
-	</div>
-</div>
+@section Styles {
+    <style>
+        .member-status-badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        
+        .member-status-badge.active {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .member-status-badge.inactive {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .member-status-badge.pending {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .section-title i {
+            margin-right: 0.5rem;
+            color: #3498db;
+        }
+        
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .naics-code {
+            font-size: 0.85rem;
+            color: #6c757d;
+            display: block;
+        }
+        
+        .detail-list {
+            margin: 0.5rem 0 0 0;
+            padding-left: 1.5rem;
+        }
+        
+        .website-link {
+            color: #3498db;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .website-link:hover {
+            color: #2c3e50;
+            text-decoration: underline;
+        }
+        
+        .contacts-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        
+        .contact-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            border-left: 3px solid #3498db;
+        }
+        
+        .contact-header {
+            margin-bottom: 0.5rem;
+        }
+        
+        .contact-type {
+            font-size: 0.8rem;
+            background: #e9ecef;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            margin-right: 0.5rem;
+        }
+        
+        .contact-name {
+            font-weight: 600;
+        }
+        
+        .contact-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .contact-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .contact-link:hover {
+            text-decoration: underline;
+        }
+        
+        .address-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        
+        .address-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            border-left: 3px solid #3498db;
+        }
+        
+        .address-type {
+            font-size: 0.8rem;
+            background: #e9ecef;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+        
+        .notes-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border-left: 3px solid #3498db;
+            white-space: pre-line;
+        }
+        
+        .contacts-item {
+            grid-column: 1 / -1;
+        }
+        
+        @* Use @@ to escape the @ symbol in CSS media queries *@
+        @@media (max-width: 768px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .contacts-list {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .hover-shadow {
+            transition: all 0.3s ease;
+        }
+        
+        .hover-shadow:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+            transform: translateY(-3px);
+        }
+    </style>
+}

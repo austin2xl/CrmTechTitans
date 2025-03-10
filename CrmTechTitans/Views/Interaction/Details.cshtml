@@ -5,74 +5,134 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="main-content">
-    <header class="page-header-details">
-        <h1>Interaction Details</h1>
-        <p class="text-muted">Detailed information about the selected interaction.</p>
-    </header>
-
-    <div class="member-card-details">
-        <div class="member-card-header-details">
-            <div class="member-avatar">
-                <i class="fas fa-comments"></i>
-            </div>
-            <div class="member-info">
-                <h2 class="member-name">Interaction Information</h2>
+<div class="container py-3">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header text-white p-3" style="background-color: #6c757d;">
+            <div class="d-flex align-items-center">
+                <div class="me-3 rounded-circle p-2" style="background-color: rgba(108, 117, 125, 0.25);">
+                    <i class="fas fa-comments fa-2x"></i>
+                </div>
+                <div>
+                    <h1 class="h3 mb-1">Interaction Details</h1>
+                    <p class="mb-0">Detailed information about the selected interaction.</p>
+                </div>
             </div>
         </div>
-        <div class="member-card-content">
-            <!-- Associated Members -->
-            <div class="member-detail">
-                <i class="fas fa-users"></i>
-                <span>
-                    <strong>Associated Members:</strong>
-                    @if (Model.InteractionMembers.Any())
+
+        <div class="card-body p-4">
+            <div class="row mb-4">
+                <div class="col-md-2 col-sm-3 text-center mb-3 mb-md-0">
+                    <div class="interaction-avatar rounded-circle bg-light border d-flex align-items-center justify-content-center mx-auto" style="width: 100px; height: 100px;">
+                        <i class="fas fa-comments fa-3x text-secondary"></i>
+                    </div>
+                </div>
+                <div class="col-md-10 col-sm-9">
+                    <h2 class="h4 mb-2">Interaction from @Model.Date.ToString("MMMM d, yyyy")</h2>
+                    @if (Model.Contact != null)
                     {
-                        @string.Join(", ", Model.InteractionMembers
-                                 .Where(im => im.Member != null)
-                                 .Select(im => im.Member.MemberName))
+                        <div class="badge bg-info text-white mb-2">
+                            <i class="fas fa-user me-1"></i> Contact: @Model.Contact.FullFormalName
+                        </div>
                     }
-                    else
-                    {
-                        <text>No Members Associated</text>
-                    }
-                </span>
+                </div>
             </div>
 
-            <!-- Interaction Details -->
-            <div class="member-detail">
-                <i class="fas fa-comment"></i>
-                <span>
-                    <strong>Interaction:</strong>
-                    @Html.DisplayFor(model => model.InteractionDetails)
-                </span>
+            <div class="row g-4">
+                <!-- Interaction Information Section -->
+                <div class="col-lg-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h3 class="h5 mb-0"><i class="fas fa-info-circle text-primary me-2"></i>Interaction Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 me-3">
+                                            <i class="fas fa-calendar-alt text-secondary"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Date</strong>
+                                            <p class="mb-0 mt-1">@Model.Date.ToString("MMMM d, yyyy")</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 me-3">
+                                            <i class="fas fa-comment text-secondary"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Details</strong>
+                                            <p class="mb-0 mt-1">@Html.DisplayFor(model => model.InteractionDetails)</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                @if (Model.Contact != null)
+                                {
+                                    <li class="list-group-item px-0">
+                                        <div class="d-flex">
+                                            <div class="flex-shrink-0 me-3">
+                                                <i class="fas fa-user text-secondary"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <strong>Contact</strong>
+                                                <p class="mb-0 mt-1">
+                                                    <a href="/Contact/Details/@Model.Contact.ID" class="text-primary">
+                                                        @Model.Contact.FullFormalName
+                                                    </a>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Associated Members Section -->
+                <div class="col-lg-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h3 class="h5 mb-0"><i class="fas fa-building text-primary me-2"></i>Associated Members</h3>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.InteractionMembers.Any())
+                            {
+                                <div class="list-group list-group-flush">
+                                    @foreach (var interactionMember in Model.InteractionMembers.Where(im => im.Member != null))
+                                    {
+                                        <a href="/Member/Details/@interactionMember.MemberID" class="list-group-item list-group-item-action px-0 border-0 border-bottom">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">@interactionMember.Member.MemberName</h6>
+                                                </div>
+                                                <span class="badge bg-primary rounded-pill">
+                                                    <i class="fas fa-chevron-right"></i>
+                                                </span>
+                                            </div>
+                                        </a>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted mb-0">No associated members found.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Date -->
-            <div class="member-detail">
-                <i class="fas fa-calendar-alt"></i>
-                <span>
-                    <strong>Date:</strong>
-                    @Model.Date.ToString("f") <!-- Full date/time pattern (long) -->
-                </span>
+            <div class="d-flex gap-2 mt-4">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                    <i class="fas fa-edit me-1"></i> Edit Interaction
+                </a>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Interactions
+                </a>
             </div>
-
-            <!-- Contacted Person -->
-            <div class="member-detail">
-                <i class="fas fa-user-tie"></i>
-                <span>
-                    <strong>Contacted Person:</strong>
-                    @Model.Contact?.FullFormalName ?? "N/A"
-                </span>
-            </div>
-        </div>
-        <div class="member-card-footer">
-            <a asp-action="Edit" asp-route-id="@Model?.Id" class="button-1">
-                <i class="fas fa-edit"></i> Edit
-            </a>
-            <a asp-action="Index" class="button-2">
-                <i class="fas fa-arrow-left"></i> Back to Interactions
-            </a>
         </div>
     </div>
 </div>

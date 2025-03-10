@@ -6,504 +6,612 @@
     ViewData["Title"] = "Edit Member";
 }
 
-<!-- BEGIN: Consistent Layout Styles -->
-<style>
-    /* Container styling */
-   .main-content {
-    /* Limit how wide the content can be */
-    max-width: 800px; 
-    /* Automatically center left & right */
-    margin: 2rem auto;
-    /* Optional: some padding if you like */
-    padding: 1rem; 
-}
-
-    /* Member Card */
-    .member-card {
-        background-color: #fff;
-        border-radius: 6px;
-        border: 1px solid #dee2e6;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .member-card-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1.5rem;
-    }
-
-    .member-avatar {
-        margin-right: 1rem;
-    }
-
-    /* Consistent layout for each detail row: icon on the left, form group on the right */
-    .member-detail {
-        display: flex;
-        align-items: flex-start;
-        margin-bottom: 1rem;
-    }
-    .member-detail i {
-        margin-right: 0.75rem;
-        font-size: 1.2rem;
-        padding-top: 0.4rem;
-        min-width: 1.5rem;
-        text-align: center;
-    }
-    .member-detail .form-group {
-        flex: 1; 
-    }
-
-    /* Address form and Contact form panels */
-    .address-form,
-    .contact-form {
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        background-color: #f9f9f9;
-    }
-    .address-form .form-group,
-    .contact-form .form-group {
-        margin-bottom: 0.75rem;
-    }
-
-    /* Buttons */
-    .button-1,
-    .button-2 {
-        display: inline-block;
-        margin: 0.5rem 0;
-    }
-    .button-1 {
-        background-color: #007bff;
-        color: #fff;
-        border-radius: 4px;
-        padding: 0.5rem 1rem;
-        border: none;
-        cursor: pointer;
-        text-decoration: none;
-    }
-    .button-2 {
-        background-color: #6c757d;
-        color: #fff;
-        border-radius: 4px;
-        padding: 0.5rem 1rem;
-        border: none;
-        cursor: pointer;
-        text-decoration: none;
-    }
-    .button-1:hover,
-    .button-2:hover {
-        opacity: 0.9;
-    }
-</style>
-<!-- END: Consistent Layout Styles -->
-
-<div class="main-content">
-    <header class="page-header">
-        <h1>Edit Member</h1>
-        <p class="text-muted">Modify the details of the selected member. Ensure all details are correct before saving.</p>
-    </header>
-
-    <div class="member-card">
-        <div class="member-card-header">
-            <div class="member-avatar">
-                @{
-                    var hasMemberPicture = (Model.MemberPhoto?.Content != null);
-                    if (hasMemberPicture)
-                    {
-                        @:<div>
-                            string imageBase64 = Convert.ToBase64String(Model.MemberPhoto.Content);
-                            string imageSrc = string.Format("data:" + Model.MemberPhoto.MimeType + ";base64,{0}", imageBase64);
-                            <img src="@imageSrc" alt="Profile Picture of @Model.MemberName" 
-                                 title="Profile Picture of @Model.MemberName" class="img-fluid rounded" />
-                        @:</div><hr />
-                    }
-                    else
-                    {
-                        <i class="fas fa-user-edit"></i>
-                    }
-                }
-            </div>
-            <div class="member-info">
-            </div>
-        </div>
-
-        <form asp-action="Edit" method="post" enctype="multipart/form-data">
-            <div class="member-card-content">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="ID" />
-
-                <!-- Member Details -->
-                <div class="member-detail">
-                    <i class="fas fa-user"></i>
-                    <div class="form-group">
-                        <label asp-for="MemberName" class="control-label">Name</label>
-                        <input asp-for="MemberName" class="form-control" placeholder="Enter Member Name" />
-                        <span asp-validation-for="MemberName" class="text-danger"></span>
-                    </div>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-xxl-8">
+            <!-- Page Header -->
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h1 class="h3 mb-0 text-dark fw-bold">Edit Member</h1>
+                    <p class="text-secondary mb-0">Modify the details of the selected member. Ensure all details are correct before saving.</p>
                 </div>
-
-              <div class="member-detail">
-    <i class="fas fa-camera"></i>   <!-- The icon for this row -->
-    <div class="form-group">
-        @if (hasMemberPicture)
-        {
-            <!-- Display the current member avatar if it exists -->
-            <div class="mb-2">
-                @{
-                    string imageBase64 = Convert.ToBase64String(Model.MemberPhoto.Content);
-                    string imageSrc = $"data:{Model.MemberPhoto.MimeType};base64,{imageBase64}";
-                }
-                <img src="@imageSrc" alt="Profile Picture" class="img-fluid rounded" />
             </div>
 
-            <!-- Check to remove the picture -->
-            <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" id="chkRemoveMemberImage" name="chkRemoveMemberImage">
-                <label class="form-check-label" for="chkRemoveMemberImage">
-                    <strong>Remove Image</strong>
-                </label>
-            </div>
-        }
-
-        <!-- File upload input -->
-        <label asp-for="MemberPhoto" class="control-label">Member Picture:</label>
-        <div class="input-group mb-3">
-            <input asp-for="MemberPhoto"
-                   type="file"
-                   class="form-control"
-                   name="memberPicture"
-                   id="memberPicture">
-        </div>
-        <span asp-validation-for="MemberPhoto" class="text-danger"></span>
-    </div>
-</div>
-
-                <div class="member-detail">
-                    <div class="form-group">
-                        <div>
-                            @foreach (var type in Model.AvailableMembershipTypes)
+            <!-- Member Card -->
+            <div class="card shadow-sm border-0 mb-4 bg-white">
+                <div class="card-body p-lg-5">
+                    <!-- Member Header with Photo -->
+                    <div class="mb-4 text-center">
+                        @{
+                            var hasMemberPicture = (Model.MemberPhoto?.Content != null);
+                            if (hasMemberPicture)
                             {
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" name="SelectedMembershipTypeIDs" value="@type.ID"
-                                        @(Model.SelectedMembershipTypeIDs.Contains(type.ID) ? "checked" : "") />
-                                    <label class="form-check-label">@type.Name</label>
+                                string imageBase64 = Convert.ToBase64String(Model.MemberPhoto.Content);
+                                string imageSrc = string.Format("data:" + Model.MemberPhoto.MimeType + ";base64,{0}", imageBase64);
+                                <div class="mb-3 position-relative mx-auto" style="width: 120px;">
+                                    <img src="@imageSrc" alt="Profile Picture of @Model.MemberName"
+                                         title="Profile Picture of @Model.MemberName" class="img-fluid rounded-circle shadow-sm border border-2 border-light"
+                                         style="width: 120px; height: 120px; object-fit: cover;" />
                                 </div>
                             }
-                        </div>
-                        <span asp-validation-for="SelectedMembershipTypeIDs" class="text-danger"></span>
+                        }
                     </div>
-                </div>
 
-                <div class="member-detail">
-                    <i class="fas fa-user-tie"></i>
-                    <div class="form-group">
-                        <label asp-for="ContactedBy" class="control-label">Contacted By</label>
-                        <input asp-for="ContactedBy" class="form-control" placeholder="Enter Contact Person" />
-                        <span asp-validation-for="ContactedBy" class="text-danger"></span>
-                    </div>
-                </div>
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        <input type="hidden" asp-for="ID" />
 
-                <div class="member-detail">
-                    <i class="fas fa-building"></i>
-                    <div class="form-group">
-                        <label asp-for="CompanySize" class="control-label">Company Size</label>
-                        <select asp-for="CompanySize" class="form-control" asp-items="Html.GetEnumSelectList<CompanySize>()">
-                            <option value="">Select Company Size</option>
-                        </select>
-                        <span asp-validation-for="CompanySize" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="member-detail">
-                    <i class="fas fa-globe"></i>
-                    <div class="form-group">
-                        <label asp-for="CompanyWebsite" class="control-label">Website</label>
-                        <input asp-for="CompanyWebsite" class="form-control" placeholder="Enter Company Website" />
-                        <span asp-validation-for="CompanyWebsite" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="member-detail">
-                    <i class="fas fa-calendar-alt"></i>
-                    <div class="form-group">
-                        <label asp-for="MemberSince" class="control-label">Member Since</label>
-                        <input asp-for="MemberSince" class="form-control" type="datetime-local" />
-                        <span asp-validation-for="MemberSince" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="member-detail">
-                    <i class="fas fa-phone"></i>
-                    <div class="form-group">
-                        <label asp-for="LastContactDate" class="control-label">Last Contact Date</label>
-                        <input asp-for="LastContactDate" class="form-control" type="datetime-local" />
-                        <span asp-validation-for="LastContactDate" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="member-detail">
-                    <i class="fas fa-sticky-note"></i>
-                    <div class="form-group">
-                        <label asp-for="Notes" class="control-label">Notes</label>
-                        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Enter any additional notes"></textarea>
-                        <span asp-validation-for="Notes" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="member-detail">
-                    <i class="fas fa-check-circle"></i>
-                    <div class="form-group">
-                        <label asp-for="MembershipStatus" class="control-label">Membership Status</label>
-                        <select asp-for="MembershipStatus" class="form-control" asp-items="Html.GetEnumSelectList<MembershipStatus>()">
-                            <option value="">Select Membership Status</option>
-                        </select>
-                        <span asp-validation-for="MembershipStatus" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <!-- Addresses Section -->
-                <div class="member-detail">
-                    <i class="fas fa-map-marker-alt"></i>
-                    @for (int i = 0; i < Model.Addresses.Count; i++)
-                    {
-                        <div class="address-form">
-                            <div class="form-group">
-                                <label asp-for="Addresses[i].Street" class="control-label">Street</label>
-                                <input asp-for="Addresses[i].Street" class="form-control" placeholder="Enter Street Address" />
-                                <span asp-validation-for="Addresses[i].Street" class="text-danger"></span>
+                        <!-- Member Details Section -->
+                        <div class="row g-4 mb-5">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3 text-dark">Member Information</h5>
                             </div>
-                            <div class="form-group">
-                                <label asp-for="Addresses[i].City" class="control-label">City</label>
-                                <input asp-for="Addresses[i].City" class="form-control" placeholder="Enter City" />
-                                <span asp-validation-for="Addresses[i].City" class="text-danger"></span>
-                            </div>
-                            <div class="form-group">
-                                <label asp-for="Addresses[i].Province" class="control-label">Province</label>
-                                <select asp-for="Addresses[i].Province" class="form-control" asp-items="Html.GetEnumSelectList<Province>()">
-                                    <option value="">Select Province</option>
-                                </select>
-                                <span asp-validation-for="Addresses[i].Province" class="text-danger"></span>
-                            </div>
-                            <div class="form-group">
-                                <label asp-for="Addresses[i].PostalCode" class="control-label">Postal Code</label>
-                                <input asp-for="Addresses[i].PostalCode" class="form-control" placeholder="Enter Postal Code" />
-                                <span asp-validation-for="Addresses[i].PostalCode" class="text-danger"></span>
-                            </div>
-                            <div class="form-group">
-                                <label asp-for="Addresses[i].AddressType" class="control-label">Address Type</label>
-                                <select asp-for="Addresses[i].AddressType" class="form-control" asp-items="Html.GetEnumSelectList<AddressType>()">
-                                    <option value="">Select Address Type</option>
-                                </select>
-                                <span asp-validation-for="Addresses[i].AddressType" class="text-danger"></span>
-                            </div>
-                        </div>
-                    }
-<button type="button" id="add-address" class="btn-add">
-    <i class="fas fa-plus"></i> Add Address
-</button>                </div>
 
-                <!-- Contacts Section -->
-                <div class="member-detail">
-                    <i class="fas fa-address-book"></i>
-                    @for (int i = 0; i < Model.Contacts.Count; i++)
-                    {
-                        <div class="contact-form">
-                            <div class="form-group">
-                                @{
-                                    var hasContactPicture = (Model.Contacts[i].ContactPhoto?.Content != null);
-                                    if (hasContactPicture)
-                                    {
-                                        @:<div>
-                                            string imageBase64 = Convert.ToBase64String(Model.Contacts[i].ContactPhoto.Content);
-                                            string imageSrc = string.Format("data:" + Model.Contacts[i].ContactPhoto.MimeType + ";base64,{0}", imageBase64);
-                                            <img src="@imageSrc" alt="Profile Picture of @Model.Contacts[i].FirstName" 
-                                                 title="Profile Picture of @Model.Contacts[i].FirstName" class="img-fluid rounded" />
-                                        @:</div><hr />
-                                    }
-                                    else
-                                    {
-                                        <!-- no contact image -->
-                                    }
-                                }
+                            <!-- Member Name -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-0">
+                                    <label asp-for="MemberName" class="form-label text-secondary">Name</label>
+                                    <input asp-for="MemberName" class="form-control bg-light border-secondary h-auto py-2" placeholder="Enter Member Name" />
+                                    <span asp-validation-for="MemberName" class="text-danger small"></span>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label asp-for="Contacts[i].FirstName" class="control-label">First Name</label>
-                                <input asp-for="Contacts[i].FirstName" class="form-control" placeholder="Enter First Name" />
-                                <span asp-validation-for="Contacts[i].FirstName" class="text-danger"></span>
-                            </div>
-                            <div class="form-group">
-                                <label asp-for="Contacts[i].LastName" class="control-label">Last Name</label>
-                                <input asp-for="Contacts[i].LastName" class="form-control" placeholder="Enter Last Name" />
-                                <span asp-validation-for="Contacts[i].LastName" class="text-danger"></span>
-                            </div>
-                            @{
-                                if (hasContactPicture)
-                                {
-                                    <div class="form-group">
-                                        <div class="form-check m-3">
-                                            <input class="form-check-input" type="checkbox" id="chkRemoveContactImage" name="chkRemoveContactImage">
-                                            <label class="form-check-label" for="chkRemoveContactImage">
-                                                <strong>Check to remove Image</strong>
-                                            </label>
-                                        </div>
+
+                            <!-- Member Photo -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-0">
+                                    <label asp-for="MemberPhoto" class="form-label text-secondary">Member Picture</label>
+                                    <div class="input-group h-auto">
+                                        <input asp-for="MemberPhoto" type="file" class="form-control bg-light border-secondary py-2" name="memberPicture" id="memberPicture">
+                                        @if (hasMemberPicture)
+                                        {
+                                            <div class="input-group-text bg-light border-secondary py-2">
+                                                <div class="form-check mb-0">
+                                                    <input class="form-check-input" type="checkbox" id="chkRemoveMemberImage" name="chkRemoveMemberImage">
+                                                    <label class="form-check-label text-secondary" for="chkRemoveMemberImage">
+                                                        Remove
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        }
                                     </div>
-                                }
-                            }
-                            <div class="form-group">
-                                <label asp-for="Contacts[i].ContactPhoto" class="control-label">Contact Picture:</label>
-                                <div class="input-group mb-3">
-                                    <input asp-for="Contacts[i].ContactPhoto" type="file" class="form-control" name="contactPicture" id="contactPicture">
+                                    <span asp-validation-for="MemberPhoto" class="text-danger small"></span>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label asp-for="Contacts[i].Email" class="control-label">Email</label>
-                                <input asp-for="Contacts[i].Email" class="form-control" placeholder="Enter Email" />
-                                <span asp-validation-for="Contacts[i].Email" class="text-danger"></span>
+
+                            <!-- Membership Types -->
+                            <div class="col-12">
+                                <div class="form-group mb-0">
+                                    <label class="form-label text-secondary">Membership Types</label>
+                                    <div class="row g-2 mt-1">
+                                        @foreach (var type in Model.AvailableMembershipTypes)
+                                        {
+                                            <div class="col-md-4 col-lg-3">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="SelectedMembershipTypeIDs" value="@type.ID"
+                                                    @(Model.SelectedMembershipTypeIDs.Contains(type.ID) ? "checked" : "") id="membershipType@(type.ID)" />
+                                                    <label class="form-check-label text-secondary" for="membershipType@(type.ID)">@type.Name</label>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <span asp-validation-for="SelectedMembershipTypeIDs" class="text-danger small"></span>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label asp-for="Contacts[i].Phone" class="control-label">Phone</label>
-                                <input asp-for="Contacts[i].Phone" class="form-control" placeholder="Enter Phone Number" />
-                                <span asp-validation-for="Contacts[i].Phone" class="text-danger"></span>
+
+                            <!-- Contacted By -->
+                            <div class="col-md-6 col-lg-3">
+                                <div class="form-group mb-0">
+                                    <label asp-for="ContactedBy" class="form-label text-secondary">Contacted By</label>
+                                    <input asp-for="ContactedBy" class="form-control bg-light border-secondary h-auto py-2" placeholder="Enter Contact Person" />
+                                    <span asp-validation-for="ContactedBy" class="text-danger small"></span>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label asp-for="Contacts[i].ContactType" class="control-label">Contact Type</label>
-                                <select asp-for="Contacts[i].ContactType" class="form-control" asp-items="Html.GetEnumSelectList<ContactType>()">
-                                    <option value="">Select Contact Type</option>
-                                </select>
-                                <span asp-validation-for="Contacts[i].ContactType" class="text-danger"></span>
+
+                            <!-- Company Size -->
+                            <div class="col-md-6 col-lg-3">
+                                <div class="form-group mb-0">
+                                    <label asp-for="CompanySize" class="form-label text-secondary">Company Size</label>
+                                    <select asp-for="CompanySize" class="form-select bg-light border-secondary h-auto py-2" asp-items="Html.GetEnumSelectList<CompanySize>()">
+                                        <option value="">Select Size</option>
+                                    </select>
+                                    <span asp-validation-for="CompanySize" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <!-- Company Website -->
+                            <div class="col-md-6 col-lg-3">
+                                <div class="form-group mb-0">
+                                    <label asp-for="CompanyWebsite" class="form-label text-secondary">Website</label>
+                                    <input asp-for="CompanyWebsite" class="form-control bg-light border-secondary h-auto py-2" placeholder="Enter Company Website" />
+                                    <span asp-validation-for="CompanyWebsite" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <!-- Membership Status -->
+                            <div class="col-md-6 col-lg-3">
+                                <div class="form-group mb-0">
+                                    <label asp-for="MembershipStatus" class="form-label text-secondary">Status</label>
+                                    <select asp-for="MembershipStatus" class="form-select bg-light border-secondary h-auto py-2" asp-items="Html.GetEnumSelectList<MembershipStatus>()">
+                                        <option value="">Select Status</option>
+                                    </select>
+                                    <span asp-validation-for="MembershipStatus" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <!-- Member Since -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-0">
+                                    <label asp-for="MemberSince" class="form-label text-secondary">Member Since</label>
+                                    <input asp-for="MemberSince" class="form-control bg-light border-secondary h-auto py-2" type="datetime-local" />
+                                    <span asp-validation-for="MemberSince" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <!-- Last Contact Date -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-0">
+                                    <label asp-for="LastContactDate" class="form-label text-secondary">Last Contact Date</label>
+                                    <input asp-for="LastContactDate" class="form-control bg-light border-secondary h-auto py-2" type="datetime-local" />
+                                    <span asp-validation-for="LastContactDate" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="col-12">
+                                <div class="form-group mb-0">
+                                    <label asp-for="Notes" class="form-label text-secondary">Notes</label>
+                                    <textarea asp-for="Notes" class="form-control bg-light border-secondary" style="height: 100px" placeholder="Enter any additional notes"></textarea>
+                                    <span asp-validation-for="Notes" class="text-danger small"></span>
+                                </div>
                             </div>
                         </div>
-                    }
-<button type="button" id="add-contact" class="btn-add">
-    <i class="fas fa-plus"></i> Add Contact
-</button>                </div>
 
-                <!-- Industries Section -->
-                <div class="member-detail">
-                    <i class="fas fa-industry"></i>
-                    <div class="form-group">
-                        <label>Select Industries</label>
-                        <select asp-for="SelectedIndustryIds" class="form-control" multiple>
-                            @foreach (var industry in Model.AvailableIndustries)
-                            {
-                                <option value="@industry.ID">@industry.Name (NAICS: @industry.NAICS)</option>
-                            }
-                        </select>
-                        <span asp-validation-for="SelectedIndustryIds" class="text-danger"></span>
-                    </div>
+                        <!-- Addresses Section -->
+                        <div class="card shadow-sm mb-4 border-0 bg-white">
+                            <div class="card-header bg-light py-3 border-bottom border-secondary">
+                                <h5 class="mb-0 text-dark fw-bold">Addresses</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-end mb-4">
+                                    <button type="button" id="add-address" class="btn btn-dark px-4">
+                                        <i class="fas fa-plus me-2"></i> Add New Address
+                                    </button>
+                                </div>
+
+                                <div id="addresses-container">
+                                    @for (int i = 0; i < Model.Addresses.Count; i++)
+                                    {
+                                        <div class="address-form mb-4 p-3 border rounded bg-light border-secondary">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h6 class="mb-0 fw-bold text-dark">Address #@(i + 1)</h6>
+                                                @if (i > 0) // Only show remove button for non-primary addresses
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary remove-address">
+                                                        <i class="fas fa-trash-alt me-1"></i> Remove
+                                                    </button>
+                                                }
+                                            </div>
+                                            <div class="row g-3">
+                                                <div class="col-md-12">
+                                                    <div class="form-group mb-0">
+                                                        <label asp-for="Addresses[i].Street" class="form-label text-secondary">Street</label>
+                                                        <input asp-for="Addresses[i].Street" class="form-control bg-white border-secondary h-auto py-2" placeholder="Enter Street Address" />
+                                                        <span asp-validation-for="Addresses[i].Street" class="text-danger small"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-5">
+                                                    <div class="form-group mb-0">
+                                                        <label asp-for="Addresses[i].City" class="form-label text-secondary">City</label>
+                                                        <input asp-for="Addresses[i].City" class="form-control bg-white border-secondary h-auto py-2" placeholder="Enter City" />
+                                                        <span asp-validation-for="Addresses[i].City" class="text-danger small"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group mb-0">
+                                                        <label asp-for="Addresses[i].Province" class="form-label text-secondary">Province</label>
+                                                        <select asp-for="Addresses[i].Province" class="form-select bg-white border-secondary h-auto py-2" asp-items="Html.GetEnumSelectList<Province>()">
+                                                            <option value="">Select</option>
+                                                        </select>
+                                                        <span asp-validation-for="Addresses[i].Province" class="text-danger small"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group mb-0">
+                                                        <label asp-for="Addresses[i].PostalCode" class="form-label text-secondary">Postal Code</label>
+                                                        <input asp-for="Addresses[i].PostalCode" class="form-control bg-white border-secondary h-auto py-2" placeholder="Enter Postal Code" />
+                                                        <span asp-validation-for="Addresses[i].PostalCode" class="text-danger small"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group mb-0">
+                                                        <label asp-for="Addresses[i].AddressType" class="form-label text-secondary">Address Type</label>
+                                                        <select asp-for="Addresses[i].AddressType" class="form-select bg-white border-secondary h-auto py-2" asp-items="Html.GetEnumSelectList<AddressType>()">
+                                                            <option value="">Select Type</option>
+                                                        </select>
+                                                        <span asp-validation-for="Addresses[i].AddressType" class="text-danger small"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contacts Section -->
+                        <div class="card shadow-sm mb-4 border-0 bg-white">
+                            <div class="card-header bg-light py-3 border-bottom border-secondary">
+                                <h5 class="mb-0 text-dark fw-bold">Contacts</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-end mb-4">
+                                    <button type="button" id="add-contact" class="btn btn-dark px-4">
+                                        <i class="fas fa-plus me-2"></i> Add New Contact
+                                    </button>
+                                </div>
+
+                                <div id="contacts-container">
+                                    @for (int i = 0; i < Model.Contacts.Count; i++)
+                                    {
+                                        <div class="contact-form mb-4 p-3 border rounded bg-light border-secondary">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h6 class="mb-0 fw-bold text-dark">Contact #@(i + 1)</h6>
+                                                @if (i > 0) // Only show remove button for non-primary contacts
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary remove-contact">
+                                                        <i class="fas fa-trash-alt me-1"></i> Remove
+                                                    </button>
+                                                }
+                                            </div>
+                                            <div class="row g-3">
+                                                @{
+                                                    var hasContactPicture = (Model.Contacts[i].ContactPhoto?.Content != null);
+                                                    if (hasContactPicture)
+                                                    {
+                                                        <div class="col-md-12 text-center mb-2">
+                                                            @{
+                                                                string imageBase64 = Convert.ToBase64String(Model.Contacts[i].ContactPhoto.Content);
+                                                                string imageSrc = string.Format("data:" + Model.Contacts[i].ContactPhoto.MimeType + ";base64,{0}", imageBase64);
+                                                            }
+                                                            <img src="@imageSrc" alt="Profile Picture of @Model.Contacts[i].FirstName"
+                                                                 title="Profile Picture of @Model.Contacts[i].FirstName" class="img-fluid rounded-circle shadow-sm border border-2 border-light"
+                                                                 style="width: 80px; height: 80px; object-fit: cover;" />
+                                                        </div>
+                                                    }
+                                                }
+                                                <div class="col-md-6">
+                                                    <div class="form-group mb-0">
+                                                        <label asp-for="Contacts[i].FirstName" class="form-label text-secondary">First Name</label>
+                                                        <input asp-for="Contacts[i].FirstName" class="form-control bg-white border-secondary h-auto py-2" placeholder="Enter First Name" />
+                                                        <span asp-validation-for="Contacts[i].FirstName" class="text-danger small"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group mb-0">
+                                                        <label asp-for="Contacts[i].LastName" class="form-label text-secondary">Last Name</label>
+                                                        <input asp-for="Contacts[i].LastName" class="form-control bg-white border-secondary h-auto py-2" placeholder="Enter Last Name" />
+                                                        <span asp-validation-for="Contacts[i].LastName" class="text-danger small"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-group mb-0">
+                                                        <label asp-for="Contacts[i].ContactPhoto" class="form-label text-secondary">Contact Picture</label>
+                                                        <div class="input-group h-auto">
+                                                            <input asp-for="Contacts[i].ContactPhoto" type="file" class="form-control bg-white border-secondary py-2" name="contactPicture" id="contactPicture@(i)">
+                                                            @if (hasContactPicture)
+                                                            {
+                                                                <div class="input-group-text bg-white border-secondary py-2">
+                                                                    <div class="form-check mb-0">
+                                                                        <input class="form-check-input" type="checkbox" id="chkRemoveContactImage@(i)" name="chkRemoveContactImage@(i)">
+                                                                        <label class="form-check-label text-secondary" for="chkRemoveContactImage@(i)">
+                                                                            Remove
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group mb-0">
+                                                        <label asp-for="Contacts[i].Email" class="form-label text-secondary">Email</label>
+                                                        <input asp-for="Contacts[i].Email" class="form-control bg-white border-secondary h-auto py-2" placeholder="Enter Email" />
+                                                        <span asp-validation-for="Contacts[i].Email" class="text-danger small"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group mb-0">
+                                                        <label asp-for="Contacts[i].Phone" class="form-label text-secondary">Phone</label>
+                                                        <input asp-for="Contacts[i].Phone" class="form-control bg-white border-secondary h-auto py-2" placeholder="Enter Phone Number" />
+                                                        <span asp-validation-for="Contacts[i].Phone" class="text-danger small"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group mb-0">
+                                                        <label asp-for="Contacts[i].ContactType" class="form-label text-secondary">Contact Type</label>
+                                                        <select asp-for="Contacts[i].ContactType" class="form-select bg-white border-secondary h-auto py-2" asp-items="Html.GetEnumSelectList<ContactType>()">
+                                                            <option value="">Select Type</option>
+                                                        </select>
+                                                        <span asp-validation-for="Contacts[i].ContactType" class="text-danger small"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Industries Section -->
+                        <div class="card shadow-sm mb-4 border-0 bg-white">
+                            <div class="card-header bg-light py-3 border-bottom border-secondary">
+                                <h5 class="mb-0 text-dark fw-bold">Industries</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="form-group">
+                                    <select asp-for="SelectedIndustryIds" class="form-select bg-white border-secondary" multiple data-bs-toggle="tooltip"
+                                            title="Hold Ctrl (or Cmd on Mac) to select multiple industries" style="height: auto; min-height: 150px;">
+                                        @foreach (var industry in Model.AvailableIndustries)
+                                        {
+                                            <option value="@industry.ID">@industry.Name (NAICS: @industry.NAICS)</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="SelectedIndustryIds" class="text-danger small"></span>
+                                    <div class="form-text mt-2 small text-secondary">
+                                        <i class="fas fa-info-circle me-1"></i> Hold Ctrl (or Cmd on Mac) to select multiple industries
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2">
+                                <i class="fas fa-arrow-left me-2"></i> Back to List
+                            </a>
+                            <button type="submit" class="btn btn-dark px-4 py-2">
+                                <i class="fas fa-save me-2"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
-
-      <div class="member-card-footer">
-    <button type="submit" class="button-2">
-        <i class="fas fa-save"></i> Save Changes
-    </button>
-    <a asp-action="Index" class="button-2">
-        <i class="fas fa-arrow-left"></i> Back to List
-    </a>
-</div>
-
-        </form>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+
+            // For existing contacts
+            document.querySelectorAll('.remove-contact').forEach(button => {
+                button.addEventListener('click', function() {
+                    this.closest('.contact-form').remove();
+                    renumberFormElements('contact');
+                });
+            });
+
+            // For existing addresses
+            document.querySelectorAll('.remove-address').forEach(button => {
+                button.addEventListener('click', function() {
+                    this.closest('.address-form').remove();
+                    renumberFormElements('address');
+                });
+            });
+        });
+
         // Add Contact
         document.getElementById('add-contact').addEventListener('click', function () {
+            const contactsContainer = document.getElementById('contacts-container');
+            const contactCount = document.querySelectorAll('.contact-form').length;
+
             const contactForm = document.createElement('div');
-            contactForm.classList.add('contact-form');
+            contactForm.classList.add('contact-form', 'mb-4', 'p-3', 'border', 'rounded', 'bg-light', 'border-secondary');
             contactForm.innerHTML = `
-                <div class="form-group">
-                    <label>First Name</label>
-                    <input name="Contacts[${document.querySelectorAll('.contact-form').length}].FirstName" class="form-control" placeholder="Enter First Name" />
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0 fw-bold text-dark">Contact #${contactCount + 1}</h6>
+                    <button type="button" class="btn btn-sm btn-outline-secondary remove-contact">
+                        <i class="fas fa-trash-alt me-1"></i> Remove
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label>Last Name</label>
-                    <input name="Contacts[${document.querySelectorAll('.contact-form').length}].LastName" class="form-control" placeholder="Enter Last Name" />
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input name="Contacts[${document.querySelectorAll('.contact-form').length}].Email" class="form-control" placeholder="Enter Email" />
-                </div>
-                <div class="form-group">
-                    <label>Phone</label>
-                    <input name="Contacts[${document.querySelectorAll('.contact-form').length}].Phone" class="form-control" placeholder="Enter Phone Number" />
-                </div>
-                <div class="form-group">
-                    <label>Contact Type</label>
-                    <select name="Contacts[${document.querySelectorAll('.contact-form').length}].ContactType" class="form-control">
-                        <option value="">Select Contact Type</option>
-                        @foreach (var value in Enum.GetValues(typeof(ContactType)))
-                        {
-                            <option value="@value">@value</option>
-                        }
-                    </select>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-group mb-0">
+                            <label class="form-label text-secondary">First Name</label>
+                            <input name="Contacts[${contactCount}].FirstName" class="form-control bg-white border-secondary h-auto py-2" placeholder="Enter First Name" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-0">
+                            <label class="form-label text-secondary">Last Name</label>
+                            <input name="Contacts[${contactCount}].LastName" class="form-control bg-white border-secondary h-auto py-2" placeholder="Enter Last Name" />
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group mb-0">
+                            <label class="form-label text-secondary">Contact Picture</label>
+                            <input type="file" name="Contacts[${contactCount}].ContactPhoto" class="form-control bg-white border-secondary py-2" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-0">
+                            <label class="form-label text-secondary">Email</label>
+                            <input name="Contacts[${contactCount}].Email" class="form-control bg-white border-secondary h-auto py-2" placeholder="Enter Email" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-0">
+                            <label class="form-label text-secondary">Phone</label>
+                            <input name="Contacts[${contactCount}].Phone" class="form-control bg-white border-secondary h-auto py-2" placeholder="Enter Phone Number" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-0">
+                            <label class="form-label text-secondary">Contact Type</label>
+                            <select name="Contacts[${contactCount}].ContactType" class="form-select bg-white border-secondary h-auto py-2">
+                                <option value="">Select Type</option>
+        @foreach (var value in Enum.GetValues(typeof(ContactType)))
+        {
+                                    <option value="@value">@value</option>
+        }
+                            </select>
+                        </div>
+                    </div>
                 </div>
             `;
-            document.querySelector('#add-contact').before(contactForm);
+            contactsContainer.appendChild(contactForm);
+
+            // Add event listener to the new remove button
+            contactForm.querySelector('.remove-contact').addEventListener('click', function() {
+                contactForm.remove();
+                renumberFormElements('contact');
+            });
         });
 
         // Add Address
         document.getElementById('add-address').addEventListener('click', function () {
+            const addressesContainer = document.getElementById('addresses-container');
+            const addressCount = document.querySelectorAll('.address-form').length;
+
             const addressForm = document.createElement('div');
-            addressForm.classList.add('address-form');
+            addressForm.classList.add('address-form', 'mb-4', 'p-3', 'border', 'rounded', 'bg-light', 'border-secondary');
             addressForm.innerHTML = `
-                <div class="form-group">
-                    <label>Street</label>
-                    <input name="Addresses[${document.querySelectorAll('.address-form').length}].Street" class="form-control" placeholder="Enter Street Address" />
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0 fw-bold text-dark">Address #${addressCount + 1}</h6>
+                    <button type="button" class="btn btn-sm btn-outline-secondary remove-address">
+                        <i class="fas fa-trash-alt me-1"></i> Remove
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label>City</label>
-                    <input name="Addresses[${document.querySelectorAll('.address-form').length}].City" class="form-control" placeholder="Enter City" />
-                </div>
-                <div class="form-group">
-                    <label>Province</label>
-                    <select name="Addresses[${document.querySelectorAll('.address-form').length}].Province" class="form-control">
-                        <option value="">Select Province</option>
-                        @foreach (var value in Enum.GetValues(typeof(Province)))
-                        {
-                            <option value="@value">@value</option>
-                        }
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Postal Code</label>
-                    <input name="Addresses[${document.querySelectorAll('.address-form').length}].PostalCode" class="form-control" placeholder="Enter Postal Code" />
-                </div>
-                <div class="form-group">
-                    <label>Address Type</label>
-                    <select name="Addresses[${document.querySelectorAll('.address-form').length}].AddressType" class="form-control">
-                        <option value="">Select Address Type</option>
-                        @foreach (var value in Enum.GetValues(typeof(AddressType)))
-                        {
-                            <option value="@value">@value</option>
-                        }
-                    </select>
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <div class="form-group mb-0">
+                            <label class="form-label text-secondary">Street</label>
+                            <input name="Addresses[${addressCount}].Street" class="form-control bg-white border-secondary h-auto py-2" placeholder="Enter Street Address" />
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group mb-0">
+                            <label class="form-label text-secondary">City</label>
+                            <input name="Addresses[${addressCount}].City" class="form-control bg-white border-secondary h-auto py-2" placeholder="Enter City" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-0">
+                            <label class="form-label text-secondary">Province</label>
+                            <select name="Addresses[${addressCount}].Province" class="form-select bg-white border-secondary h-auto py-2">
+                                <option value="">Select</option>
+        @foreach (var value in Enum.GetValues(typeof(Province)))
+        {
+                                    <option value="@value">@value</option>
+        }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group mb-0">
+                            <label class="form-label text-secondary">Postal Code</label>
+                            <input name="Addresses[${addressCount}].PostalCode" class="form-control bg-white border-secondary h-auto py-2" placeholder="Enter Postal Code" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-0">
+                            <label class="form-label text-secondary">Address Type</label>
+                            <select name="Addresses[${addressCount}].AddressType" class="form-select bg-white border-secondary h-auto py-2">
+                                <option value="">Select Type</option>
+        @foreach (var value in Enum.GetValues(typeof(AddressType)))
+        {
+                                    <option value="@value">@value</option>
+        }
+                            </select>
+                        </div>
+                    </div>
                 </div>
             `;
-            document.querySelector('#add-address').before(addressForm);
+            addressesContainer.appendChild(addressForm);
+
+            // Add event listener to the new remove button
+            addressForm.querySelector('.remove-address').addEventListener('click', function() {
+                addressForm.remove();
+                renumberFormElements('address');
+            });
         });
 
-        // Add Industry
-        document.getElementById('add-industry').addEventListener('click', function () {
-            const industryForm = document.createElement('div');
-            industryForm.classList.add('industry-form');
-            industryForm.innerHTML = `
-                <div class="form-group">
-                    <label>Industry Name</label> 
-                    <input name="Industries[${document.querySelectorAll('.industry-form').length}].Name" class="form-control" placeholder="Enter Industry Name" />
-                </div>
-                <div class="form-group">
-                    <label>NAICS Code</label>
-                    <input name="Industries[${document.querySelectorAll('.industry-form').length}].NAICS" class="form-control" placeholder="Enter NAICS Code" />
-                </div>
-            `;
-            document.querySelector('#add-industry').before(industryForm);
-        });
+        // Function to renumber form elements after removal
+        function renumberFormElements(type) {
+            if (type === 'contact') {
+                const contactForms = document.querySelectorAll('.contact-form');
+                contactForms.forEach((form, index) => {
+                    // Update the heading
+                    const heading = form.querySelector('h6');
+                    if (heading) {
+                        heading.textContent = `Contact #${index + 1}`;
+                    }
+
+                    // Update input names and IDs
+                    const inputs = form.querySelectorAll('input, select, textarea');
+                    inputs.forEach(input => {
+                        const name = input.getAttribute('name');
+                        if (name && name.includes('Contacts[')) {
+                            const newName = name.replace(/Contacts\[\d+\]/, `Contacts[${index}]`);
+                            input.setAttribute('name', newName);
+
+                            // Update IDs and labels if they exist
+                            const id = input.getAttribute('id');
+                            if (id && id.match(/^(firstName|lastName|email|phone|contactType|contactPicture)\d+$/)) {
+                                const baseId = id.replace(/\d+$/, '');
+                                const newId = `${baseId}${index}`;
+                                input.setAttribute('id', newId);
+
+                                // Find and update the corresponding label
+                                const label = form.querySelector(`label[for="${id}"]`);
+                                if (label) {
+                                    label.setAttribute('for', newId);
+                                }
+                            }
+                        }
+                    });
+                });
+            } else if (type === 'address') {
+                const addressForms = document.querySelectorAll('.address-form');
+                addressForms.forEach((form, index) => {
+                    // Update the heading
+                    const heading = form.querySelector('h6');
+                    if (heading) {
+                        heading.textContent = `Address #${index + 1}`;
+                    }
+
+                    // Update input names and IDs
+                    const inputs = form.querySelectorAll('input, select');
+                    inputs.forEach(input => {
+                        const name = input.getAttribute('name');
+                        if (name && name.includes('Addresses[')) {
+                            const newName = name.replace(/Addresses\[\d+\]/, `Addresses[${index}]`);
+                            input.setAttribute('name', newName);
+
+                            // Update IDs and labels if they exist
+                            const id = input.getAttribute('id');
+                            if (id && id.match(/^(street|city|province|postalCode|addressType)\d+$/)) {
+                                const baseId = id.replace(/\d+$/, '');
+                                const newId = `${baseId}${index}`;
+                                input.setAttribute('id', newId);
+
+                                // Find and update the corresponding label
+                                const label = form.querySelector(`label[for="${id}"]`);
+                                if (label) {
+                                    label.setAttribute('for', newId);
+                                }
+                            }
+                        }
+                    });
+                });
+            }
+        }
     </script>
 
     @{

@@ -19,6 +19,11 @@
             </div>
         </header>
 
+        <!-- Helper text for sorting -->
+        <div class="alert alert-info mb-3">
+            <i class="fas fa-info-circle"></i> Click on column headers to sort the table.
+        </div>
+
         <!-- Filter Section -->
         <div class="filter-container">
             <!-- Filter by Status -->
@@ -50,9 +55,9 @@
         <table class="table custom-table" id="opportunitiesTable">
             <thead>
                 <tr>
-                    <th onclick="sortTable(0)">Title</th>
-                    <th onclick="sortTable(1)">Status</th>
-                    <th onclick="sortTable(2)">Priority</th>
+                    <th onclick="sortTable(0)" class="sortable">Title <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(1)" class="sortable">Status <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(2)" class="sortable">Priority <i class="fas fa-sort"></i></th>
                     <th class="text-center">Actions</th>
                 </tr>
             </thead>
@@ -94,7 +99,7 @@
 
 @section Scripts {
     <script>
-               $(document).ready(function () {
+        $(document).ready(function () {
             var currentPage = 1;
             var recordsPerPage = parseInt($('#recordsPerPage').val());
             var totalRecords = $('#opportunitiesTable tbody tr').length;
@@ -205,7 +210,10 @@
             // Initial page load
             updatePagination();
         });
-         sortTable(0, "asc");
+
+        // Initial sort on page load
+        sortTable(0, "asc");
+
         // Sorting function
         function sortTable(columnIndex, initialDirection = "asc") {
             var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
@@ -227,6 +235,20 @@
 
             // Add sorting class to the clicked header
             table.rows[0].getElementsByTagName("th")[columnIndex].classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
+
+            // Update sort icon for the clicked header
+            for (i = 0; i < table.rows[0].getElementsByTagName("th").length; i++) {
+                if (i !== columnIndex && i < 3) { // Only for sortable columns
+                    table.rows[0].getElementsByTagName("th")[i].querySelector(".fas").className = "fas fa-sort";
+                }
+            }
+
+            // Update the icon for the sorted column
+            if (dir === "asc") {
+                table.rows[0].getElementsByTagName("th")[columnIndex].querySelector(".fas").className = "fas fa-sort-up";
+            } else {
+                table.rows[0].getElementsByTagName("th")[columnIndex].querySelector(".fas").className = "fas fa-sort-down";
+            }
 
             // Perform sorting
             while (switching) {
@@ -266,16 +288,37 @@
     </script>
 
     <style>
+        /* Styling for sortable columns */
+        .sortable {
+            position: relative;
+            cursor: pointer;
+        }
+
+            .sortable:hover {
+                background-color: #f5f5f5;
+            }
+
+            .sortable .fas {
+                margin-left: 5px;
+                color: #aaa;
+            }
+
+        .sorted-asc .fa-sort-up,
+        .sorted-desc .fa-sort-down {
+            color: #333;
+        }
+
+        /* Original styles */
         th {
             cursor: pointer;
         }
 
             th.sorted-asc::after {
-                content: " ▲";
+                content: ""; /* Removed as we're using Font Awesome icons now */
             }
 
             th.sorted-desc::after {
-                content: " ▼";
+                content: ""; /* Removed as we're using Font Awesome icons now */
             }
 
         .pagination {

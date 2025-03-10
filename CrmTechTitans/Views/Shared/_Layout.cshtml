@@ -28,46 +28,95 @@
             top: 0;
             width: 14rem;
             height: 100%;
+            background-color: #2d3339;
             color: white;
             display: flex;
             flex-direction: column;
-            padding: 18px;
-            transition: transform 0.3s ease-in-out;
+            padding: 0;
             z-index: 1000;
+            transition: transform 0.3s ease-in-out;
         }
 
-            .sidebar a {
-                display: flex;
-                align-items: center;
-                padding: 12px;
-                font-size: 14px;
-                color: white;
-                text-decoration: none;
-                border-radius: 5px;
-                transition: background 0.3s ease-in-out;
-            }
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-                .sidebar a i {
-                    margin-right: 10px;
-                    font-size: 1.2rem;
-                }
+        .sidebar-logo {
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
 
-                .sidebar a:hover {
-                    background: rgba(255, 255, 255, 0.2);
-                }
+        .logo-img {
+            width: 140px;
+            height: 70px;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            object-fit: contain;
+            background-color: white;
+            padding: 6px;
+        }
 
-        .sidebar-toggle {
-            position: fixed;
-            top: 15px;
-            left: 240px;
-            background: #2e2e2e;
-            color: white;
-            border: none;
-            padding: 10px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: left 0.3s ease-in-out;
-            z-index: 1100;
+        .sidebar-subtitle {
+            color: #adb5bd;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .nav-section {
+            margin-bottom: 1rem;
+            padding: 0.5rem 0;
+        }
+
+        .nav-section-title {
+            color: #6c757d;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05rem;
+            padding: 0.5rem 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+            color: #e9ecef;
+            text-decoration: none;
+            transition: background 0.2s ease-in-out;
+        }
+
+        .sidebar a i {
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+            width: 1.5rem;
+            text-align: center;
+        }
+
+        .sidebar a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar a.active {
+            background: rgba(255, 255, 255, 0.15);
+            border-left: 3px solid #00b8d4;
+            padding-left: calc(1.5rem - 3px);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.85rem;
         }
 
         /* === Main Content Adjustments === */
@@ -77,56 +126,125 @@
             transition: margin-left 0.3s ease-in-out;
         }
 
-        /* When Sidebar is Hidden */
-        .sidebar.hidden {
-            transform: translateX(-100%);
+        /* Mobile Navigation */
+        .mobile-nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            background: #343a40;
+            color: white;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1100;
         }
 
-            .sidebar.hidden + .content-container {
+        .mobile-nav-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        /* Responsive Adjustments */
+        @@media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 100%;
+                padding-top: 60px;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .content-container {
                 margin-left: 0;
             }
 
-            .sidebar.hidden ~ .sidebar-toggle {
-                left: 15px;
+            .mobile-nav-toggle {
+                display: block;
             }
+
+            .mobile-nav-overlay.active {
+                display: block;
+            }
+        }
     </style>
 
 </head>
 <body>
-    <!-- Sidebar Toggle Button -->
-    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <!-- Mobile Navigation Toggle Button -->
+    <button class="mobile-nav-toggle" id="mobileNavToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
 
     <div class="main-container">
         <!-- Sidebar -->
-        <div class="sidebar">
-            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")"
-               asp-area="" asp-controller="Home" asp-action="Index">
-                <i class="fas fa-home"></i> Dashboard
-            </a>
-            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Member" ? "active" : "")"
-               asp-area="" asp-controller="Member" asp-action="Index">
-                <i class="fas fa-users"></i> Members
-            </a>
-            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Contact" ? "active" : "")"
-               asp-area="" asp-controller="Contact" asp-action="Index">
-                <i class="fas fa-address-book"></i> Contacts
-            </a>
-            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Address" ? "active" : "")"
-               asp-area="" asp-controller="Address" asp-action="Index">
-                <i class="fas fa-map-marker-alt"></i> Municipalities
-            </a>
-            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Opportunity" ? "active" : "")"
-               asp-area="" asp-controller="Opportunity" asp-action="Index">
-                <i class="fas fa-briefcase"></i> Opportunities
-            </a>
-            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Interaction" ? "active" : "")"
-               asp-area="" asp-controller="Interaction" asp-action="Index">
-                <i class="fas fa-comments"></i> Interactions
-            </a>
-            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Industry" ? "active" : "")"
-               asp-area="" asp-controller="Industry" asp-action="Index">
-                <i class="fas fa-industry"></i> Industries
-            </a>
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="~/images/logo.png" alt="CrmTechTitans Logo" class="logo-img" />
+                    <span>CrmTechTitans</span>
+                </div>
+                <div class="sidebar-subtitle">Member Management</div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">MAIN</div>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")"
+                   asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Member" ? "active" : "")"
+                   asp-area="" asp-controller="Member" asp-action="Index">
+                    <i class="fas fa-users"></i> Members
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">CONTACTS</div>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Contact" ? "active" : "")"
+                   asp-area="" asp-controller="Contact" asp-action="Index">
+                    <i class="fas fa-address-book"></i> Contacts
+                </a>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Address" ? "active" : "")"
+                   asp-area="" asp-controller="Address" asp-action="Index">
+                    <i class="fas fa-map-marker-alt"></i> Municipalities
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">BUSINESS</div>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Opportunity" ? "active" : "")"
+                   asp-area="" asp-controller="Opportunity" asp-action="Index">
+                    <i class="fas fa-briefcase"></i> Opportunities
+                </a>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Interaction" ? "active" : "")"
+                   asp-area="" asp-controller="Interaction" asp-action="Index">
+                    <i class="fas fa-comments"></i> Interactions
+                </a>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Industry" ? "active" : "")"
+                   asp-area="" asp-controller="Industry" asp-action="Index">
+                    <i class="fas fa-industry"></i> Industries
+                </a>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-user-circle me-2"></i>
+                    <span>Administrator</span>
+                </div>
+            </div>
         </div>
 
         <!-- Main Content -->
@@ -149,48 +267,51 @@
     @await RenderSectionAsync("Scripts", required: false)
     <script src="~/js/dashboard.js" asp-append-version="true"></script>
 
-    <!-- Sidebar Toggle Script -->
+    <!-- Navigation Script -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            let sidebar = document.querySelector('.sidebar');
-            let toggleButton = document.querySelector('.sidebar-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const mobileNavToggle = document.getElementById('mobileNavToggle');
+            const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+            const mobileLinks = document.querySelectorAll('.sidebar a');
 
-            // Check localStorage for previous state
-            if (localStorage.getItem("sidebarState") === "closed") {
-                sidebar.classList.add("hidden");
-                toggleButton.style.left = "15px"; // Keep button in place when sidebar is closed
+            // Function to check if we're on mobile
+            function isMobile() {
+                return window.innerWidth <= 768;
             }
 
-            // Toggle sidebar visibility when clicking the button
-            toggleButton.addEventListener("click", function (event) {
-                event.stopPropagation(); // Prevent event bubbling
-                sidebar.classList.toggle("hidden");
-
-                // Move toggle button when sidebar is open/closed
-                if (sidebar.classList.contains("hidden")) {
-                    localStorage.setItem("sidebarState", "closed");
-                    toggleButton.style.left = "15px";
-                } else {
-                    localStorage.setItem("sidebarState", "open");
-                    toggleButton.style.left = "230px"; // Adjust this value based on sidebar width
-                }
+            // Toggle mobile navigation
+            mobileNavToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('mobile-open');
+                mobileNavOverlay.classList.toggle('active');
             });
 
-            // Automatically close sidebar when clicking outside of it
-            document.addEventListener("click", function (event) {
-                let isClickInsideSidebar = sidebar.contains(event.target);
-                let isClickOnToggleButton = toggleButton.contains(event.target);
+            // Close mobile navigation when clicking the overlay
+            mobileNavOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('mobile-open');
+                mobileNavOverlay.classList.remove('active');
+            });
 
-                if (!isClickInsideSidebar && !isClickOnToggleButton) {
-                    sidebar.classList.add("hidden");
-                    localStorage.setItem("sidebarState", "closed");
-                    toggleButton.style.left = "15px"; // Reset toggle button position
+            // Close mobile navigation when clicking a link (on mobile only)
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (isMobile()) {
+                        sidebar.classList.remove('mobile-open');
+                        mobileNavOverlay.classList.remove('active');
+                    }
+                });
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (!isMobile()) {
+                    // If desktop, ensure sidebar is visible
+                    sidebar.classList.remove('mobile-open');
+                    mobileNavOverlay.classList.remove('active');
                 }
             });
         });
-
     </script>
 
 </body>
 </html>
-

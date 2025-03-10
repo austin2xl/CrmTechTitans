@@ -17,7 +17,11 @@
                 </a>
             </div>
         </header>
-        <p></p>
+
+        <!-- Helper text for sorting -->
+        <div class="alert alert-info mb-3">
+            <i class="fas fa-info-circle"></i> Click on column headers to sort the table.
+        </div>
 
         <!-- Filter Section -->
         <div class="filter-container">
@@ -30,7 +34,7 @@
             <!-- Filter by Email -->
             <div class="col-md-4">
                 <label for="emailFilter" class="filter-label">Search by Email:</label>
-                <input type="text" id="emailFilter" class="form-control search-input" placeholder="Enter email" data-bs-toggle="tooltip" title="Enter a contact’s email address to filter">
+                <input type="text" id="emailFilter" class="form-control search-input" placeholder="Enter email" data-bs-toggle="tooltip" title="Enter a contact's email address to filter">
             </div>
         </div>
 
@@ -40,10 +44,10 @@
                 <thead>
                     <tr>
                         <th>Photo</th>
-                        <th onclick="sortTable(1)">Full Name</th>
-                        <th onclick="sortTable(2)">Company</th>
-                        <th onclick="sortTable(3)">Email</th>
-                        <th onclick="sortTable(4)">Phone</th>
+                        <th onclick="sortTable(1)" class="sortable">Full Name <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(2)" class="sortable">Company <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(3)" class="sortable">Email <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(4)" class="sortable">Phone <i class="fas fa-sort"></i></th>
                         <th class="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -201,9 +205,11 @@
 
             // Initial page load
             updatePagination();
+
+            // Initial sort on page load
+            sortTable(1, "asc");
         });
 
-         sortTable(1, "asc");
         // Sorting function
         function sortTable(columnIndex, initialDirection = "asc") {
             var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
@@ -225,6 +231,22 @@
 
             // Add sorting class to the clicked header
             table.rows[0].getElementsByTagName("th")[columnIndex].classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
+
+            // Update sort icon for all headers
+            for (i = 1; i < 5; i++) { // Only for sortable columns (1-4)
+                if (i !== columnIndex) {
+                    var iconElement = table.rows[0].getElementsByTagName("th")[i].querySelector(".fas");
+                    if (iconElement) {
+                        iconElement.className = "fas fa-sort";
+                    }
+                }
+            }
+
+            // Update the icon for the sorted column
+            var sortedIconElement = table.rows[0].getElementsByTagName("th")[columnIndex].querySelector(".fas");
+            if (sortedIconElement) {
+                sortedIconElement.className = dir === "asc" ? "fas fa-sort-up" : "fas fa-sort-down";
+            }
 
             // Perform sorting
             while (switching) {
@@ -264,16 +286,37 @@
     </script>
 
     <style>
+        /* Styling for sortable columns */
+        .sortable {
+            position: relative;
+            cursor: pointer;
+        }
+
+            .sortable:hover {
+                background-color: #f5f5f5;
+            }
+
+            .sortable .fas {
+                margin-left: 5px;
+                color: #aaa;
+            }
+
+        .sorted-asc .fa-sort-up,
+        .sorted-desc .fa-sort-down {
+            color: #333;
+        }
+
+        /* Original styles */
         th {
             cursor: pointer;
         }
 
             th.sorted-asc::after {
-                content: " ▲";
+                content: ""; /* Removed as we're using Font Awesome icons now */
             }
 
             th.sorted-desc::after {
-                content: " ▼";
+                content: ""; /* Removed as we're using Font Awesome icons now */
             }
 
         .pagination {
