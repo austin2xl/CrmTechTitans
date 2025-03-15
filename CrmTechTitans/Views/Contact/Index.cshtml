@@ -9,41 +9,48 @@
 
 <div class="crm-container">
     <div class="main-content">
-        <header class="page-header">
+        <header class="page-header d-flex justify-content-between align-items-center mb-4">
             <h1>All Contacts</h1>
             <div class="d-flex align-items-center gap-3">
-                <a asp-action="Create" class="btn btn-danger" data-bs-toggle="tooltip" title="Add a new Contact to the system">
+                <a asp-action="Create" class="btn btn-primary" data-bs-toggle="tooltip" title="Add a new Contact to the system">
                     <i class="fas fa-user-plus"></i> Create New Contact
                 </a>
             </div>
         </header>
-        <p></p>
 
         <!-- Filter Section -->
-        <div class="filter-container">
-            <!-- Filter by Name -->
-            <div class="col-md-4">
-                <label for="nameFilter" class="filter-label">Search by Name:</label>
-                <input type="text" id="nameFilter" class="form-control search-input" placeholder="Enter contact name" data-bs-toggle="tooltip" title="Enter a contact's full or partial name">
-            </div>
+        <section class="filter-container bg-light p-3 rounded mb-4">
+            <div class="filter-row d-flex align-items-end gap-3">
+                <!-- Filter by Name -->
+                <div class="filter-item">
+                    <label for="nameFilter" class="form-label">Search by Name</label>
+                    <input type="text" id="nameFilter" class="form-control" placeholder="Enter contact name" data-bs-toggle="tooltip" title="Enter a contact's full or partial name">
+                </div>
 
-            <!-- Filter by Email -->
-            <div class="col-md-4">
-                <label for="emailFilter" class="filter-label">Search by Email:</label>
-                <input type="text" id="emailFilter" class="form-control search-input" placeholder="Enter email" data-bs-toggle="tooltip" title="Enter a contact’s email address to filter">
+                <!-- Filter by Email -->
+                <div class="filter-item">
+                    <label for="emailFilter" class="form-label">Search by Email</label>
+                    <input type="text" id="emailFilter" class="form-control" placeholder="Enter email" data-bs-toggle="tooltip" title="Enter a contact's email address to filter">
+                </div>
             </div>
-        </div>
+        </section>
 
         <!-- Contacts Table -->
-        <section class="members-table-container">
+        <section class="table-responsive">
+            <!-- Helper text for sorting -->
+            <div class="alert alert-info d-flex align-items-center py-2" role="alert">
+                <i class="fas fa-info-circle me-2"></i>
+                Click on column headers to sort the table.
+            </div>
+
             <table class="table custom-table" id="contactsTable">
                 <thead>
                     <tr>
                         <th>Photo</th>
-                        <th onclick="sortTable(1)">Full Name</th>
-                        <th onclick="sortTable(2)">Company</th>
-                        <th onclick="sortTable(3)">Email</th>
-                        <th onclick="sortTable(4)">Phone</th>
+                        <th onclick="sortTable(1)" class="sortable">Full Name <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(2)" class="sortable">Company <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(3)" class="sortable">Email <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(4)" class="sortable">Phone <i class="fas fa-sort"></i></th>
                         <th class="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -58,7 +65,7 @@
                                         string imageBase64 = Convert.ToBase64String(item.ContactThumbnail.Content);
                                         string imageSrc = string.Format("data:" + item.ContactThumbnail.MimeType + ";base64,{0}", imageBase64);
                                         <img src="@imageSrc" alt="Profile Picture of @item?.FullFormalName"
-                                             title="Profile Picture of @item?.FullFormalName" class="img-fluid rounded" />
+                                             title="Profile Picture of @item?.FullFormalName" class="img-fluid rounded" style="max-width: 50px;" />
                                     }
                                 }
                             </td>
@@ -72,15 +79,18 @@
                             </td>
                             <td>@item.Email</td>
                             <td>@item.Phone</td>
-                            <td class="text-center action-buttons">
-                                <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-edit" data-bs-toggle="tooltip" title="Edit contact details">Edit</a>
-                                <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-details" data-bs-toggle="tooltip" title="View full contact details">Details</a>
+                            <td class="text-center">
+                                <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Edit contact details">Edit</a>
+                                <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="View full contact details">Details</a>
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
+        </section>
 
+        <!-- Pagination Controls -->
+        <div class="row mt-4">
             <!-- Records per page -->
             <div class="col-md-4">
                 <label for="recordsPerPage">Records per page:</label>
@@ -91,14 +101,13 @@
                     <option value="20">20</option>
                 </select>
             </div>
-
             <!-- Pagination Controls -->
-            <div id="paginationControls" class="pagination">
-                <button id="prevPage" class="btn btn-primary">Previous</button>
-                <span id="pageInfo"></span>
-                <button id="nextPage" class="btn btn-primary">Next</button>
+            <div id="paginationControls" class="col-md-8 d-flex justify-content-end align-items-center gap-3">
+                <button id="prevPage" class="btn btn-primary pagination-btn">Previous</button>
+                <span id="pageInfo" class="pagination-info">Page 1 of 1 (0 records)</span>
+                <button id="nextPage" class="btn btn-primary pagination-btn">Next</button>
             </div>
-        </section>
+        </div>
     </div>
 </div>
 
@@ -107,6 +116,12 @@
         $(document).ready(function () {
             var currentPage = 1;
             var recordsPerPage = parseInt($('#recordsPerPage').val());
+
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
 
             // Function to get visible rows (rows not hidden by filter)
             function getVisibleRows() {
@@ -129,7 +144,7 @@
             // Function to show the current page
             function showPage(page) {
                 var visibleRows = getVisibleRows();
-                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
 
                 // Ensure currentPage is within valid range
                 if (page < 1) page = 1;
@@ -145,17 +160,17 @@
                 visibleRows.slice(startIndex, endIndex).show();
 
                 // Update page info
-                $('#pageInfo').text(`Page ${page} of ${totalPages}`);
+                $('#pageInfo').text(`Page ${page} of ${totalPages} (${visibleRows.length} records)`);
 
                 // Enable/disable pagination buttons
                 $('#prevPage').prop('disabled', page === 1);
-                $('#nextPage').prop('disabled', page === totalPages);
+                $('#nextPage').prop('disabled', page === totalPages || visibleRows.length === 0);
             }
 
             // Function to update pagination
             function updatePagination() {
                 var visibleRows = getVisibleRows();
-                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
 
                 if (currentPage > totalPages) {
                     currentPage = totalPages > 0 ? totalPages : 1;
@@ -182,7 +197,7 @@
             // Event listener for next page button
             $('#nextPage').on('click', function () {
                 var visibleRows = getVisibleRows();
-                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
 
                 if (currentPage < totalPages) {
                     currentPage++;
@@ -201,9 +216,11 @@
 
             // Initial page load
             updatePagination();
+
+            // Initial sort on page load
+            sortTable(1, "asc");
         });
 
-         sortTable(1, "asc");
         // Sorting function
         function sortTable(columnIndex, initialDirection = "asc") {
             var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
@@ -225,6 +242,22 @@
 
             // Add sorting class to the clicked header
             table.rows[0].getElementsByTagName("th")[columnIndex].classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
+
+            // Update sort icon for all headers
+            for (i = 1; i < 5; i++) { // Only for sortable columns (1-4)
+                if (i !== columnIndex) {
+                    var iconElement = table.rows[0].getElementsByTagName("th")[i].querySelector(".fas");
+                    if (iconElement) {
+                        iconElement.className = "fas fa-sort";
+                    }
+                }
+            }
+
+            // Update the icon for the sorted column
+            var sortedIconElement = table.rows[0].getElementsByTagName("th")[columnIndex].querySelector(".fas");
+            if (sortedIconElement) {
+                sortedIconElement.className = dir === "asc" ? "fas fa-sort-up" : "fas fa-sort-down";
+            }
 
             // Perform sorting
             while (switching) {
@@ -260,35 +293,73 @@
                     }
                 }
             }
+
+            // Update pagination after sorting
+            $(document).ready(function() {
+                updatePagination();
+            });
         }
     </script>
 
     <style>
+        /* Styling for sortable columns */
+        .sortable {
+            position: relative;
+            cursor: pointer;
+        }
+
+            .sortable:hover {
+                background-color: #f5f5f5;
+            }
+
+            .sortable .fas {
+                margin-left: 5px;
+                color: #aaa;
+            }
+
+        .sorted-asc .fa-sort-up,
+        .sorted-desc .fa-sort-down {
+            color: #333;
+        }
+
+        /* Table header styling */
         th {
             cursor: pointer;
         }
 
             th.sorted-asc::after {
-                content: " ▲";
+                content: ""; /* Removed as we're using Font Awesome icons now */
             }
 
             th.sorted-desc::after {
-                content: " ▼";
+                content: ""; /* Removed as we're using Font Awesome icons now */
             }
 
-        .pagination {
-            display: flex;
+        /* Pagination button styling */
+        .pagination-btn {
+            min-width: 100px;
+            width: 100px;
+            height: 38px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
-            margin-top: 20px;
+            padding: 0.375rem 0.75rem;
         }
 
-            .pagination button {
-                margin: 0 5px;
-            }
+        .pagination-info {
+            font-size: 14px;
+            color: #6c757d;
+            padding: 0 10px;
+        }
 
-        #pageInfo {
-            margin: 0 10px;
-            line-height: 2;
+        /* Custom alert styling to match the design */
+        .alert-info {
+            background-color: #e8f4ff;
+            border: none;
+            color: #2c5282;
+            font-size: 14px;
+            border-radius: 4px;
         }
     </style>
 }

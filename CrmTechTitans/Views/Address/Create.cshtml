@@ -1,69 +1,90 @@
-﻿@model CrmTechTitans.Models.Address
+﻿@using CrmTechTitans.Models.Enumerations
+@model CrmTechTitans.Models.Address
 
 @{
     ViewData["Title"] = "Create Address";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var hasValidationErrors = ViewBag.HasValidationErrors ?? false;
 }
 
-<div class="main-content">
-    <header class="page-header">
-        <h1>Create New Address</h1>
-    </header>
+<link rel="stylesheet" href="~/css/multi-step-form.css" />
 
-    <div class="member-card">
-        <div class="member-card-header">
-            <div class="member-avatar">
-                <i class="fas fa-map-marker-alt"></i>
-            </div>
-            <div class="member-info">
-                <h2 class="member-name">New Address</h2>
-                <p class="member-type">Please fill in the details below</p>
+<div class="container py-4">
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-primary text-white p-4">
+            <div class="d-flex align-items-center">
+                <div class="me-3 bg-primary bg-opacity-25 rounded-circle p-3">
+                    <i class="fas fa-map-marker-alt fa-2x"></i>
+                </div>
+                <div>
+                    <h1 class="h3 mb-1">Create Address</h1>
+                    <p class="mb-0">Fill in the details below to add a new address to the database.</p>
+                </div>
             </div>
         </div>
-        <form asp-action="Create">
-            <div class="member-card-content">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <div class="member-detail">
-                    <i class="fas fa-road"></i>
-                    <div class="form-group">
-                        <label asp-for="Street" class="control-label"></label>
-                        <input asp-for="Street" class="form-control" />
+
+        <div class="card-body p-4">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                <p class="text-muted small mb-4"><span class="text-danger">*</span> Indicates a required field.</p>
+
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label asp-for="Street" class="form-label">Street <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-road"></i></span>
+                            <input asp-for="Street" class="form-control" placeholder="Enter street address" />
+                        </div>
                         <span asp-validation-for="Street" class="text-danger"></span>
                     </div>
-                </div>
-                <div class="member-detail">
-                    <i class="fas fa-city"></i>
-                    <div class="form-group">
-                        <label asp-for="City" class="control-label"></label>
-                        <input asp-for="City" class="form-control" />
+
+                    <div class="col-md-6">
+                        <label asp-for="City" class="form-label">City <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-city"></i></span>
+                            <input asp-for="City" class="form-control" placeholder="Enter city" />
+                        </div>
                         <span asp-validation-for="City" class="text-danger"></span>
                     </div>
                 </div>
-                <div class="member-detail">
-                    <i class="fas fa-flag"></i>
-                    <div class="form-group">
-                        <label asp-for="Province" class="control-label"></label>
-                        <select asp-for="Province" class="form-control" asp-items="Html.GetEnumSelectList<CrmTechTitans.Models.Enumerations.Province>()"></select>
+
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label asp-for="Province" class="form-label">Province <span class="text-danger">*</span></label>
+                        <select asp-for="Province" class="form-select" asp-items="Html.GetEnumSelectList<Province>()">
+                            <option value="">Select Province</option>
+                        </select>
                         <span asp-validation-for="Province" class="text-danger"></span>
                     </div>
-                </div>
-                <div class="member-detail">
-                    <i class="fas fa-mail-bulk"></i>
-                    <div class="form-group">
-                        <label asp-for="PostalCode" class="control-label"></label>
-                        <input asp-for="PostalCode" class="form-control" />
+
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label asp-for="PostalCode" class="form-label">Postal Code</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-mail-bulk"></i></span>
+                            <input asp-for="PostalCode" class="form-control" placeholder="Ex. L4E 7K8" />
+                        </div>
                         <span asp-validation-for="PostalCode" class="text-danger"></span>
                     </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="AddressType" class="form-label">Address Type</label>
+                        <select asp-for="AddressType" class="form-select" asp-items="Html.GetEnumSelectList<AddressType>()">
+                            <option value="">Select Address Type</option>
+                        </select>
+                        <span asp-validation-for="AddressType" class="text-danger"></span>
+                    </div>
                 </div>
-            </div>
-            <div class="member-card-footer">
-                <button type="submit" class="button-1">
-                    <i class="fas fa-plus"></i> Create
-                </button>
-                <a asp-action="Index" class="button-2">
-                    <i class="fas fa-arrow-left"></i> Back to List
-                </a>
-            </div>
-        </form>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Addresses
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-1"></i> Create
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -71,4 +92,12 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+}
+
+@section Styles {
+    <style>
+        .bg-primary {
+            background-color: #6c757d !important;
+        }
+    </style>
 }

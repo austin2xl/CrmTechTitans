@@ -7,81 +7,97 @@
 
 <partial name="_Notification" />
 
-<div class="crm-container">
-    <!-- Main Content -->
-    <div class="crm-container">
-        <div class="main-content">
-            <header class="page-header">
-                <h1>All Industries</h1>
-                <div class="d-flex align-items-center gap-3">
-                    <a asp-action="Create" class="btn btn-danger" data-bs-toggle="tooltip" title="Add a new Industry to the system">
-                        <i class="fas fa-user-plus"></i> Create New Industry
-                    </a>
-                </div>
-            </header>
+<div class="container-fluid">
+    <header class="page-header d-flex justify-content-between align-items-center mb-4">
+        <h1>All Industries</h1>
+        <div class="d-flex align-items-center gap-3">
+            <a asp-action="Create" class="btn btn-primary" data-bs-toggle="tooltip" title="Add a new Industry to the system">
+                <i class="fas fa-plus-circle"></i> Create New Industry
+            </a>
+        </div>
+    </header>
 
-            <!-- Filter Section -->
-            <div class="filter-container">
-                <div class="col-md-4">
-                    <label for="SearchString" class="filter-label">Search Industry Name:</label>
-                    <input type="text" id="SearchString" class="form-control search-input" placeholder="Enter industry name">
-                </div>
-                <div class="col-md-4">
-                    <label for="NAICSCode" class="filter-label">Filter by NAICS Code:</label>
-                    @Html.DropDownList("NAICSCode", ViewBag.NAICSCodeList as SelectList, "-- Select NAICS Code --", new { @class = "form-control filter-select" })
-                </div>
+    <!-- Filter Section -->
+    <section class="filter-container bg-light p-3 rounded mb-4">
+        <div class="filter-row d-flex align-items-end gap-3">
+            <!-- Filter by Industry Name -->
+            <div class="filter-item">
+                <label for="SearchString" class="form-label">Search Industry Name</label>
+                <input type="text" id="SearchString" class="form-control" placeholder="Enter industry name" data-bs-toggle="tooltip" title="Enter an industry's full or partial name">
             </div>
 
-            <!-- Table View for Industries -->
-            <section class="members-table-container">
-                <table class="table custom-table" id="industriesTable">
-                    <thead>
-                        <tr>
-                            <th onclick="sortTable(0)">Industry Name</th>
-                            <th onclick="sortTable(1)">NAICS Code</th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td>@item.Name</td>
-                                <td>@item.NAICS</td>
-                                <td class="text-center action-buttons">
-                                    <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-edit">Edit</a>
-                                    <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-details">Details</a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-                <div class="col-md-4">
-                    <label for="recordsPerPage">Records per page:</label>
-                    <select id="recordsPerPage" class="form-control">
-                        <option value="5">5</option>
-                        <option value="10">10</option>
-                        <option value="15">15</option>
-                        <option value="20">20</option>
-                    </select>
-                </div>
+            <!-- Filter by NAICS Code -->
+            <div class="filter-item">
+                <label for="NAICSCode" class="form-label">Filter by NAICS Code</label>
+                @Html.DropDownList("NAICSCode", ViewBag.NAICSCodeList as SelectList, "-- Select NAICS Code --", new { @class = "form-select" })
+            </div>
+        </div>
+    </section>
 
-                <div id="paginationControls" class="pagination">
-                    <button id="prevPage" class="btn btn-primary">Previous</button>
-                    <span id="pageInfo"></span>
-                    <button id="nextPage" class="btn btn-primary">Next</button>
-                </div>
+    <!-- Industries Table -->
+    <section class="table-responsive">
+        <!-- Helper text for sorting -->
+        <div class="alert alert-info d-flex align-items-center py-2" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            Click on column headers to sort the table.
+        </div>
 
-            </section>
+        <table class="table custom-table" id="industriesTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)" class="sortable">Industry Name <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(1)" class="sortable">NAICS Code <i class="fas fa-sort"></i></th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@item.NAICS</td>
+                        <td class="text-center">
+                            <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Edit industry details">Edit</a>
+                            <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="View industry details">Details</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Pagination Controls -->
+    <div class="row mt-4">
+        <!-- Records per page -->
+        <div class="col-md-4">
+            <label for="recordsPerPage">Records per page:</label>
+            <select id="recordsPerPage" class="form-control">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+            </select>
+        </div>
+        <!-- Pagination Controls -->
+        <div id="paginationControls" class="col-md-8 d-flex justify-content-end align-items-center gap-3">
+            <button id="prevPage" class="btn btn-primary pagination-btn">Previous</button>
+            <span id="pageInfo" class="pagination-info">Page 1 of 1 (0 records)</span>
+            <button id="nextPage" class="btn btn-primary pagination-btn">Next</button>
         </div>
     </div>
-
 </div>
+
 @section Scripts {
     <script>
         $(document).ready(function () {
             var currentPage = 1;
             var recordsPerPage = parseInt($('#recordsPerPage').val());
+
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
 
             // Function to get visible rows (rows not hidden by filter)
             function getVisibleRows() {
@@ -104,7 +120,7 @@
             // Function to show the current page
             function showPage(page) {
                 var visibleRows = getVisibleRows();
-                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
 
                 // Ensure currentPage is within valid range
                 if (page < 1) page = 1;
@@ -120,17 +136,17 @@
                 visibleRows.slice(startIndex, endIndex).show();
 
                 // Update page info
-                $('#pageInfo').text(`Page ${page} of ${totalPages}`);
+                $('#pageInfo').text(`Page ${page} of ${totalPages} (${visibleRows.length} records)`);
 
                 // Enable/disable pagination buttons
                 $('#prevPage').prop('disabled', page === 1);
-                $('#nextPage').prop('disabled', page === totalPages);
+                $('#nextPage').prop('disabled', page === totalPages || visibleRows.length === 0);
             }
 
             // Function to update pagination
             function updatePagination() {
                 var visibleRows = getVisibleRows();
-                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
 
                 if (currentPage > totalPages) {
                     currentPage = totalPages > 0 ? totalPages : 1;
@@ -157,7 +173,7 @@
             // Event listener for next page button
             $('#nextPage').on('click', function () {
                 var visibleRows = getVisibleRows();
-                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
 
                 if (currentPage < totalPages) {
                     currentPage++;
@@ -176,8 +192,10 @@
 
             // Initial page load
             updatePagination();
+
+            // Initial sort on page load
+            sortTable(0, "asc");
         });
-         sortTable(0, "asc");
 
         // Sorting function
         function sortTable(columnIndex, initialDirection = "asc") {
@@ -200,6 +218,22 @@
 
             // Add sorting class to the clicked header
             table.rows[0].getElementsByTagName("th")[columnIndex].classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
+
+            // Update sort icon for all headers
+            for (i = 0; i < 2; i++) { // Only for sortable columns (0-1)
+                if (i !== columnIndex) {
+                    var iconElement = table.rows[0].getElementsByTagName("th")[i].querySelector(".fas");
+                    if (iconElement) {
+                        iconElement.className = "fas fa-sort";
+                    }
+                }
+            }
+
+            // Update the icon for the sorted column
+            var sortedIconElement = table.rows[0].getElementsByTagName("th")[columnIndex].querySelector(".fas");
+            if (sortedIconElement) {
+                sortedIconElement.className = dir === "asc" ? "fas fa-sort-up" : "fas fa-sort-down";
+            }
 
             // Perform sorting
             while (switching) {
@@ -235,35 +269,73 @@
                     }
                 }
             }
+
+            // Update pagination after sorting
+            $(document).ready(function() {
+                updatePagination();
+            });
         }
     </script>
 
+    <style>
+        /* Styling for sortable columns */
+        .sortable {
+            position: relative;
+            cursor: pointer;
+        }
 
-} <style>
-      th {
-          cursor: pointer;
-      }
+            .sortable:hover {
+                background-color: #f5f5f5;
+            }
 
-          th.sorted-asc::after {
-              content: " ▲";
-          }
+            .sortable .fas {
+                margin-left: 5px;
+                color: #aaa;
+            }
 
-          th.sorted-desc::after {
-              content: " ▼";
-          }
+        .sorted-asc .fa-sort-up,
+        .sorted-desc .fa-sort-down {
+            color: #333;
+        }
 
-      .pagination {
-          display: flex;
-          justify-content: center;
-          margin-top: 20px;
-      }
+        /* Table header styling */
+        th {
+            cursor: pointer;
+        }
 
-          .pagination button {
-              margin: 0 5px;
-          }
+            th.sorted-asc::after {
+                content: ""; /* Removed as we're using Font Awesome icons now */
+            }
 
-      #pageInfo {
-          margin: 0 10px;
-          line-height: 2;
-      }
-</style>
+            th.sorted-desc::after {
+                content: ""; /* Removed as we're using Font Awesome icons now */
+            }
+
+        /* Pagination button styling */
+        .pagination-btn {
+            min-width: 100px;
+            width: 100px;
+            height: 38px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.375rem 0.75rem;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: #6c757d;
+            padding: 0 10px;
+        }
+
+        /* Custom alert styling to match the design */
+        .alert-info {
+            background-color: #e8f4ff;
+            border: none;
+            color: #2c5282;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+    </style>
+}

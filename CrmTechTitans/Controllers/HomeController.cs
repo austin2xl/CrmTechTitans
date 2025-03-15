@@ -23,86 +23,160 @@ namespace CrmTechTitans.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Retrieve data from the database asynchronously
-            var memberSummaryList = await _context.Members
-                .GroupBy(m => m.MembershipStatus)
-                .Select(grp => new MemberCountVM
-                {
-                    Membership = grp.Key.ToString(),
-                    TotalMembers = grp.Count(),
-                    GoodStanding = grp.Count(m => m.MembershipStatus == MembershipStatus.GoodStanding),
-                    Cancelled = grp.Count(m => m.MembershipStatus == MembershipStatus.Cancelled),
-                    OutStanding = grp.Count(m => m.MembershipStatus == MembershipStatus.OutStanding)
-                }).ToListAsync();
-
-            // Aggregate results manually to ensure all data is considered
-            var memberSummary = new MemberCountVM
+            try
             {
-                Membership = "Summary",
-                TotalMembers = memberSummaryList.Sum(x => x.TotalMembers),
-                GoodStanding = memberSummaryList.Sum(x => x.GoodStanding),
-                Cancelled = memberSummaryList.Sum(x => x.Cancelled),
-                OutStanding = memberSummaryList.Sum(x => x.OutStanding)
-            };
+                // Get total counts for each membership status
+                var goodStandingCount = await _context.Members
+                    .CountAsync(m => m.MembershipStatus == MembershipStatus.GoodStanding);
+                
+                var outstandingCount = await _context.Members
+                    .CountAsync(m => m.MembershipStatus == MembershipStatus.OutStanding);
+                
+                var cancelledCount = await _context.Members
+                    .CountAsync(m => m.MembershipStatus == MembershipStatus.Cancelled);
+                
+                var totalMembers = goodStandingCount + outstandingCount + cancelledCount;
 
-            var membershipSummaryList = await _context.MemberMembershipTypes
-                .GroupBy(mmt => mmt.MembershipType.Name)
-                .Select(grp => new
+                // Create member summary
+                var memberSummary = new MemberCountVM
                 {
-                    Name = grp.Key.ToLower(),
-                    Count = grp.Count()
-                }).ToListAsync();
+                    Membership = "Summary",
+                    TotalMembers = totalMembers,
+                    GoodStanding = goodStandingCount,
+                    OutStanding = outstandingCount,
+                    Cancelled = cancelledCount
+                };
 
-            var membershipSummary = new MembershipTypeCountVM
-            {
-                AssociateCount = membershipSummaryList.Where(x => x.Name == "associate").Sum(x => x.Count),
-                ChamberAssociateCount = membershipSummaryList.Where(x => x.Name == "chamberassociate").Sum(x => x.Count),
-                NonLocalIndustrialCount = membershipSummaryList.Where(x => x.Name == "nonlocalindustrial").Sum(x => x.Count),
-                GovernmentAssociationCount = membershipSummaryList.Where(x => x.Name == "governmenteducationassociate").Sum(x => x.Count),
-                LocalCount = membershipSummaryList.Where(x => x.Name == "localindustrial").Sum(x => x.Count),
-                OtherCount = membershipSummaryList.Where(x => x.Name == "other").Sum(x => x.Count)
-            };
+                // Get all members with their membership types
+                var members = await _context.Members
+                    .Include(m => m.MemberMembershipTypes)
+                    .ThenInclude(mmt => mmt.MembershipType)
+                    .ToListAsync();
 
-            var opportunitySummaryList = await _context.Opportunities
-                .GroupBy(o => o.Status)
-                .Select(grp => new OpportunityCountVM
+                // Create a dictionary to count members by membership type
+                var membershipTypeCounts = new Dictionary<string, int>();
+                
+                // Count members for each membership type
+                foreach (var member in members)
                 {
-                    QualificationCount = grp.Count(o => o.Status == Status.Qualification),
-                    NegotiationCount = grp.Count(o => o.Status == Status.Negotiating),
-                    ClosedNewMembersCount = grp.Count(o => o.Status == Status.ClosedNewMember),
-                    ClosedNotInterestedCount = grp.Count(o => o.Status == Status.ClosedNotInterested)
-                }).ToListAsync();
+                    foreach (var memberMembershipType in member.MemberMembershipTypes)
+                    {
+                        var typeName = memberMembershipType.MembershipType.Name;
+                        if (!membershipTypeCounts.ContainsKey(typeName))
+                        {
+                            membershipTypeCounts[typeName] = 0;
+                        }
+                        membershipTypeCounts[typeName]++;
+                    }
+                }
 
-            // Aggregate results manually to ensure all data is considered
-            var opportunitySummary = new OpportunityCountVM
-            {
-                QualificationCount = opportunitySummaryList.Sum(x => x.QualificationCount),
-                NegotiationCount = opportunitySummaryList.Sum(x => x.NegotiationCount),
-                ClosedNewMembersCount = opportunitySummaryList.Sum(x => x.ClosedNewMembersCount),
-                ClosedNotInterestedCount = opportunitySummaryList.Sum(x => x.ClosedNotInterestedCount)
-            };
-
-            // Ensure dates are serialized to ISO strings
-            var memberCountOverTime = await _context.Members
-                .GroupBy(m => m.MemberSince.Date)
-                .Select(grp => new MemberCountOverTimeVM
+                // Create membership type summary
+                var membershipSummary = new MembershipTypeCountVM();
+                
+                // Add all membership types to the dictionary
+                foreach (var kvp in membershipTypeCounts)
                 {
-                    Date = grp.Key, // DateTime object
-                    Count = grp.Count()
-                })
-                .OrderBy(m => m.Date)
-                .ToListAsync();
+                    membershipSummary.AllMembershipTypes[kvp.Key] = kvp.Value;
+                }
+                
+                // Map the counts to the view model properties for backward compatibility
+                membershipSummary.AssociateCount = membershipTypeCounts.GetValueOrDefault("Associate", 0);
+                membershipSummary.ChamberAssociateCount = membershipTypeCounts.GetValueOrDefault("Chamber", 0);
+                membershipSummary.NonLocalIndustrialCount = membershipTypeCounts.GetValueOrDefault("Non-Local", 0);
+                membershipSummary.GovernmentAssociationCount = membershipTypeCounts.GetValueOrDefault("Government Education", 0);
+                membershipSummary.LocalCount = membershipTypeCounts.GetValueOrDefault("Local", 0);
+                
+                // Calculate "Other" as any types not explicitly mapped above
+                membershipSummary.OtherCount = membershipTypeCounts
+                    .Where(kvp => 
+                        kvp.Key != "Associate" && 
+                        kvp.Key != "Chamber" && 
+                        kvp.Key != "Non-Local" && 
+                        kvp.Key != "Government Education" && 
+                        kvp.Key != "Local")
+                    .Sum(kvp => kvp.Value);
 
-            // Combine all summaries into a single view model
-            var dashboardViewModel = new DashboardVM
+                // Get opportunity counts
+                var qualificationCount = await _context.Opportunities
+                    .CountAsync(o => o.Status == Status.Qualification);
+                
+                var negotiationCount = await _context.Opportunities
+                    .CountAsync(o => o.Status == Status.Negotiating);
+                
+                var closedNewMembersCount = await _context.Opportunities
+                    .CountAsync(o => o.Status == Status.ClosedNewMember);
+                
+                var closedNotInterestedCount = await _context.Opportunities
+                    .CountAsync(o => o.Status == Status.ClosedNotInterested);
+
+                var opportunitySummary = new OpportunityCountVM
+                {
+                    QualificationCount = qualificationCount,
+                    NegotiationCount = negotiationCount,
+                    ClosedNewMembersCount = closedNewMembersCount,
+                    ClosedNotInterestedCount = closedNotInterestedCount
+                };
+
+                // Get member growth over time - calculate cumulative count
+                var membersByDate = members
+                    .OrderBy(m => m.MemberSince.Date)
+                    .GroupBy(m => new DateTime(m.MemberSince.Year, m.MemberSince.Month, 1)) // Group by month
+                    .Select(g => new { Date = g.Key, NewMembers = g.Count() })
+                    .ToList();
+
+                var memberCountOverTime = new List<MemberCountOverTimeVM>();
+                int cumulativeCount = 0;
+                
+                // Generate a complete timeline from the earliest member to today
+                if (membersByDate.Any())
+                {
+                    var startDate = membersByDate.Min(m => m.Date);
+                    var endDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+                    
+                    for (var date = startDate; date <= endDate; date = date.AddMonths(1))
+                    {
+                        // Find new members for this month
+                        var newMembersInMonth = membersByDate
+                            .Where(m => m.Date == date)
+                            .Sum(m => m.NewMembers);
+                        
+                        cumulativeCount += newMembersInMonth;
+                        
+                        memberCountOverTime.Add(new MemberCountOverTimeVM
+                        {
+                            Date = date,
+                            Count = cumulativeCount
+                        });
+                    }
+                }
+
+                // Combine all summaries into a single view model
+                var dashboardViewModel = new DashboardVM
+                {
+                    MemberCountSummary = memberSummary,
+                    MembershipTypeSummary = membershipSummary,
+                    OpportunityCountSummary = opportunitySummary,
+                    MemberCountOverTime = memberCountOverTime
+                };
+
+                _logger.LogInformation("Dashboard data loaded successfully");
+                return View(dashboardViewModel);
+            }
+            catch (Exception ex)
             {
-                MemberCountSummary = memberSummary,
-                MembershipTypeSummary = membershipSummary,
-                OpportunityCountSummary = opportunitySummary,
-                MemberCountOverTime = memberCountOverTime // New data
-            };
-
-            return View(dashboardViewModel);
+                _logger.LogError(ex, "Error loading dashboard data");
+                
+                // Create empty view model to avoid null reference exceptions
+                var emptyViewModel = new DashboardVM
+                {
+                    MemberCountSummary = new MemberCountVM { Membership = "Summary", TotalMembers = 0, GoodStanding = 0, OutStanding = 0, Cancelled = 0 },
+                    MembershipTypeSummary = new MembershipTypeCountVM(),
+                    OpportunityCountSummary = new OpportunityCountVM(),
+                    MemberCountOverTime = new List<MemberCountOverTimeVM>()
+                };
+                
+                return View(emptyViewModel);
+            }
         }
 
         public IActionResult Privacy()

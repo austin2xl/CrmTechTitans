@@ -1,218 +1,222 @@
-﻿document.addEventListener('DOMContentLoaded', function () {
-    const cardsView = document.getElementById('cards-view');
-    const tableView = document.getElementById('table-view');
-    const viewButtons = document.querySelectorAll('.view-btn');
+﻿/**
+ * Member Index Page JavaScript
+ * Handles filtering, pagination, and sorting for the members table
+ */
+
+document.addEventListener('DOMContentLoaded', function () {
+    // DOM Elements
+    const membersTable = document.getElementById('membersTable');
+    const tableRows = document.querySelectorAll('#membersTable tbody tr');
     const memberNameFilter = document.getElementById('memberNameFilter');
     const membershipStatusFilter = document.getElementById('membershipStatusFilter');
-    const recordsPerPageDropdown = document.getElementById('recordsPerPage');
+    const recordsPerPageSelect = document.getElementById('recordsPerPage');
     const prevPageButton = document.getElementById('prevPage');
     const nextPageButton = document.getElementById('nextPage');
     const pageInfo = document.getElementById('pageInfo');
-
+    
+    // Pagination state
     let currentPage = 1;
-    let recordsPerPage = parseInt(recordsPerPageDropdown.value);
-    let totalRecords = 0;
-    let totalPages = 0;
-
-    // Set default filter to "Good Standing"
-    membershipStatusFilter.value = "GoodStanding";
-
-    function setView(view) {
-        cardsView.style.display = view === 'cards' ? 'grid' : 'none';
-        tableView.style.display = view === 'table' ? 'block' : 'none';
-        viewButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.view === view));
-        localStorage.setItem('preferredView', view);
-        updatePagination(); // Update pagination when switching views
-    }
-
-    viewButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            setView(this.dataset.view);
-        });
-    });
-
-    function getVisibleRows() {
-        const nameFilter = memberNameFilter.value.toLowerCase();
-        const statusFilter = membershipStatusFilter.value.toLowerCase();
-
-        if (cardsView.style.display === 'grid') {
-            return Array.from(document.querySelectorAll('#cards-view .member-card')).filter(card => {
-                const name = (card.dataset.name || '').toLowerCase();
-                const status = (card.dataset.status || '').toLowerCase();
-                return name.includes(nameFilter) && (statusFilter === '' || status === statusFilter);
-            });
-        } else {
-            return Array.from(document.querySelectorAll('#membersTable tbody tr')).filter(row => {
-                const name = (row.dataset.name || '').toLowerCase();
-                const status = (row.dataset.status || '').toLowerCase();
-                return name.includes(nameFilter) && (statusFilter === '' || status === statusFilter);
-            });
-        }
-    }
-
-    function showPage(page) {
-        const visibleRows = getVisibleRows();
-        const startIndex = (page - 1) * recordsPerPage;
-        const endIndex = startIndex + recordsPerPage;
-
-        if (cardsView.style.display === 'grid') {
-            document.querySelectorAll('#cards-view .member-card').forEach(card => card.style.display = 'none');
-            visibleRows.slice(startIndex, endIndex).forEach(card => card.style.display = 'block');
-        } else {
-            document.querySelectorAll('#membersTable tbody tr').forEach(row => row.style.display = 'none');
-            visibleRows.slice(startIndex, endIndex).forEach(row => row.style.display = '');
-        }
-
-        pageInfo.textContent = `Page ${page} of ${Math.ceil(visibleRows.length / recordsPerPage)}`;
-        prevPageButton.disabled = page === 1;
-        nextPageButton.disabled = page === Math.ceil(visibleRows.length / recordsPerPage);
-    }
-
-    function updatePagination() {
-        const visibleRows = getVisibleRows();
-        totalRecords = visibleRows.length;
-        totalPages = Math.ceil(totalRecords / recordsPerPage);
-
-        if (currentPage > totalPages) {
-            currentPage = totalPages > 0 ? totalPages : 1;
-        }
-
-        showPage(currentPage);
-    }
-
-    recordsPerPageDropdown.addEventListener('change', function () {
-        recordsPerPage = parseInt(this.value);
-        currentPage = 1;
-        updatePagination();
-    });
-
-    prevPageButton.addEventListener('click', function () {
-        if (currentPage > 1) {
-            currentPage--;
-            showPage(currentPage);
-        }
-    });
-
-    nextPageButton.addEventListener('click', function () {
-        const visibleRows = getVisibleRows();
-        const totalPages = Math.ceil(visibleRows.length / recordsPerPage);
-
-        if (currentPage < totalPages) {
-            currentPage++;
-            showPage(currentPage);
-        }
-    });
-
-    function filterMembers() {
-        currentPage = 1;
-        updatePagination();
-    }
-
-    memberNameFilter.addEventListener('input', filterMembers);
-    membershipStatusFilter.addEventListener('change', filterMembers);
-
-    filterMembers();
-
-    const preferredView = localStorage.getItem('preferredView') || 'cards';
-    setView(preferredView);
-
+    let recordsPerPage = parseInt(recordsPerPageSelect.value);
+    
+    // Initialize tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
-
+    
+    // Set default filter to "Good Standing"
+    membershipStatusFilter.value = "GoodStanding";
+    
+    /**
+     * Get rows that match the current filter criteria
+     */
+    function getFilteredRows() {
+        const nameFilter = memberNameFilter.value.toLowerCase();
+        const statusFilter = membershipStatusFilter.value.toLowerCase();
+        
+        return Array.from(tableRows).filter(row => {
+            const name = row.dataset.name || '';
+            const status = row.dataset.status || '';
+            
+            return name.includes(nameFilter) && 
+                  (statusFilter === '' || status === statusFilter);
+        });
+    }
+    
+    /**
+     * Update the table to show only the current page of filtered rows
+     */
+    function updateTableDisplay() {
+        const filteredRows = getFilteredRows();
+        const totalPages = Math.max(1, Math.ceil(filteredRows.length / recordsPerPage));
+        
+        // Adjust current page if needed
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
+        
+        const startIndex = (currentPage - 1) * recordsPerPage;
+        const endIndex = Math.min(startIndex + recordsPerPage, filteredRows.length);
+        
+        // Hide all rows first
+        tableRows.forEach(row => {
+            row.style.display = 'none';
+        });
+        
+        // Show only the rows for the current page
+        filteredRows.slice(startIndex, endIndex).forEach(row => {
+            row.style.display = '';
+        });
+        
+        // Update pagination info and buttons
+        pageInfo.textContent = `Page ${currentPage} of ${totalPages} (${filteredRows.length} records)`;
+        prevPageButton.disabled = currentPage <= 1;
+        nextPageButton.disabled = currentPage >= totalPages;
+    }
+    
+    /**
+     * Handle filter changes
+     */
+    function handleFilterChange() {
+        currentPage = 1; // Reset to first page when filter changes
+        updateTableDisplay();
+    }
+    
+    /**
+     * Handle records per page change
+     */
+    function handleRecordsPerPageChange() {
+        recordsPerPage = parseInt(recordsPerPageSelect.value);
+        currentPage = 1; // Reset to first page
+        updateTableDisplay();
+    }
+    
+    /**
+     * Navigate to previous page
+     */
+    function goToPreviousPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            updateTableDisplay();
+        }
+    }
+    
+    /**
+     * Navigate to next page
+     */
+    function goToNextPage() {
+        const filteredRows = getFilteredRows();
+        const totalPages = Math.ceil(filteredRows.length / recordsPerPage);
+        
+        if (currentPage < totalPages) {
+            currentPage++;
+            updateTableDisplay();
+        }
+    }
+    
+    // Event listeners
+    memberNameFilter.addEventListener('input', handleFilterChange);
+    membershipStatusFilter.addEventListener('change', handleFilterChange);
+    recordsPerPageSelect.addEventListener('change', handleRecordsPerPageChange);
+    prevPageButton.addEventListener('click', goToPreviousPage);
+    nextPageButton.addEventListener('click', goToNextPage);
+    
+    // Handle archive/unarchive functionality
     const archiveButtons = document.querySelectorAll('.archive-btn');
-
     archiveButtons.forEach(button => {
-        button.addEventListener('click', function () {
+        button.addEventListener('click', function() {
             const memberId = this.dataset.id;
-            let currentStatus = this.dataset.status.toLowerCase();
+            const currentStatus = this.dataset.status.toLowerCase();
             const newStatus = (currentStatus === 'cancelled') ? 'GoodStanding' : 'Cancelled';
             const confirmMessage = (currentStatus === 'cancelled')
                 ? "Are you sure you want to unarchive this member?"
                 : "Are you sure you want to archive this member?";
-
+                
             if (!confirm(confirmMessage)) {
                 return;
             }
-
-            fetch(`/Member/ToggleArchive`, {
+            
+            fetch('/Member/ToggleArchive', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     memberId: parseInt(memberId),
                     newStatus: newStatus
                 })
             })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(error => { throw new Error(error.message); });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    alert(data.message);
-                    location.reload();
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                    alert("Failed to update member status.");
-                });
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(error => { throw new Error(error.message); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(data.message);
+                location.reload();
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Failed to update member status.");
+            });
         });
     });
+    
+    // Initialize the table display
+    updateTableDisplay();
+    
+    // Sort the table by name initially
+    sortTable(1, 'asc');
 });
-// Sort the table by member name in ascending order on page load
-sortTable(1, "asc"); // 0 is the index for the member name column
 
-function sortTable(columnIndex, initialDirection = "asc") {
-    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-    table = document.getElementById("membersTable");
-    switching = true;
-    dir = initialDirection;
-
-    if (table.rows[0].getElementsByTagName("th")[columnIndex].classList.contains("sorted-asc")) {
-        dir = "desc";
-    } else if (table.rows[0].getElementsByTagName("th")[columnIndex].classList.contains("sorted-desc")) {
-        dir = "asc";
+/**
+ * Sort the table by the specified column
+ * @param {number} columnIndex - The index of the column to sort by
+ * @param {string} initialDirection - The initial sort direction ('asc' or 'desc')
+ */
+function sortTable(columnIndex, initialDirection = 'asc') {
+    const table = document.getElementById('membersTable');
+    const headers = table.querySelectorAll('th');
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    
+    // Determine sort direction
+    let direction = initialDirection;
+    if (headers[columnIndex].classList.contains('sorted-asc')) {
+        direction = 'desc';
+    } else if (headers[columnIndex].classList.contains('sorted-desc')) {
+        direction = 'asc';
     }
-
-    for (i = 0; i < table.rows[0].getElementsByTagName("th").length; i++) {
-        table.rows[0].getElementsByTagName("th")[i].classList.remove("sorted-asc", "sorted-desc");
-    }
-
-    table.rows[0].getElementsByTagName("th")[columnIndex].classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
-
-    while (switching) {
-        switching = false;
-        rows = table.rows;
-
-        for (i = 1; i < (rows.length - 1); i++) {
-            shouldSwitch = false;
-            x = rows[i].getElementsByTagName("td")[columnIndex];
-            y = rows[i + 1].getElementsByTagName("td")[columnIndex];
-
-            if (dir === "asc") {
-                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                    shouldSwitch = true;
-                    break;
-                }
-            } else if (dir === "desc") {
-                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                    shouldSwitch = true;
-                    break;
-                }
-            }
+    
+    // Remove sort indicators from all headers
+    headers.forEach(header => {
+        header.classList.remove('sorted-asc', 'sorted-desc');
+    });
+    
+    // Add sort indicator to current header
+    headers[columnIndex].classList.add(direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
+    
+    // Sort the rows
+    rows.sort((rowA, rowB) => {
+        const cellA = rowA.cells[columnIndex].textContent.trim().toLowerCase();
+        const cellB = rowB.cells[columnIndex].textContent.trim().toLowerCase();
+        
+        if (cellA < cellB) {
+            return direction === 'asc' ? -1 : 1;
         }
-
-        if (shouldSwitch) {
-            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-            switching = true;
-            switchcount++;
-        } else {
-            if (switchcount === 0 && dir === "asc") {
-                dir = "desc";
-                switching = true;
-            }
+        if (cellA > cellB) {
+            return direction === 'asc' ? 1 : -1;
         }
-    }
+        return 0;
+    });
+    
+    // Reorder the rows in the table
+    rows.forEach(row => {
+        tbody.appendChild(row);
+    });
+    
+    // Update the display to maintain pagination
+    const event = new Event('sort-complete');
+    document.dispatchEvent(event);
 }

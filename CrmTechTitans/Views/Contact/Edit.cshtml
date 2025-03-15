@@ -5,121 +5,118 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="main-content">
-    <header class="page-header">
-        <h1>Edit Contact</h1>
-        <p class="text-muted">Modify the details of the selected contact. Ensure all information is correct before saving.</p>
-    </header>
-
-    <div class="member-card">
-        <div class="member-card-header">
-            <div class="member-avatar">
-                @{
-    var hasPicture = (Model.ContactPhoto?.Content != null);
-    if (hasPicture)
-    {
-        @:<div>
-            string imageBase64 = Convert.ToBase64String(Model.ContactPhoto.Content);
-            string imageSrc = string.Format("data:" + Model.ContactPhoto.MimeType + ";base64,{0}", imageBase64);
-            <img src="@imageSrc" alt="Profile Picture of @Model.FullFormalName" 
-                title="Profile Picture of @Model.FullFormalName" class="img-fluid rounded" />
-        @:</div><hr />
-    }else
-    {
-        <i class="fas fa-user-edit"></i>
-    }
-                 }
-               
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Page Header -->
+            <div class="mb-4">
+                <h1 class="h3 mb-2">Edit Contact</h1>
+                <p class="text-muted">Modify the details of the selected contact. Ensure all information is correct before saving.</p>
             </div>
-            <div class="member-info">
-                <h2 class="member-name">Edit Contact Information</h2>
+
+            <!-- Contact Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <!-- Contact Header with Photo -->
+                    <div class="mb-4 text-center">
+                        @{
+                            var hasPicture = (Model.ContactPhoto?.Content != null);
+                            if (hasPicture)
+                            {
+                                string imageBase64 = Convert.ToBase64String(Model.ContactPhoto.Content);
+                                string imageSrc = string.Format("data:" + Model.ContactPhoto.MimeType + ";base64,{0}", imageBase64);
+                                <div class="mb-3">
+                                    <img src="@imageSrc" alt="Profile Picture of @Model.FullFormalName"
+                                         title="Profile Picture of @Model.FullFormalName" class="img-fluid rounded-circle"
+                                         style="width: 120px; height: 120px; object-fit: cover;" />
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        <input type="hidden" asp-for="ID" />
+
+                        <!-- Contact Details Section -->
+                        <div class="row g-3 mb-4">
+                            <!-- First Name -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="FirstName" class="form-label">First Name</label>
+                                    <input asp-for="FirstName" class="form-control" placeholder="Enter First Name" />
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Last Name -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="LastName" class="form-label">Last Name</label>
+                                    <input asp-for="LastName" class="form-control" placeholder="Enter Last Name" />
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Contact Photo -->
+                            <div class="col-md-12">
+                                <div class="form-group mb-3">
+                                    <label asp-for="ContactPhoto" class="form-label">Contact Picture</label>
+                                    @if (hasPicture)
+                                    {
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="chkRemoveContactImage" name="chkRemoveContactImage">
+                                            <label class="form-check-label" for="chkRemoveContactImage">
+                                                Remove Image
+                                            </label>
+                                        </div>
+                                    }
+                                    <input asp-for="ContactPhoto" type="file" class="form-control" name="contactPicture" id="contactPicture">
+                                    <span asp-validation-for="ContactPhoto" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Email" class="form-label">Email</label>
+                                    <input asp-for="Email" class="form-control" placeholder="Enter Email" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Phone" class="form-label">Phone</label>
+                                    <input asp-for="Phone" class="form-control" placeholder="Enter Phone Number" />
+                                    <span asp-validation-for="Phone" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- LinkedIn -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Linkedin" class="form-label">LinkedIn</label>
+                                    <input asp-for="Linkedin" class="form-control" placeholder="Enter LinkedIn Profile" />
+                                    <span asp-validation-for="Linkedin" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                Back to List
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-        <form asp-action="Edit" method="post" enctype="multipart/form-data">
-            <div class="member-card-content">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="ID" />
-
-                <div class="member-detail">
-                    <i class="fas fa-user"></i>
-                    <div class="form-group">
-                        <label asp-for="FirstName" class="control-label">First Name</label>
-                        <input asp-for="FirstName" class="form-control" />
-                        <span asp-validation-for="FirstName" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="member-detail">
-                    <i class="fas fa-user"></i>
-                    <div class="form-group">
-                        <label asp-for="LastName" class="control-label">Last Name</label>
-                        <input asp-for="LastName" class="form-control" />
-                        <span asp-validation-for="LastName" class="text-danger"></span>
-                    </div>
-                </div>
-
-                 <div class="member-detail">
-        @{
-            if (hasPicture)
-            {
-                <div class="form-group">
-                    <div class="form-check m-3">
-                        
-                        <input class="form-check-input" type="checkbox" id="chkRemoveContactImage" name="chkRemoveContactImage">
-                        <label class="form-check-label" for="chkRemoveContactImage">
-                        <strong>Check to remove Image</strong>
-                        </label>
-                    </div>
-                </div>
-            }
-        }
-                  </div>
-
-                  <div class="member-detail">
-                  <div class="form-group">
-                <label asp-for="ContactPhoto" class="control-label">Contact Picture:</label>
-                <div class="input-group mb-3">
-                    <input asp-for="ContactPhoto" type="file" class="form-control" name="contactPicture" id="contactPicture">
-                </div>
-                </div>
-                  </div>
-
-                <div class="member-detail">
-                    <i class="fas fa-envelope"></i>
-                    <div class="form-group">
-                        <label asp-for="Email" class="control-label">Email</label>
-                        <input asp-for="Email" class="form-control" />
-                        <span asp-validation-for="Email" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="member-detail">
-                    <i class="fas fa-phone"></i>
-                    <div class="form-group">
-                        <label asp-for="Phone" class="control-label">Phone</label>
-                        <input asp-for="Phone" class="form-control" />
-                        <span asp-validation-for="Phone" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="member-detail">
-                    <i class="fab fa-linkedin"></i>
-                    <div class="form-group">
-                        <label asp-for="Linkedin" class="control-label">LinkedIn</label>
-                        <input asp-for="Linkedin" class="form-control" />
-                        <span asp-validation-for="Linkedin" class="text-danger"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="member-card-footer">
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-save"></i> Save Changes
-                </button>
-                <a asp-action="Index" class="button-2">
-                    <i class="fas fa-arrow-left"></i> Back to List
-                </a>
-            </div>
-        </form>
     </div>
 </div>
 

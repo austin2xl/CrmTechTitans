@@ -1,0 +1,44 @@
+name: Deploy to Azure App Service
+
+on:
+  push:
+    branches:
+      - 'AutoFill,Seeddata,EditButton,FixedPagination07/03/2025'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Build with dotnet
+      run: dotnet build --configuration Release
+    
+    - name: Publish with dotnet
+      run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+    
+    - name: Copy SQLite database
+      run: |
+        cp CrmDatabase.db ${{env.DOTNET_ROOT}}/myapp/
+        cp CrmDatabase.db-shm ${{env.DOTNET_ROOT}}/myapp/ || true
+        cp CrmDatabase.db-wal ${{env.DOTNET_ROOT}}/myapp/ || true
+    
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Deploy to Azure Web App
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'crmtechtitans'  # Replace with your app name
+        slot-name: 'production'
+        package: ${{env.DOTNET_ROOT}}/myapp 

@@ -4,64 +4,134 @@
     ViewData["Title"] = "Address Details";
 }
 
-<div class="main-content">
-    <header class="page-header-details">
-        <h1>Address Details</h1>
-    </header>
-
-    <div class="member-card-details">
-        <div class="member-card-header-details">
-            <div class="member-avatar">
-                <i class="fas fa-map-marker-alt"></i>
-            </div>
-            <div class="member-info">
-                <h2 class="member-name">Address Information</h2>
+<div class="container py-3">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header text-white p-3" style="background-color: #6c757d;">
+            <div class="d-flex align-items-center">
+                <div class="me-3 rounded-circle p-2" style="background-color: rgba(108, 117, 125, 0.25);">
+                    <i class="fas fa-map-marker-alt fa-2x"></i>
+                </div>
+                <div>
+                    <h1 class="h3 mb-1">Address Details</h1>
+                    <p class="mb-0">Detailed information about the selected address.</p>
+                </div>
             </div>
         </div>
-        <div class="member-card-content">
-            <!-- Member Name -->
-            <div class="member-detail">
-                <i class="fas fa-user"></i>
-                <span>
-                    <strong>Member Names:</strong>
-                    @if (Model.MemberAddresses != null && Model.MemberAddresses.Any())
-                    {
-                        @string.Join(", ", Model.MemberAddresses.Select(ma => ma.Member?.MemberName))
-                    }
-                    else
-                    {
-                        <span>No member associated</span>
-                    }
-                </span>
+
+        <div class="card-body p-4">
+            <div class="row mb-4">
+                <div class="col-md-2 col-sm-3 text-center mb-3 mb-md-0">
+                    <div class="address-avatar rounded-circle bg-light border d-flex align-items-center justify-content-center mx-auto" style="width: 100px; height: 100px;">
+                        <i class="fas fa-map-marker-alt fa-3x text-secondary"></i>
+                    </div>
+                </div>
+                <div class="col-md-10 col-sm-9">
+                    <h2 class="h4 mb-2">@Model.Street</h2>
+                    <p class="text-muted mb-0">@Model.City, @Model.Province, @Model.PostalCode</p>
+                </div>
             </div>
 
-            <!-- Address Summary -->
-            <div class="member-detail">
-                <i class="fas fa-road"></i>
-                <span>
-                    <strong>Address:</strong>
-                    @Model.Street, @Model.City, @Model.Province, @Model.PostalCode
-                </span>
+            <div class="row g-4">
+                <!-- Address Information Section -->
+                <div class="col-lg-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h3 class="h5 mb-0"><i class="fas fa-info-circle text-primary me-2"></i>Address Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 me-3">
+                                            <i class="fas fa-road text-secondary"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Street</strong>
+                                            <p class="mb-0 mt-1">@Model.Street</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 me-3">
+                                            <i class="fas fa-city text-secondary"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>City</strong>
+                                            <p class="mb-0 mt-1">@Model.City</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 me-3">
+                                            <i class="fas fa-flag text-secondary"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Province</strong>
+                                            <p class="mb-0 mt-1">@Model.Province</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 me-3">
+                                            <i class="fas fa-mail-bulk text-secondary"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Postal Code</strong>
+                                            <p class="mb-0 mt-1">@Model.PostalCode</p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Associated Members Section -->
+                <div class="col-lg-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h3 class="h5 mb-0"><i class="fas fa-building text-primary me-2"></i>Associated Members</h3>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.MemberAddresses != null && Model.MemberAddresses.Any())
+                            {
+                                <div class="list-group list-group-flush">
+                                    @foreach (var memberAddress in Model.MemberAddresses.Where(ma => ma.Member != null))
+                                    {
+                                        <a href="/Member/Details/@memberAddress.MemberID" class="list-group-item list-group-item-action px-0 border-0 border-bottom">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">@memberAddress.Member.MemberName</h6>
+                                                    <small class="text-muted">@memberAddress.AddressType</small>
+                                                </div>
+                                                <span class="badge bg-primary rounded-pill">
+                                                    <i class="fas fa-chevron-right"></i>
+                                                </span>
+                                            </div>
+                                        </a>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted mb-0">No associated members found.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Municipality (City Name) -->
-            <div class="member-detail">
-                <i class="fas fa-city"></i>
-                <span>
-                    <strong>Municipality:</strong>
-                    @Model.City
-                </span>
+            <div class="d-flex gap-2 mt-4">
+                <a asp-action="Edit" asp-route-id="@Model.ID" class="btn btn-primary">
+                    <i class="fas fa-edit me-1"></i> Edit Address
+                </a>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Addresses
+                </a>
             </div>
-
-           
-        </div>
-        <div class="member-card-footer">
-            <a asp-action="Edit" asp-route-id="@Model?.ID" class="button-1">
-                <i class="fas fa-edit"></i> Edit
-            </a>
-            <a asp-action="Index" class="button-2">
-                <i class="fas fa-arrow-left"></i> Back to Municipalities
-            </a>
         </div>
     </div>
 </div>

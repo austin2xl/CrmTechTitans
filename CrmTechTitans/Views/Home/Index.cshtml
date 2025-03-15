@@ -1,261 +1,927 @@
 ﻿@model CrmTechTitans.ViewModels.DashboardVM
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
-
-    <!-- Ensures the chart container takes the full width and has a set height -->
+    <!-- Custom dashboard styles -->
     <style>
+        :root {
+            /* Modern color palette */
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --primary-dark: #1e3a8a;
+            --secondary: #334155;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light: #f8fafc;
+            --dark: #0f172a;
+            /* Neutral colors */
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            /* Border radius */
+            --radius-sm: 0.25rem;
+            --radius: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+        }
+
+        body {
+            background-color: var(--gray-100);
+            color: var(--gray-800);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        .dashboard-container {
+            padding: 1.5rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1.75rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-left: 4px solid var(--primary);
+        }
+
+        .dashboard-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .company-logo {
+            height: 3rem;
+            width: auto;
+        }
+
+        .dashboard-title h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            letter-spacing: -0.025em;
+        }
+
+        .btn {
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+        }
+
+        .btn-outline-secondary {
+            color: var(--gray-700);
+            border-color: var(--gray-300);
+            background-color: white;
+        }
+
+            .btn-outline-secondary:hover {
+                background-color: var(--gray-100);
+                border-color: var(--gray-400);
+                color: var(--gray-800);
+            }
+
+        .dropdown-menu {
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+            padding: 0.5rem;
+        }
+
+        .dropdown-item {
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            color: var(--gray-700);
+        }
+
+            .dropdown-item:hover {
+                background-color: var(--gray-100);
+                color: var(--primary);
+            }
+
+        .dropdown-divider {
+            margin: 0.5rem 0;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        /* Navigation Cards */
+        .nav-card {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            text-decoration: none;
+            color: var(--gray-800);
+            border: 1px solid var(--gray-200);
+            position: relative;
+            overflow: hidden;
+        }
+
+            .nav-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 4px;
+                background-color: var(--primary-light);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .nav-card:hover {
+                transform: translateY(-0.25rem);
+                box-shadow: var(--shadow-lg);
+                color: var(--gray-800);
+                border-color: var(--gray-300);
+            }
+
+                .nav-card:hover::before {
+                    opacity: 1;
+                }
+
+        .nav-icon {
+            background-color: var(--primary-light);
+            color: white;
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.1);
+        }
+
+        .nav-card:hover .nav-icon {
+            background-color: var(--primary);
+            transform: scale(1.05);
+            box-shadow: 0 0 0 10px rgba(59, 130, 246, 0.15);
+        }
+
+        .nav-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--gray-800);
+        }
+
+        .nav-card p {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* Metric Cards */
+        .metric-card {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1.75rem;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+
+            .metric-card:hover {
+                box-shadow: var(--shadow-md);
+                transform: translateY(-2px);
+            }
+
+        .metric-icon {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .metric-icon::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(45deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%);
+            }
+
+        .metric-info {
+            flex-grow: 1;
+        }
+
+            .metric-info h3 {
+                font-size: 0.875rem;
+                font-weight: 600;
+                color: var(--gray-500);
+                margin: 0 0 0.5rem 0;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            .metric-info span {
+                font-size: 2rem;
+                font-weight: 700;
+                color: var(--gray-800);
+                display: block;
+                line-height: 1.2;
+            }
+
+        .accent-blue .metric-icon {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+        }
+
+        .accent-green .metric-icon {
+            background: linear-gradient(135deg, #34d399 0%, var(--success) 100%);
+        }
+
+        .accent-yellow .metric-icon {
+            background: linear-gradient(135deg, #fbbf24 0%, var(--warning) 100%);
+        }
+
+        .accent-red .metric-icon {
+            background: linear-gradient(135deg, #f87171 0%, var(--danger) 100%);
+        }
+
+        /* Chart Containers */
         .chart-container {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            height: 280px;
+            overflow: hidden;
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+
+            .chart-container:hover {
+                box-shadow: var(--shadow-md);
+            }
+
+            .chart-container h3 {
+                font-size: 1.125rem;
+                font-weight: 600;
+                color: var(--gray-800);
+                margin: 0 0 1rem 0;
+                padding-bottom: 0.75rem;
+                border-bottom: 1px solid var(--gray-200);
+            }
+
+        .chart-canvas {
             width: 100%;
-            height: 400px; /* Adjust as needed */
-            position: relative; /* Required for Chart.js responsiveness */
-            margin-top: 1rem; /* Optional spacing */
+            height: 200px !important;
+            max-height: 200px !important;
         }
     </style>
-}
-
-@section Scripts {
-    <!-- Include Chart.js, date-fns, and the date adapter -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0"></script>
-
-    <!-- Your custom JS file that will actually build the chart -->
-    <script src="~/js/dashboard.js" asp-append-version="true"></script>
 }
 
 @{
     ViewData["Title"] = "Dashboard Overview";
 }
 
-<div class="main-content">
-    <header class="page-header d-flex align-items-center">
-        <img src="~/images/Logo.png" alt="Company Logo" class="company-logo">
-        <h1>Member Management Dashboard</h1>
-    </header>
-
-    <div class="links-grid">
-        <!-- Link to Members -->
-        <a href="/Member/Index" class="link-card">
-            <div class="link-icon">
-                <i class="fas fa-users"></i>
-            </div>
-            <div class="link-info">
-                <h3>Members</h3>
-                <p>View and manage all members</p>
-            </div>
-        </a>
-
-        <!-- Link to Municipalities -->
-        <a href="/Address/Index" class="link-card">
-            <div class="link-icon">
-                <i class="fas fa-id-card"></i>
-            </div>
-            <div class="link-info">
-                <h3>Municipalities</h3>
-                <p>View and manage Members By Municipalities</p>
-            </div>
-        </a>
-
-        <!-- Link to Opportunities -->
-        <a href="/Opportunity/Index" class="link-card">
-            <div class="link-icon">
-                <i class="fas fa-handshake"></i>
-            </div>
-            <div class="link-info">
-                <h3>Opportunities</h3>
-                <p>View and manage opportunities</p>
-            </div>
-        </a>
-
-        <!-- Link to Reports -->
-        <a href="/Home/Privacy" class="link-card">
-            <div class="link-icon">
-                <i class="fas fa-chart-line"></i>
-            </div>
-            <div class="link-info">
-                <h3>Reports</h3>
-                <p>View and generate reports</p>
-            </div>
-        </a>
-    </div>
-
-    <!-- If you really need two .main-content divs, keep both; if not, remove one. -->
-    <div class="main-content">
-        <header class="page-header">
-            <h1>Member Admin Center</h1>
-            <div class="dashboard-tabs" id="dashboardTabs">
-                <button class="tab-btn active" data-tab="overview">Overview</button>
-                <button class="tab-btn" data-tab="membership">Membership Types</button>
-                <button class="tab-btn" data-tab="opportunities">Opportunities</button>
-            </div>
-        </header>
-
-        <section class="tab-content active" id="overview">
-            <div class="metrics-grid">
-                <!-- Total Members Card -->
-                <div class="metric-card accent-blue">
-                    <div class="metric-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Total Members</h3>
-                        <span>@(Model.MemberCountSummary?.TotalMembers ?? 0)</span>
-                    </div>
-                </div>
-
-                <!-- GoodStanding Members Card -->
-                <div class="metric-card accent-green">
-                    <div class="metric-icon">
-                        <i class="fas fa-user-check"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>GoodStanding Members</h3>
-                        <span>@(Model.MemberCountSummary?.GoodStanding ?? 0)</span>
-                    </div>
-                </div>
-
-                <!-- Outstanding Members Card -->
-                <div class="metric-card accent-red">
-                    <div class="metric-icon">
-                        <i class="fas fa-user-times"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>OutStanding Members</h3>
-                        <span>@(Model.MemberCountSummary?.OutStanding ?? 0)</span>
-                    </div>
-                </div>
-
-                <!-- Cancelled Members Card -->
-                <div class="metric-card accent-red">
-                    <div class="metric-icon">
-                        <i class="fas fa-user-times"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Cancelled Members</h3>
-                        <span>@(Model.MemberCountSummary?.Cancelled ?? 0)</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- The Chart Container -->
-            <div class="chart-container">
-                <canvas id="membersPerMonthChart"></canvas>
-            </div>
-        </section>
-
-        <section class="tab-content" id="membership">
-            <div class="metrics-grid">
-                <!-- Membership Type Cards -->
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-user-tie"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Associate</h3>
-                        <span>@Model.MembershipTypeSummary.AssociateCount</span>
-                    </div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-building"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Chamber Associate</h3>
-                        <span>@Model.MembershipTypeSummary.ChamberAssociateCount</span>
-                    </div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-industry"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Non-Local Industrial</h3>
-                        <span>@Model.MembershipTypeSummary.NonLocalIndustrialCount</span>
-                    </div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-landmark"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Government Association</h3>
-                        <span>@Model.MembershipTypeSummary.GovernmentAssociationCount</span>
-                    </div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-map-marker-alt"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Local</h3>
-                        <span>@Model.MembershipTypeSummary.LocalCount</span>
-                    </div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-ellipsis-h"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Others</h3>
-                        <span>@Model.MembershipTypeSummary.OtherCount</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="tab-content" id="opportunities">
-            <div class="metrics-grid">
-                <!-- Opportunity Status Cards -->
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-clipboard-check"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Qualification</h3>
-                        <span>@Model.OpportunityCountSummary.QualificationCount</span>
-                    </div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-handshake"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Negotiating</h3>
-                        <span>@Model.OpportunityCountSummary.NegotiationCount</span>
-                    </div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-user-plus"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Closed - New Members</h3>
-                        <span>@Model.OpportunityCountSummary.ClosedNewMembersCount</span>
-                    </div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-icon">
-                        <i class="fas fa-user-slash"></i>
-                    </div>
-                    <div class="metric-info">
-                        <h3>Closed - Not Interested</h3>
-                        <span>@Model.OpportunityCountSummary.ClosedNotInterestedCount</span>
-                    </div>
-                </div>
-            </div>
-        </section>
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="dashboard-title">
+            <h1>Member Management Dashboard</h1>
+        </div>
+        <div class="d-flex align-items-center">
+        </div>
     </div>
 </div>
 
-<!-- Pass the data to JavaScript with ISO date strings -->
+<!-- Navigation Cards -->
+<div class="row g-4 mb-4">
+    <!-- Link to Members -->
+    <div class="col-md-6 col-lg-3">
+        <a href="/Member/Index" class="nav-card">
+            <div class="nav-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3>Members</h3>
+            <p>View and manage all members in the system</p>
+        </a>
+    </div>
+
+    <!-- Link to Municipalities -->
+    <div class="col-md-6 col-lg-3">
+        <a href="/Address/Index" class="nav-card">
+            <div class="nav-icon">
+                <i class="fas fa-id-card"></i>
+            </div>
+            <h3>Municipalities</h3>
+            <p>View and filter members by municipalities</p>
+        </a>
+    </div>
+
+    <!-- Link to Opportunities -->
+    <div class="col-md-6 col-lg-3">
+        <a href="/Opportunity/Index" class="nav-card">
+            <div class="nav-icon">
+                <i class="fas fa-handshake"></i>
+            </div>
+            <h3>Opportunities</h3>
+            <p>Manage and track business opportunities</p>
+        </a>
+    </div>
+
+    <!-- Link to Reports - UPDATED to link to Member/Index -->
+    <div class="col-md-6 col-lg-3">
+        <a href="/Member/Index" class="nav-card" id="reportsCard">
+            <div class="nav-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h3>Reports</h3>
+            <p>Generate and view detailed reports</p>
+        </a>
+    </div>
+</div>
+
+<!-- Metrics Cards -->
+<div class="row g-4 mb-4">
+    <!-- Total Members Card -->
+    <div class="col-md-6 col-lg-3">
+        <div class="metric-card accent-blue">
+            <div class="metric-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="metric-info">
+                <h3>Total Members</h3>
+                <span data-member-count="total">@(Model.MemberCountSummary?.TotalMembers ?? 0)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- GoodStanding Members Card -->
+    <div class="col-md-6 col-lg-3">
+        <div class="metric-card accent-green">
+            <div class="metric-icon">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="metric-info">
+                <h3>Good Standing</h3>
+                <span data-member-count="goodStanding">@(Model.MemberCountSummary?.GoodStanding ?? 0)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Outstanding Members Card -->
+    <div class="col-md-6 col-lg-3">
+        <div class="metric-card accent-yellow">
+            <div class="metric-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="metric-info">
+                <h3>Outstanding</h3>
+                <span data-member-count="outstanding">@(Model.MemberCountSummary?.OutStanding ?? 0)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancelled Members Card -->
+    <div class="col-md-6 col-lg-3">
+        <div class="metric-card accent-red">
+            <div class="metric-icon">
+                <i class="fas fa-user-times"></i>
+            </div>
+            <div class="metric-info">
+                <h3>Cancelled</h3>
+                <span data-member-count="cancelled">@(Model.MemberCountSummary?.Cancelled ?? 0)</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Dashboard Charts -->
+<div class="row g-4">
+    <!-- Member Growth Chart -->
+    <div class="col-md-12 col-lg-4">
+        <div class="chart-container">
+            <h3>Member Growth</h3>
+            <canvas id="memberGrowthChart" class="chart-canvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Membership Distribution Chart -->
+    <div class="col-md-12 col-lg-4">
+        <div class="chart-container">
+            <h3>Membership Distribution</h3>
+            <canvas id="membershipDistributionChart" class="chart-canvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Opportunity Status Chart -->
+    <div class="col-md-12 col-lg-4">
+        <div class="chart-container">
+            <h3>Opportunity Status</h3>
+            <canvas id="opportunityStatusChart" class="chart-canvas"></canvas>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0"></script>
+
+<!-- Pass data to JavaScript -->
 <script>
-    window.memberCountOverTime = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-        Model.MemberCountOverTime.Select(m => new
-        {
-            Date = m.Date.ToString("yyyy-MM-dd"),
-            m.Count
+    // Set a flag in localStorage when the Reports card is clicked
+    document.getElementById('reportsCard').addEventListener('click', function() {
+        localStorage.setItem('openExcelExport', 'true');
+    });
+
+    // Pass the data from the model to JavaScript
+    @if (Model.MemberCountOverTime != null && Model.MemberCountOverTime.Any())
+    {
+        <text>
+                window.memberCountOverTime = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            Model.MemberCountOverTime.Select(m => new
+            {
+                Date = m.Date.ToString("yyyy-MM-dd"),
+                m.Count
+            }).ToList()
+        ));
+        </text>
+    }
+    else
+    {
+        <text>
+                window.memberCountOverTime = [];
+        </text>
+    }
+
+    // Pass all membership types to JavaScript
+    @if (Model.MembershipTypeSummary?.AllMembershipTypes != null && Model.MembershipTypeSummary.AllMembershipTypes.Any())
+    {
+        <text>
+                window.allMembershipTypes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MembershipTypeSummary.AllMembershipTypes));
+        </text>
+    }
+    else
+    {
+        <text>
+                window.allMembershipTypes = {};
+        </text>
+    }
+
+    window.membershipTypeSummary = {
+        associateCount: @(Model.MembershipTypeSummary?.AssociateCount ?? 0),
+        chamberAssociateCount: @(Model.MembershipTypeSummary?.ChamberAssociateCount ?? 0),
+        nonLocalIndustrialCount: @(Model.MembershipTypeSummary?.NonLocalIndustrialCount ?? 0),
+        governmentAssociationCount: @(Model.MembershipTypeSummary?.GovernmentAssociationCount ?? 0),
+        localCount: @(Model.MembershipTypeSummary?.LocalCount ?? 0),
+        otherCount: @(Model.MembershipTypeSummary?.OtherCount ?? 0)
+    };
+
+    window.opportunityCountSummary = {
+        qualificationCount: @(Model.OpportunityCountSummary?.QualificationCount ?? 0),
+        negotiationCount: @(Model.OpportunityCountSummary?.NegotiationCount ?? 0),
+        closedNewMembersCount: @(Model.OpportunityCountSummary?.ClosedNewMembersCount ?? 0),
+        closedNotInterestedCount: @(Model.OpportunityCountSummary?.ClosedNotInterestedCount ?? 0)
+    };
+
+    window.memberCounts = {
+        total: @(Model.MemberCountSummary?.TotalMembers ?? 0),
+        goodStanding: @(Model.MemberCountSummary?.GoodStanding ?? 0),
+        outstanding: @(Model.MemberCountSummary?.OutStanding ?? 0),
+        cancelled: @(Model.MemberCountSummary?.Cancelled ?? 0)
+    };
+
+    console.log("Dashboard data loaded:", {
+        memberCountOverTime: window.memberCountOverTime,
+        allMembershipTypes: window.allMembershipTypes,
+        membershipTypeSummary: window.membershipTypeSummary,
+        opportunityCountSummary: window.opportunityCountSummary,
+        memberCounts: window.memberCounts
+    });
+
+    // Wait for the DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Update the member count cards with real data
+        document.querySelectorAll('[data-member-count]').forEach(element => {
+            const type = element.getAttribute('data-member-count');
+            if (window.memberCounts && window.memberCounts[type] !== undefined) {
+                element.textContent = window.memberCounts[type];
+            }
+        });
+
+        // Initialize Bootstrap tabs
+        var triggerTabList = [].slice.call(document.querySelectorAll('#dashboardTabs button'))
+        triggerTabList.forEach(function (triggerEl) {
+            var tabTrigger = new bootstrap.Tab(triggerEl)
+            triggerEl.addEventListener('click', function (event) {
+                event.preventDefault()
+                tabTrigger.show()
+            })
         })
-    ));
-    console.log("Member Count Over Time Data:", window.memberCountOverTime);
+
+        // Initialize Member Growth Chart
+        if (window.memberCountOverTime && window.memberCountOverTime.length > 0) {
+            console.log("Member data available:", window.memberCountOverTime);
+
+            // Format the data for Chart.js
+            const memberLabels = window.memberCountOverTime.map(item => item.Date);
+            const memberData = window.memberCountOverTime.map(item => item.Count);
+
+            // Member Growth Chart
+            const memberGrowthCtx = document.getElementById('memberGrowthChart')?.getContext('2d');
+            if (memberGrowthCtx) {
+                const memberGrowthChart = new Chart(memberGrowthCtx, {
+                    type: 'line',
+                    data: {
+                        labels: memberLabels,
+                        datasets: [{
+                            label: 'Member Count',
+                            data: memberData,
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'month',
+                                    tooltipFormat: 'MMM yyyy',
+                                    displayFormats: {
+                                        month: 'MMM yyyy'
+                                    }
+                                },
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    },
+                                    precision: 0
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                                padding: 12,
+                                titleFont: {
+                                    size: 13,
+                                    weight: 'bold'
+                                },
+                                bodyFont: {
+                                    size: 12
+                                },
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Members: ${context.parsed.y}`;
+                                    }
+                                }
+                            },
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            } else {
+                console.warn("Canvas element 'memberGrowthChart' not found");
+            }
+        } else {
+            console.warn("No member data available for charts");
+        }
+
+        // Initialize Membership Distribution Chart
+        const membershipDistributionCtx = document.getElementById('membershipDistributionChart')?.getContext('2d');
+        if (membershipDistributionCtx) {
+            // Use the allMembershipTypes dictionary if available
+            const labels = [];
+            const data = [];
+            const backgroundColors = [
+                'rgba(59, 130, 246, 0.8)',   // Blue
+                'rgba(139, 92, 246, 0.8)',   // Purple
+                'rgba(16, 185, 129, 0.8)',   // Green
+                'rgba(245, 158, 11, 0.8)',   // Orange
+                'rgba(239, 68, 68, 0.8)',    // Red
+                'rgba(14, 165, 233, 0.8)',   // Sky Blue
+                'rgba(236, 72, 153, 0.8)',   // Pink
+                'rgba(168, 85, 247, 0.8)',   // Violet
+                'rgba(234, 179, 8, 0.8)',    // Yellow
+                'rgba(100, 116, 139, 0.8)'   // Slate
+            ];
+            const borderColors = [
+                'rgba(59, 130, 246, 1)',     // Blue
+                'rgba(139, 92, 246, 1)',     // Purple
+                'rgba(16, 185, 129, 1)',     // Green
+                'rgba(245, 158, 11, 1)',     // Orange
+                'rgba(239, 68, 68, 1)',      // Red
+                'rgba(14, 165, 233, 1)',     // Sky Blue
+                'rgba(236, 72, 153, 1)',     // Pink
+                'rgba(168, 85, 247, 1)',     // Violet
+                'rgba(234, 179, 8, 1)',      // Yellow
+                'rgba(100, 116, 139, 1)'     // Slate
+            ];
+
+            const bgColors = [];
+            const bdrColors = [];
+
+            if (window.allMembershipTypes && Object.keys(window.allMembershipTypes).length > 0) {
+                // Use all membership types from the dictionary
+                let colorIndex = 0;
+                for (const [typeName, count] of Object.entries(window.allMembershipTypes)) {
+                    if (count > 0) {
+                        labels.push(typeName);
+                        data.push(count);
+                        bgColors.push(backgroundColors[colorIndex % backgroundColors.length]);
+                        bdrColors.push(borderColors[colorIndex % borderColors.length]);
+                        colorIndex++;
+                    }
+                }
+            } else {
+                // Fallback to the old method
+                if (window.membershipTypeSummary.associateCount > 0) {
+                    labels.push('Associate');
+                    data.push(window.membershipTypeSummary.associateCount);
+                    bgColors.push(backgroundColors[0]);
+                    bdrColors.push(borderColors[0]);
+                }
+
+                if (window.membershipTypeSummary.chamberAssociateCount > 0) {
+                    labels.push('Chamber');
+                    data.push(window.membershipTypeSummary.chamberAssociateCount);
+                    bgColors.push(backgroundColors[1]);
+                    bdrColors.push(borderColors[1]);
+                }
+
+                if (window.membershipTypeSummary.nonLocalIndustrialCount > 0) {
+                    labels.push('Non-Local');
+                    data.push(window.membershipTypeSummary.nonLocalIndustrialCount);
+                    bgColors.push(backgroundColors[2]);
+                    bdrColors.push(borderColors[2]);
+                }
+
+                if (window.membershipTypeSummary.governmentAssociationCount > 0) {
+                    labels.push('Gov Assoc');
+                    data.push(window.membershipTypeSummary.governmentAssociationCount);
+                    bgColors.push(backgroundColors[3]);
+                    bdrColors.push(borderColors[3]);
+                }
+
+                if (window.membershipTypeSummary.localCount > 0) {
+                    labels.push('Local');
+                    data.push(window.membershipTypeSummary.localCount);
+                    bgColors.push(backgroundColors[4]);
+                    bdrColors.push(borderColors[4]);
+                }
+
+                if (window.membershipTypeSummary.otherCount > 0) {
+                    labels.push('Others');
+                    data.push(window.membershipTypeSummary.otherCount);
+                    bgColors.push(backgroundColors[5]);
+                    bdrColors.push(borderColors[5]);
+                }
+            }
+
+            // If no data, add a placeholder
+            if (data.length === 0) {
+                labels.push('No Data');
+                data.push(1);
+                bgColors.push('rgba(203, 213, 225, 0.5)');
+                bdrColors.push('rgba(203, 213, 225, 1)');
+            }
+
+            const membershipDistributionChart = new Chart(membershipDistributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: bgColors,
+                        borderColor: bdrColors,
+                        borderWidth: 1,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 15,
+                                boxWidth: 12,
+                                font: {
+                                    size: 11,
+                                    weight: '500'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                            padding: 12,
+                            titleFont: {
+                                size: 13,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 12
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.label === 'No Data') return 'No data available';
+
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            console.warn("Canvas element 'membershipDistributionChart' not found");
+        }
+
+        // Initialize Opportunity Status Chart
+        const opportunityStatusCtx = document.getElementById('opportunityStatusChart')?.getContext('2d');
+        if (opportunityStatusCtx) {
+            // Filter out zero values for better visualization
+            const labels = [];
+            const data = [];
+            const bgColors = [];
+            const borderColors = [];
+
+            if (window.opportunityCountSummary.qualificationCount > 0) {
+                labels.push('Qualification');
+                data.push(window.opportunityCountSummary.qualificationCount);
+                bgColors.push('rgba(59, 130, 246, 0.8)');
+                borderColors.push('rgba(59, 130, 246, 1)');
+            }
+
+            if (window.opportunityCountSummary.negotiationCount > 0) {
+                labels.push('Negotiating');
+                data.push(window.opportunityCountSummary.negotiationCount);
+                bgColors.push('rgba(245, 158, 11, 0.8)');
+                borderColors.push('rgba(245, 158, 11, 1)');
+            }
+
+            if (window.opportunityCountSummary.closedNewMembersCount > 0) {
+                labels.push('Closed - New');
+                data.push(window.opportunityCountSummary.closedNewMembersCount);
+                bgColors.push('rgba(16, 185, 129, 0.8)');
+                borderColors.push('rgba(16, 185, 129, 1)');
+            }
+
+            if (window.opportunityCountSummary.closedNotInterestedCount > 0) {
+                labels.push('Closed - Not Int.');
+                data.push(window.opportunityCountSummary.closedNotInterestedCount);
+                bgColors.push('rgba(239, 68, 68, 0.8)');
+                borderColors.push('rgba(239, 68, 68, 1)');
+            }
+
+            // If no data, add a placeholder
+            if (data.length === 0) {
+                labels.push('No Data');
+                data.push(1);
+                bgColors.push('rgba(203, 213, 225, 0.5)');
+                borderColors.push('rgba(203, 213, 225, 1)');
+            }
+
+            const opportunityStatusChart = new Chart(opportunityStatusCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Opportunities',
+                        data: data,
+                        backgroundColor: bgColors,
+                        borderColor: borderColors,
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        barPercentage: 0.7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                            padding: 12,
+                            titleFont: {
+                                size: 13,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 12
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.label === 'No Data') return 'No data available';
+                                    return `Count: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            console.warn("Canvas element 'opportunityStatusChart' not found");
+        }
+    });
 </script>

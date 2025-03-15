@@ -16,15 +16,6 @@
             <button id="exportExcelBtn" class="btn btn-success" data-bs-toggle="tooltip" title="Export members to Excel">
                 <i class="fas fa-file-excel"></i> Export to Excel
             </button>
-            @* Card view temp disabled *@
-            @* <div class="btn-group" role="group" aria-label="View toggle"> *@
-            @*     <button type="button" class="btn btn-outline-secondary active" data-view="cards" data-bs-toggle="tooltip" title="Switch to Card View"> *@
-            @*         <i class="fas fa-th-large"></i> *@
-            @*     </button> *@
-            @*     <button type="button" class="btn btn-outline-secondary" data-view="table" data-bs-toggle="tooltip" title="Switch to Table View"> *@
-            @*         <i class="fas fa-table"></i> *@
-            @*     </button> *@
-            @* </div> *@
         </div>
     </header>
 
@@ -34,6 +25,7 @@
                 <label for="memberNameFilter" class="form-label">Search by Member Name</label>
                 <input type="text" id="memberNameFilter" class="form-control" placeholder="Enter member name">
             </div>
+
             <div class="filter-item">
                 <label for="membershipStatusFilter" class="form-label">Filter by Member Status</label>
                 <select id="membershipStatusFilter" class="form-select">
@@ -46,79 +38,11 @@
         </div>
     </section>
 
-    <section class="members-grid" id="cards-view">
-        @foreach (var item in Model)
-        {
-            <div class="member-card" data-name="@item.MemberName.ToLower()" data-status="@item.MembershipStatus.ToString().ToLower()">
-                <div class="card-logo">
-                    @if (item.MemberThumbnail?.Content != null)
-                    {
-                        string imageBase64 = Convert.ToBase64String(item.MemberThumbnail.Content);
-                        string imageSrc = string.Format("data:{0};base64,{1}", item.MemberThumbnail.MimeType, imageBase64);
-                        <img src="@imageSrc" alt="@item.MemberName Logo" class="img-fluid rounded" />
-                    }
-                    else
-                    {
-                        <i class="fas fa-building"></i>
-                    }
-                </div>
-                <div class="card-content">
-                    <div class="card-header">
-                        <h2 class="company-name">@item.MemberName</h2>
-                        <span class="status-badge status-@item.MembershipStatus.ToString().ToLower()">
-                            @item.MembershipStatus
-                        </span>
-                    </div>
-                    <div class="card-details">
-                        <div class="detail-item">
-                            <i class="fas fa-users"></i>
-                            <span>@item.CompanySize</span>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span>Member since @item.MemberSince.ToString("MMM yyyy")</span>
-                        </div>
-                        @if (!string.IsNullOrEmpty(item.CompanyWebsite))
-                        {
-                            <div class="detail-item">
-                                <i class="fas fa-globe"></i>
-                                <a href="@item.CompanyWebsite" target="_blank">Website</a>
-                            </div>
-                        }
-                    </div>
-                    <div class="membership-types">
-                        <h3>Membership Types:</h3>
-                        <p>
-                            @if (item.MemberMembershipTypes != null && item.MemberMembershipTypes.Any())
-                            {
-                                @string.Join(", ", item.MemberMembershipTypes.Select(mmt => mmt.MembershipType.Name))
-                            }
-                            else
-                            {
-                                <span>No Membership Type Assigned</span>
-                            }
-                        </p>
-                    </div>
-                </div>
-                <div class="card-actions">
-                    <a href="javascript:void(0);"
-                       class="btn btn-outline-danger btn-sm archive-btn"
-                       data-id="@item.ID"
-                       data-status="@item.MembershipStatus.ToString()"
-                       data-bs-toggle="tooltip"
-                       title="@(item.MembershipStatus == MembershipStatus.Cancelled ? "Unarchive this member" : "Archive this member")">
-                        <!-- Dynamically change the icon based on the status -->
-                        <i class="fas fa-archive @(item.MembershipStatus == MembershipStatus.Cancelled ? "fa-undo" : "fa-archive")"></i>
-                    </a>
-                    <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-outline-primary btn-sm" data-bs-toggle="tooltip" title="View member details">
-                        <i class="fas fa-info-circle"></i>
-                    </a>
-                </div>
-            </div>
-        }
-    </section>
-
-    <section class="table-responsive" id="table-view" style="display: none;">
+    <section class="table-responsive">
+        <div class="alert alert-info d-flex align-items-center py-2" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            Click on column headers to sort the table.
+        </div>
         <table class="table custom-table" id="membersTable">
             <thead>
                 <tr>
@@ -162,6 +86,7 @@
                         <td>@item.MemberSince.ToShortDateString()</td>
                         <td><span class="status-badge status-@item.MembershipStatus.ToString().ToLower()">@item.MembershipStatus</span></td>
                         <td class="text-center">
+                            <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="View member edit page">Edit</a>
                             <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="View member details">Details</a>
                             <a href="javascript:void(0);"
                                class="btn btn-sm archive-btn @(item.MembershipStatus == MembershipStatus.Cancelled ? "btn-success" : "btn-danger")"
@@ -191,10 +116,10 @@
             </select>
         </div>
         <!-- Pagination Controls -->
-        <div id="paginationControls" class="col-md-8 d-flex justify-content-end align-items-center">
-            <button id="prevPage" class="btn btn-primary me-2">Previous</button>
-            <span id="pageInfo"></span>
-            <button id="nextPage" class="btn btn-primary ms-2">Next</button>
+        <div id="paginationControls" class="col-md-8 d-flex justify-content-end align-items-center gap-3">
+            <button id="prevPage" class="btn btn-primary pagination-btn">Previous</button>
+            <span id="pageInfo" class="pagination-info">Page 1 of 4 (16 records)</span>
+            <button id="nextPage" class="btn btn-primary pagination-btn">Next</button>
         </div>
     </div>
 </div>
@@ -278,9 +203,214 @@
 
 @section Scripts {
     <script src="~/js/excel.js"></script>
-    <script src="~/js/member.js"></script>
-    <style>
+    <script>
+        $(document).ready(function () {
+            var currentPage = 1;
+            var recordsPerPage = parseInt($('#recordsPerPage').val());
 
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Set default filter to "Good Standing"
+            $('#membershipStatusFilter').val("GoodStanding");
+
+            // Function to get visible rows (rows not hidden by filter)
+            function getVisibleRows() {
+                var nameFilter = $('#memberNameFilter').val().toLowerCase();
+                var statusFilter = $('#membershipStatusFilter').val().toLowerCase();
+
+                var visibleRows = $('#membersTable tbody tr').filter(function () {
+                    var name = $(this).data('name') || '';
+                    var status = $(this).data('status') || '';
+
+                    var nameMatch = nameFilter === "" || name.includes(nameFilter);
+                    var statusMatch = statusFilter === "" || status === statusFilter;
+
+                    return nameMatch && statusMatch;
+                });
+
+                return visibleRows;
+            }
+
+            // Function to show the current page
+            function showPage(page) {
+                var visibleRows = getVisibleRows();
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
+
+                // Ensure currentPage is within valid range
+                if (page < 1) page = 1;
+                if (page > totalPages) page = totalPages;
+
+                var startIndex = (page - 1) * recordsPerPage;
+                var endIndex = startIndex + recordsPerPage;
+
+                // Hide all rows first
+                $('#membersTable tbody tr').hide();
+
+                // Show only the rows for the current page
+                visibleRows.slice(startIndex, endIndex).show();
+
+                // Update page info
+                $('#pageInfo').text(`Page ${page} of ${totalPages} (${visibleRows.length} records)`);
+
+                // Enable/disable pagination buttons
+                $('#prevPage').prop('disabled', page === 1);
+                $('#nextPage').prop('disabled', page === totalPages || visibleRows.length === 0);
+            }
+
+            // Function to update pagination
+            function updatePagination() {
+                var visibleRows = getVisibleRows();
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
+
+                if (currentPage > totalPages) {
+                    currentPage = totalPages > 0 ? totalPages : 1;
+                }
+
+                showPage(currentPage);
+            }
+
+            // Event listener for records per page dropdown
+            $('#recordsPerPage').on('change', function () {
+                recordsPerPage = parseInt($(this).val());
+                currentPage = 1; // Reset to the first page
+                updatePagination();
+            });
+
+            // Event listener for previous page button
+            $('#prevPage').on('click', function () {
+                if (currentPage > 1) {
+                    currentPage--;
+                    showPage(currentPage);
+                }
+            });
+
+            // Event listener for next page button
+            $('#nextPage').on('click', function () {
+                var visibleRows = getVisibleRows();
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
+
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    showPage(currentPage);
+                }
+            });
+
+            // Filter function
+            function filterTable() {
+                currentPage = 1; // Reset to the first page
+                updatePagination();
+            }
+
+            // Attach filter function to input events
+            $('#memberNameFilter, #membershipStatusFilter').on('input change', filterTable);
+
+            // Handle archive/unarchive functionality
+            $('.archive-btn').on('click', function () {
+                const memberId = $(this).data('id');
+                const currentStatus = $(this).data('status').toLowerCase();
+                const newStatus = (currentStatus === 'cancelled') ? 'GoodStanding' : 'Cancelled';
+                const confirmMessage = (currentStatus === 'cancelled')
+                    ? "Are you sure you want to unarchive this member?"
+                    : "Are you sure you want to archive this member?";
+
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+
+                $.ajax({
+                    url: '/Member/ToggleArchive',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        memberId: parseInt(memberId),
+                        newStatus: newStatus
+                    }),
+                    success: function (data) {
+                        alert(data.message);
+                        location.reload();
+                    },
+                    error: function (error) {
+                        console.error("Error:", error);
+                        alert("Failed to update member status.");
+                    }
+                });
+            });
+
+            // Initial page load
+            updatePagination();
+
+            // Sort the table by name initially
+            sortTable(1, "asc");
+        });
+
+        // Sorting function
+        function sortTable(columnIndex, initialDirection = "asc") {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("membersTable");
+            switching = true;
+            dir = initialDirection; // Default sorting direction
+
+            // Determine the current sorting direction
+            if (table.rows[0].getElementsByTagName("th")[columnIndex].classList.contains("sorted-asc")) {
+                dir = "desc";
+            } else if (table.rows[0].getElementsByTagName("th")[columnIndex].classList.contains("sorted-desc")) {
+                dir = "asc";
+            }
+
+            // Remove sorting classes from all headers
+            for (i = 0; i < table.rows[0].getElementsByTagName("th").length; i++) {
+                table.rows[0].getElementsByTagName("th")[i].classList.remove("sorted-asc", "sorted-desc");
+            }
+
+            // Add sorting class to the clicked header
+            table.rows[0].getElementsByTagName("th")[columnIndex].classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
+
+            // Perform sorting
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("td")[columnIndex];
+                    y = rows[i + 1].getElementsByTagName("td")[columnIndex];
+
+                    if (dir === "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir === "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount === 0 && dir === "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+
+            // Update pagination after sorting
+            $(document).ready(function() {
+                updatePagination();
+            });
+        }
+    </script>
+    <style>
         th {
             cursor: pointer;
         }
@@ -306,6 +436,33 @@
         #pageInfo {
             margin: 0 10px;
             line-height: 2;
+        }
+
+        /* Pagination button styling */
+        .pagination-btn {
+            min-width: 100px;
+            width: 100px;
+            height: 38px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.375rem 0.75rem;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: #6c757d;
+            padding: 0 10px;
+        }
+
+        /* Custom alert styling to match the design */
+        .alert-info {
+            background-color: #e8f4ff;
+            border: none;
+            color: #2c5282;
+            font-size: 14px;
+            border-radius: 4px;
         }
     </style>
 }

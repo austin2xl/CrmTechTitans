@@ -8,7 +8,6 @@ namespace CrmTechTitans.Models.ViewModels
 {
     public class MemberCreateViewModel
     {
-        // Member Properties
         public int ID { get; set; }
 
         [Display(Name = "Member Name")]
@@ -18,12 +17,11 @@ namespace CrmTechTitans.Models.ViewModels
 
         [Display(Name = "Membership Type")]
         [Required(ErrorMessage = "Membership Type is required")]
-        public List<int> SelectedMembershipTypeIDs { get; set; } = new List<int>();// Stores the selected MembershipType ID
-
-		public List<MembershipTypeViewModel> AvailableMembershipTypes { get; set; } = new List<MembershipTypeViewModel>(); // List for dropdown
-
+        public List<int> SelectedMembershipTypeIDs { get; set; } = new List<int>();
+        public List<MembershipTypeViewModel> AvailableMembershipTypes { get; set; } = new List<MembershipTypeViewModel>();
 
         [Display(Name = "Contacted By")]
+        [Required(ErrorMessage = "Contacted By is required")]
         [StringLength(100, ErrorMessage = "Contacted By cannot exceed 100 characters")]
         public string ContactedBy { get; set; }
 
@@ -33,11 +31,13 @@ namespace CrmTechTitans.Models.ViewModels
 
         [Display(Name = "Company Website")]
         [Url(ErrorMessage = "Invalid URL format")]
+        [Required(ErrorMessage = "Company Website is required")]
         [StringLength(255, ErrorMessage = "Website cannot exceed 255 characters")]
         public string CompanyWebsite { get; set; }
 
         [Display(Name = "Member Since")]
         [DataType(DataType.Date)]
+        [Required(ErrorMessage = "Member Since is required")]
         public DateTime MemberSince { get; set; } = DateTime.UtcNow;
 
         [Display(Name = "Last Contact Date")]
@@ -45,6 +45,7 @@ namespace CrmTechTitans.Models.ViewModels
         public DateTime? LastContactDate { get; set; }
 
         [Display(Name = "Notes")]
+        [Required(ErrorMessage = "Notes are required")]
         [StringLength(500, ErrorMessage = "Notes cannot exceed 500 characters")]
         public string Notes { get; set; }
 
@@ -53,25 +54,20 @@ namespace CrmTechTitans.Models.ViewModels
         public MembershipStatus MembershipStatus { get; set; }
 
         public MemberPhoto? MemberPhoto { get; set; }
-
         public MemberThumbnail? MemberThumbnail { get; set; }
 
-        // Address Properties
         public List<AddressViewModel> Addresses { get; set; } = new List<AddressViewModel>();
-
-        // Contacts Properties
         public List<ContactViewModel> Contacts { get; set; } = new List<ContactViewModel>();
 
-        // Industries Properties
         [Display(Name = "Industries")]
+        [Required(ErrorMessage = "At least one industry is required")]
         public List<int> SelectedIndustryIds { get; set; } = new List<int>();
-
-        public List<IndustryViewModel> AvailableIndustries { get; set; } = new List<IndustryViewModel>(); // ✅ FIXED
+        public List<IndustryViewModel> AvailableIndustries { get; set; } = new List<IndustryViewModel>();
     }
 
     public class AddressViewModel
     {
-        public int ID { get; set; } // ✅ Added for tracking edits
+        public int ID { get; set; }
 
         [Display(Name = "Street")]
         [Required(ErrorMessage = "Street is required")]
@@ -88,6 +84,7 @@ namespace CrmTechTitans.Models.ViewModels
         public Province Province { get; set; }
 
         [Display(Name = "Postal Code")]
+        [Required(ErrorMessage = "Postal Code is required")]
         [StringLength(20, ErrorMessage = "Postal Code cannot exceed 20 characters")]
         [RegularExpression(@"^[A-Za-z]\d[A-Za-z][ ]?\d[A-Za-z]\d$", ErrorMessage = "Invalid postal code format (A#A #A#)")]
         public string PostalCode { get; set; }
@@ -99,7 +96,7 @@ namespace CrmTechTitans.Models.ViewModels
 
     public class ContactViewModel
     {
-        public int ID { get; set; } // ✅ Added for tracking edits
+        public int ID { get; set; }
 
         [Display(Name = "First Name")]
         [Required(ErrorMessage = "First Name is required")]
@@ -107,15 +104,18 @@ namespace CrmTechTitans.Models.ViewModels
         public string FirstName { get; set; }
 
         [Display(Name = "Last Name")]
+        [Required(ErrorMessage = "Last Name is required")]
         [StringLength(100, ErrorMessage = "Last Name cannot exceed 100 characters")]
         public string LastName { get; set; }
 
         [Display(Name = "Email")]
+        [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Invalid email format")]
         [StringLength(255, ErrorMessage = "Email cannot exceed 255 characters")]
         public string Email { get; set; }
 
         [Display(Name = "Phone")]
+        [Required(ErrorMessage = "Phone number is required")]
         [RegularExpression(@"^\d{10}$", ErrorMessage = "Phone number must be 10 digits")]
         public string Phone { get; set; }
 
@@ -124,13 +124,12 @@ namespace CrmTechTitans.Models.ViewModels
         public ContactType ContactType { get; set; }
 
         public ContactPhoto? ContactPhoto { get; set; }
-
         public ContactThumbnail? ContactThumbnail { get; set; }
     }
 
     public class IndustryViewModel
     {
-        public int ID { get; set; } // ✅ Added for binding in views
+        public int ID { get; set; }
 
         [Display(Name = "Industry")]
         [Required(ErrorMessage = "Industry is required")]
@@ -142,14 +141,11 @@ namespace CrmTechTitans.Models.ViewModels
         public int NAICS { get; set; }
     }
 
-  
-     public class MembershipTypeViewModel
-      {
-                public int ID { get; set; }
+    public class MembershipTypeViewModel
+    {
+        public int ID { get; set; }
 
-                [Display(Name = "Membership Type")]
-                public string Name { get; set; }
-      }
-    
-
+        [Display(Name = "Membership Type")]
+        public string Name { get; set; }
+    }
 }

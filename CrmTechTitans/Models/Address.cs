@@ -24,6 +24,10 @@ namespace CrmTechTitans.Models
         [RegularExpression(@"^[A-Za-z]\d[A-Za-z][ ]?\d[A-Za-z]\d$", ErrorMessage = "Invalid postal code format (should be in the format 'A#A #A#' )")]
         public string? PostalCode { get; set; }
 
+        // Address Type property
+        [Display(Name = "Address Type")]
+        public AddressType? AddressType { get; set; }
+
         // Computed property to display the full address
         public string Summary
         {

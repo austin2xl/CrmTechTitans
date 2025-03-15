@@ -4,6 +4,7 @@
 @{
     ViewData["Title"] = "Create Member";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var hasValidationErrors = ViewBag.HasValidationErrors ?? false;
 }
 
 <link rel="stylesheet" href="~/css/multi-step-form.css" />
@@ -36,7 +37,7 @@
         </div>
 
         <div class="card-body p-4">
-            <form asp-action="Create" method="post" id="multiStepForm" enctype="multipart/form-data">
+            <form asp-action="Create" method="post" id="multiStepForm" enctype="multipart/form-data" data-has-validation-errors="@hasValidationErrors.ToString().ToLower()">
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
                 <p class="text-muted small mb-4"><span class="text-danger">*</span> Indicates a required field.</p>
 
@@ -115,8 +116,11 @@
                     </div>
 
                     <div class="d-flex justify-content-end mt-4">
+                        <!-- Add this button to each step -->
+                        <button type="button" class="btn btn-warning auto-fill" data-step="1">
+                            <i class="fas fa-magic me-1"></i> Auto-Fill
+                        </button>
                         <button type="button" class="btn btn-primary next-step">Continue <i class="fas fa-arrow-right ms-1"></i></button>
-
                     </div>
                 </div>
 
@@ -154,6 +158,10 @@
 
                     <div class="d-flex justify-content-between mt-4">
                         <button type="button" class="btn btn-outline-secondary prev-step"><i class="fas fa-arrow-left me-1"></i> Back</button>
+                        <!-- Add this button to each step -->
+                        <button type="button" class="btn btn-warning auto-fill" data-step="2">
+                            <i class="fas fa-magic me-1"></i> Auto-Fill
+                        </button>
                         <button type="button" class="btn btn-primary next-step">Continue <i class="fas fa-arrow-right ms-1"></i></button>
                     </div>
                 </div>
@@ -231,6 +239,10 @@
 
                     <div class="d-flex justify-content-between mt-4">
                         <button type="button" class="btn btn-outline-secondary prev-step"><i class="fas fa-arrow-left me-1"></i> Back</button>
+                        <!-- Add this button to each step -->
+                        <button type="button" class="btn btn-warning auto-fill" data-step="3">
+                            <i class="fas fa-magic me-1"></i> Auto-Fill
+                        </button>
                         <button type="button" class="btn btn-primary next-step">Continue <i class="fas fa-arrow-right ms-1"></i></button>
                     </div>
                 </div>
@@ -340,6 +352,10 @@
 
                     <div class="d-flex justify-content-between mt-4">
                         <button type="button" class="btn btn-outline-secondary prev-step"><i class="fas fa-arrow-left me-1"></i> Back</button>
+                        <!-- Add this button to each step -->
+                        <button type="button" class="btn btn-warning auto-fill" data-step="4">
+                            <i class="fas fa-magic me-1"></i> Auto-Fill
+                        </button>
                         <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i> Submit</button>
                     </div>
                 </div>
@@ -351,6 +367,19 @@
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
     <script src="~/js/multi-step-form.js"></script>
+    <script>
+        // Add script to check for validation errors on page load
+        document.addEventListener("DOMContentLoaded", function() {
+            const form = document.getElementById("multiStepForm");
+            const hasErrors = form.getAttribute("data-has-validation-errors") === "true";
+            
+            if (hasErrors) {
+                // If there are validation errors, retrieve the last active step from session storage
+                const lastStep = parseInt(sessionStorage.getItem("currentFormStep") || "0");
+                // This will be handled by the multi-step-form.js script
+            }
+        });
+    </script>
 }
 @section Styles {
     <style>

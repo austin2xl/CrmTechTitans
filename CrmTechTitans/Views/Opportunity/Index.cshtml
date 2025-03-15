@@ -8,23 +8,23 @@
 
 <partial name="_Notification" />
 
-<div class="crm-container">
-    <div class="main-content">
-        <header class="page-header">
-            <h1>All Opportunities</h1>
-            <div class="d-flex align-items-center gap-3">
-                <a asp-action="Create" class="btn btn-danger" data-bs-toggle="tooltip" title="Add a new Opportunity to the system">
-                    <i class="fas fa-user-plus"></i> Create New Opportunity
-                </a>
-            </div>
-        </header>
+<div class="container-fluid">
+    <header class="page-header d-flex justify-content-between align-items-center mb-4">
+        <h1>All Opportunities</h1>
+        <div class="d-flex align-items-center gap-3">
+            <a asp-action="Create" class="btn btn-primary" data-bs-toggle="tooltip" title="Add a new Opportunity to the system">
+                <i class="fas fa-plus-circle"></i> Create New Opportunity
+            </a>
+        </div>
+    </header>
 
-        <!-- Filter Section -->
-        <div class="filter-container">
+    <!-- Filter Section -->
+    <section class="filter-container bg-light p-3 rounded mb-4">
+        <div class="filter-row d-flex align-items-end gap-3">
             <!-- Filter by Status -->
-            <div class="col-md-4">
-                <label for="statusFilter" class="filter-label">Filter by Status:</label>
-                <select id="statusFilter" class="form-control search-input">
+            <div class="filter-item">
+                <label for="statusFilter" class="form-label">Filter by Status</label>
+                <select id="statusFilter" class="form-select">
                     <option value="">All</option>
                     @foreach (var status in Enum.GetValues(typeof(Status)))
                     {
@@ -34,9 +34,9 @@
             </div>
 
             <!-- Filter by Priority -->
-            <div class="col-md-4">
-                <label for="priorityFilter" class="filter-label">Filter by Priority:</label>
-                <select id="priorityFilter" class="form-control search-input">
+            <div class="filter-item">
+                <label for="priorityFilter" class="form-label">Filter by Priority</label>
+                <select id="priorityFilter" class="form-select">
                     <option value="">All</option>
                     @foreach (var priority in Enum.GetValues(typeof(PriorityType)))
                     {
@@ -45,14 +45,22 @@
                 </select>
             </div>
         </div>
+    </section>
 
-        <!-- Opportunities Table -->
+    <!-- Opportunities Table -->
+    <section class="table-responsive">
+        <!-- Helper text for sorting -->
+        <div class="alert alert-info d-flex align-items-center py-2" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            Click on column headers to sort the table.
+        </div>
+
         <table class="table custom-table" id="opportunitiesTable">
             <thead>
                 <tr>
-                    <th onclick="sortTable(0)">Title</th>
-                    <th onclick="sortTable(1)">Status</th>
-                    <th onclick="sortTable(2)">Priority</th>
+                    <th onclick="sortTable(0)" class="sortable">Title <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(1)" class="sortable">Status <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(2)" class="sortable">Priority <i class="fas fa-sort"></i></th>
                     <th class="text-center">Actions</th>
                 </tr>
             </thead>
@@ -63,15 +71,18 @@
                         <td>@item.Title</td>
                         <td>@item.Status</td>
                         <td>@item.Priority</td>
-                        <td class="text-center action-buttons">
-                            <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-edit">Edit</a>
-                            <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-details">Details</a>
+                        <td class="text-center">
+                            <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Edit opportunity details">Edit</a>
+                            <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="View opportunity details">Details</a>
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
+    </section>
 
+    <!-- Pagination Controls -->
+    <div class="row mt-4">
         <!-- Records per page -->
         <div class="col-md-4">
             <label for="recordsPerPage">Records per page:</label>
@@ -82,37 +93,41 @@
                 <option value="20">20</option>
             </select>
         </div>
-
         <!-- Pagination Controls -->
-        <div id="paginationControls" class="pagination">
-            <button id="prevPage" class="btn btn-primary">Previous</button>
-            <span id="pageInfo"></span>
-            <button id="nextPage" class="btn btn-primary">Next</button>
+        <div id="paginationControls" class="col-md-8 d-flex justify-content-end align-items-center gap-3">
+            <button id="prevPage" class="btn btn-primary pagination-btn">Previous</button>
+            <span id="pageInfo" class="pagination-info">Page 1 of 1 (0 records)</span>
+            <button id="nextPage" class="btn btn-primary pagination-btn">Next</button>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-               $(document).ready(function () {
+        $(document).ready(function () {
             var currentPage = 1;
             var recordsPerPage = parseInt($('#recordsPerPage').val());
-            var totalRecords = $('#opportunitiesTable tbody tr').length;
-            var totalPages = Math.ceil(totalRecords / recordsPerPage);
+
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
 
             // Function to get visible rows (rows not hidden by filter)
             function getVisibleRows() {
-                var visibleRows = $('#opportunitiesTable tbody tr').filter(function () {
-                    return $(this).css('display') !== 'none';
-                });
-
-                // If no filters are applied, return all rows
                 var statusFilter = $('#statusFilter').val().toLowerCase();
                 var priorityFilter = $('#priorityFilter').val().toLowerCase();
 
-                if (statusFilter === "" && priorityFilter === "") {
-                    return $('#opportunitiesTable tbody tr');
-                }
+                var visibleRows = $('#opportunitiesTable tbody tr').filter(function () {
+                    var statusText = $(this).find('td:nth-child(2)').text().toLowerCase();
+                    var priorityText = $(this).find('td:nth-child(3)').text().toLowerCase();
+
+                    var statusMatch = statusFilter === "" || statusText === statusFilter;
+                    var priorityMatch = priorityFilter === "" || priorityText === priorityFilter;
+
+                    return statusMatch && priorityMatch;
+                });
 
                 return visibleRows;
             }
@@ -120,6 +135,12 @@
             // Function to show the current page
             function showPage(page) {
                 var visibleRows = getVisibleRows();
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
+
+                // Ensure currentPage is within valid range
+                if (page < 1) page = 1;
+                if (page > totalPages) page = totalPages;
+
                 var startIndex = (page - 1) * recordsPerPage;
                 var endIndex = startIndex + recordsPerPage;
 
@@ -130,18 +151,17 @@
                 visibleRows.slice(startIndex, endIndex).show();
 
                 // Update page info
-                $('#pageInfo').text(`Page ${page} of ${totalPages}`);
+                $('#pageInfo').text(`Page ${page} of ${totalPages} (${visibleRows.length} records)`);
 
                 // Enable/disable pagination buttons
                 $('#prevPage').prop('disabled', page === 1);
-                $('#nextPage').prop('disabled', page === totalPages);
+                $('#nextPage').prop('disabled', page === totalPages || visibleRows.length === 0);
             }
 
             // Function to update pagination
             function updatePagination() {
                 var visibleRows = getVisibleRows();
-                totalRecords = visibleRows.length;
-                totalPages = Math.ceil(totalRecords / recordsPerPage);
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
 
                 if (currentPage > totalPages) {
                     currentPage = totalPages > 0 ? totalPages : 1;
@@ -161,41 +181,24 @@
             $('#prevPage').on('click', function () {
                 if (currentPage > 1) {
                     currentPage--;
-                    console.log("Previous Page:", currentPage); // Debugging
                     showPage(currentPage);
                 }
             });
 
             // Event listener for next page button
             $('#nextPage').on('click', function () {
+                var visibleRows = getVisibleRows();
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
+
                 if (currentPage < totalPages) {
                     currentPage++;
-                    console.log("Next Page:", currentPage); // Debugging
                     showPage(currentPage);
                 }
             });
 
             // Filter function
             function filterTable() {
-                var statusFilter = $('#statusFilter').val().toLowerCase();
-                var priorityFilter = $('#priorityFilter').val().toLowerCase();
-
-                $('#opportunitiesTable tbody tr').each(function () {
-                    var rowStatus = $(this).find('td:nth-child(2)').text().toLowerCase();
-                    var rowPriority = $(this).find('td:nth-child(3)').text().toLowerCase();
-
-                    var statusMatch = statusFilter === "" || rowStatus === statusFilter;
-                    var priorityMatch = priorityFilter === "" || rowPriority === priorityFilter;
-
-                    if (statusMatch && priorityMatch) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
-                    }
-                });
-
-                // Reset pagination after filtering
-                currentPage = 1;
+                currentPage = 1; // Reset to the first page
                 updatePagination();
             }
 
@@ -204,8 +207,11 @@
 
             // Initial page load
             updatePagination();
+
+            // Initial sort on page load
+            sortTable(0, "asc");
         });
-         sortTable(0, "asc");
+
         // Sorting function
         function sortTable(columnIndex, initialDirection = "asc") {
             var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
@@ -227,6 +233,22 @@
 
             // Add sorting class to the clicked header
             table.rows[0].getElementsByTagName("th")[columnIndex].classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
+
+            // Update sort icon for all headers
+            for (i = 0; i < 3; i++) { // Only for sortable columns (0-2)
+                if (i !== columnIndex) {
+                    var iconElement = table.rows[0].getElementsByTagName("th")[i].querySelector(".fas");
+                    if (iconElement) {
+                        iconElement.className = "fas fa-sort";
+                    }
+                }
+            }
+
+            // Update the icon for the sorted column
+            var sortedIconElement = table.rows[0].getElementsByTagName("th")[columnIndex].querySelector(".fas");
+            if (sortedIconElement) {
+                sortedIconElement.className = dir === "asc" ? "fas fa-sort-up" : "fas fa-sort-down";
+            }
 
             // Perform sorting
             while (switching) {
@@ -262,35 +284,73 @@
                     }
                 }
             }
+
+            // Update pagination after sorting
+            $(document).ready(function() {
+                updatePagination();
+            });
         }
     </script>
 
     <style>
+        /* Styling for sortable columns */
+        .sortable {
+            position: relative;
+            cursor: pointer;
+        }
+
+            .sortable:hover {
+                background-color: #f5f5f5;
+            }
+
+            .sortable .fas {
+                margin-left: 5px;
+                color: #aaa;
+            }
+
+        .sorted-asc .fa-sort-up,
+        .sorted-desc .fa-sort-down {
+            color: #333;
+        }
+
+        /* Table header styling */
         th {
             cursor: pointer;
         }
 
             th.sorted-asc::after {
-                content: " ▲";
+                content: ""; /* Removed as we're using Font Awesome icons now */
             }
 
             th.sorted-desc::after {
-                content: " ▼";
+                content: ""; /* Removed as we're using Font Awesome icons now */
             }
 
-        .pagination {
-            display: flex;
+        /* Pagination button styling */
+        .pagination-btn {
+            min-width: 100px;
+            width: 100px;
+            height: 38px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
-            margin-top: 20px;
+            padding: 0.375rem 0.75rem;
         }
 
-            .pagination button {
-                margin: 0 5px;
-            }
+        .pagination-info {
+            font-size: 14px;
+            color: #6c757d;
+            padding: 0 10px;
+        }
 
-        #pageInfo {
-            margin: 0 10px;
-            line-height: 2;
+        /* Custom alert styling to match the design */
+        .alert-info {
+            background-color: #e8f4ff;
+            border: none;
+            color: #2c5282;
+            font-size: 14px;
+            border-radius: 4px;
         }
     </style>
 }

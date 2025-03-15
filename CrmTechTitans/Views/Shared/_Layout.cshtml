@@ -12,121 +12,337 @@
     <link rel="stylesheet" href="~/css/cards.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/details.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     @await RenderSectionAsync("Styles", required: false)
 
     <style>
+        :root {
+            /* Modern color palette */
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --primary-dark: #1e3a8a;
+            --secondary: #334155;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light: #f8fafc;
+            --dark: #0f172a;
+            /* Neutral colors */
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--gray-100);
+            color: var(--gray-800);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
         /* === Sidebar Styling === */
         .sidebar {
             position: fixed;
             left: 0;
             top: 0;
-            width: 14rem;
+            width: 260px;
             height: 100%;
+            background: linear-gradient(180deg, var(--dark) 0%, var(--gray-800) 100%);
             color: white;
             display: flex;
             flex-direction: column;
-            padding: 18px;
-            transition: transform 0.3s ease-in-out;
+            padding: 0;
             z-index: 1000;
+            transition: all 0.3s ease-in-out;
+            box-shadow: var(--shadow-lg);
         }
 
-            .sidebar a {
-                display: flex;
-                align-items: center;
-                padding: 12px;
-                font-size: 14px;
-                color: white;
-                text-decoration: none;
-                border-radius: 5px;
-                transition: background 0.3s ease-in-out;
+        .sidebar-header {
+            padding: 1.75rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-logo {
+            color: #ffffff;
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            letter-spacing: -0.025em;
+        }
+
+        .logo-img {
+            width: 150px;
+            height: 75px;
+            border-radius: 10px;
+            margin-bottom: 0.75rem;
+            object-fit: contain;
+            background-color: white;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+        }
+
+            .logo-img:hover {
+                transform: scale(1.02);
             }
 
-                .sidebar a i {
-                    margin-right: 10px;
-                    font-size: 1.2rem;
+        .sidebar-subtitle {
+            color: var(--gray-400);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            font-weight: 500;
+        }
+
+        .nav-section {
+            margin-bottom: 1.25rem;
+            padding: 0.75rem 0;
+        }
+
+        .nav-section-title {
+            color: var(--gray-400);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.075rem;
+            padding: 0.5rem 1.75rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1.75rem;
+            font-size: 0.9rem;
+            color: var(--gray-300);
+            text-decoration: none;
+            transition: all 0.2s ease-in-out;
+            border-left: 3px solid transparent;
+            margin: 0.125rem 0;
+        }
+
+            .sidebar a i {
+                margin-right: 0.875rem;
+                font-size: 1.1rem;
+                width: 1.5rem;
+                text-align: center;
+                transition: all 0.2s ease;
+            }
+
+            .sidebar a:hover {
+                background: rgba(255, 255, 255, 0.08);
+                color: white;
+            }
+
+                .sidebar a:hover i {
+                    color: var(--primary-light);
+                    transform: translateX(2px);
                 }
 
-                .sidebar a:hover {
-                    background: rgba(255, 255, 255, 0.2);
+            .sidebar a.active {
+                background: rgba(59, 130, 246, 0.15);
+                border-left: 3px solid var(--primary-light);
+                color: white;
+                font-weight: 500;
+            }
+
+                .sidebar a.active i {
+                    color: var(--primary-light);
                 }
 
-        .sidebar-toggle {
-            position: fixed;
-            top: 15px;
-            left: 240px;
-            background: #2e2e2e;
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 1.25rem 1.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.875rem;
+            background-color: rgba(0, 0, 0, 0.15);
+        }
+
+            .sidebar-footer .user-info {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            border: none;
-            padding: 10px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: left 0.3s ease-in-out;
-            z-index: 1100;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .user-role {
+            color: var(--gray-400);
+            font-size: 0.75rem;
+            margin-top: 0.125rem;
         }
 
         /* === Main Content Adjustments === */
         .content-container {
-            margin-left: 14rem;
-            padding: 20px;
+            margin-left: 260px;
+            padding: 2rem;
+            transition: margin-left 0.3s ease-in-out;
+            flex: 1;
+        }
+
+        /* Mobile Navigation */
+        .mobile-nav-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            z-index: 1100;
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s ease;
+        }
+
+            .mobile-nav-toggle:hover {
+                background: var(--primary-dark);
+            }
+
+            .mobile-nav-toggle i {
+                font-size: 1.25rem;
+            }
+
+        .mobile-nav-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            backdrop-filter: blur(2px);
+            transition: opacity 0.3s ease;
+        }
+
+        /* Footer */
+        footer {
+            background-color: white;
+            padding: 1rem 2rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            border-top: 1px solid var(--gray-200);
+            margin-left: 260px;
             transition: margin-left 0.3s ease-in-out;
         }
 
-        /* When Sidebar is Hidden */
-        .sidebar.hidden {
-            transform: translateX(-100%);
-        }
-
-            .sidebar.hidden + .content-container {
-                margin-left: 0;
-            }
-
-            .sidebar.hidden ~ .sidebar-toggle {
-                left: 15px;
-            }
+       
     </style>
 
 </head>
 <body>
-    <!-- Sidebar Toggle Button -->
-    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <!-- Mobile Navigation Toggle Button -->
+    <button class="mobile-nav-toggle" id="mobileNavToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
 
     <div class="main-container">
         <!-- Sidebar -->
-        <div class="sidebar">
-            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")"
-               asp-area="" asp-controller="Home" asp-action="Index">
-                <i class="fas fa-home"></i> Dashboard
-            </a>
-            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Member" ? "active" : "")"
-               asp-area="" asp-controller="Member" asp-action="Index">
-                <i class="fas fa-users"></i> Members
-            </a>
-            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Contact" ? "active" : "")"
-               asp-area="" asp-controller="Contact" asp-action="Index">
-                <i class="fas fa-address-book"></i> Contacts
-            </a>
-            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Address" ? "active" : "")"
-               asp-area="" asp-controller="Address" asp-action="Index">
-                <i class="fas fa-map-marker-alt"></i> Municipalities
-            </a>
-            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Opportunity" ? "active" : "")"
-               asp-area="" asp-controller="Opportunity" asp-action="Index">
-                <i class="fas fa-briefcase"></i> Opportunities
-            </a>
-            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Interaction" ? "active" : "")"
-               asp-area="" asp-controller="Interaction" asp-action="Index">
-                <i class="fas fa-comments"></i> Interactions
-            </a>
-            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Industry" ? "active" : "")"
-               asp-area="" asp-controller="Industry" asp-action="Index">
-                <i class="fas fa-industry"></i> Industries
-            </a>
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="~/images/logo.png" alt="CrmTechTitans Logo" class="logo-img" />
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">MAIN</div>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")"
+                   asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Member" ? "active" : "")"
+                   asp-area="" asp-controller="Member" asp-action="Index">
+                    <i class="fas fa-users"></i> Members
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">CONTACTS</div>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Contact" ? "active" : "")"
+                   asp-area="" asp-controller="Contact" asp-action="Index">
+                    <i class="fas fa-address-book"></i> Contacts
+                </a>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Address" ? "active" : "")"
+                   asp-area="" asp-controller="Address" asp-action="Index">
+                    <i class="fas fa-map-marker-alt"></i> Municipalities
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">BUSINESS</div>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Opportunity" ? "active" : "")"
+                   asp-area="" asp-controller="Opportunity" asp-action="Index">
+                    <i class="fas fa-briefcase"></i> Opportunities
+                </a>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Interaction" ? "active" : "")"
+                   asp-area="" asp-controller="Interaction" asp-action="Index">
+                    <i class="fas fa-comments"></i> Interactions
+                </a>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Industry" ? "active" : "")"
+                   asp-area="" asp-controller="Industry" asp-action="Index">
+                    <i class="fas fa-industry"></i> Industries
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+               
+                </div>
+            </div>
         </div>
 
         <!-- Main Content -->
@@ -137,7 +353,11 @@
         </div>
     </div>
 
-    <footer class="border-top footer text-muted"></footer>
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; @DateTime.Now.Year - CrmTechTitans - Member Management System
+        </div>
+    </footer>
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -149,48 +369,76 @@
     @await RenderSectionAsync("Scripts", required: false)
     <script src="~/js/dashboard.js" asp-append-version="true"></script>
 
-    <!-- Sidebar Toggle Script -->
+    <!-- Navigation Script -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            let sidebar = document.querySelector('.sidebar');
-            let toggleButton = document.querySelector('.sidebar-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const mobileNavToggle = document.getElementById('mobileNavToggle');
+            const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+            const mobileLinks = document.querySelectorAll('.sidebar a');
 
-            // Check localStorage for previous state
-            if (localStorage.getItem("sidebarState") === "closed") {
-                sidebar.classList.add("hidden");
-                toggleButton.style.left = "15px"; // Keep button in place when sidebar is closed
+            // Function to check if we're on mobile
+            function isMobile() {
+                return window.innerWidth <= 768;
             }
 
-            // Toggle sidebar visibility when clicking the button
-            toggleButton.addEventListener("click", function (event) {
-                event.stopPropagation(); // Prevent event bubbling
-                sidebar.classList.toggle("hidden");
+            // Toggle mobile navigation
+            mobileNavToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('mobile-open');
+                mobileNavOverlay.classList.toggle('active');
 
-                // Move toggle button when sidebar is open/closed
-                if (sidebar.classList.contains("hidden")) {
-                    localStorage.setItem("sidebarState", "closed");
-                    toggleButton.style.left = "15px";
+                // Change icon based on state
+                const icon = this.querySelector('i');
+                if (sidebar.classList.contains('mobile-open')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times');
                 } else {
-                    localStorage.setItem("sidebarState", "open");
-                    toggleButton.style.left = "230px"; // Adjust this value based on sidebar width
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
                 }
             });
 
-            // Automatically close sidebar when clicking outside of it
-            document.addEventListener("click", function (event) {
-                let isClickInsideSidebar = sidebar.contains(event.target);
-                let isClickOnToggleButton = toggleButton.contains(event.target);
+            // Close mobile navigation when clicking the overlay
+            mobileNavOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('mobile-open');
+                mobileNavOverlay.classList.remove('active');
 
-                if (!isClickInsideSidebar && !isClickOnToggleButton) {
-                    sidebar.classList.add("hidden");
-                    localStorage.setItem("sidebarState", "closed");
-                    toggleButton.style.left = "15px"; // Reset toggle button position
+                // Reset icon
+                const icon = mobileNavToggle.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            });
+
+            // Close mobile navigation when clicking a link (on mobile only)
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (isMobile()) {
+                        sidebar.classList.remove('mobile-open');
+                        mobileNavOverlay.classList.remove('active');
+
+                        // Reset icon
+                        const icon = mobileNavToggle.querySelector('i');
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
+                });
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (!isMobile()) {
+                    // If desktop, ensure sidebar is visible
+                    sidebar.classList.remove('mobile-open');
+                    mobileNavOverlay.classList.remove('active');
+
+                    // Reset icon
+                    const icon = mobileNavToggle.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
                 }
             });
         });
-
     </script>
 
 </body>
 </html>
-

@@ -6,75 +6,200 @@
 }
 <partial name="_Notification" />
 
-<div class="crm-container">
-    <!-- Main Content -->
-    <div class="main-content">
-        <header class="page-header">
-            <h1>All Interactions</h1>
-            <div class="d-flex align-items-center gap-3">
-                <a asp-action="Create" class="btn btn-danger" data-bs-toggle="tooltip" title="Add a new interaction to the system">
-                    <i class="fas fa-user-plus"></i> Create New Interaction
-                </a>
-            </div>
-        </header>
-        <p></p>
-
-        <!-- Search Input -->
-        <div class="filter-container">
-            <label for="memberNameFilter" class="filter-label">Filter interactions by member name:</label>
-            <input type="text" id="memberNameFilter" class="form-control search-input" placeholder="Search by Member Name..." onkeyup="filterTable()">
+<div class="container-fluid">
+    <header class="page-header d-flex justify-content-between align-items-center mb-4">
+        <h1>All Interactions</h1>
+        <div class="d-flex align-items-center gap-3">
+            <a asp-action="Create" class="btn btn-primary" data-bs-toggle="tooltip" title="Add a new interaction to the system">
+                <i class="fas fa-plus-circle"></i> Create New Interaction
+            </a>
         </div>
-        <p></p>
-        <section class="members-table-container">
-            <table class="table custom-table" id="interactionTable">
-                <thead>
+    </header>
+
+    <!-- Filter Section -->
+    <section class="filter-container bg-light p-3 rounded mb-4">
+        <div class="filter-row d-flex align-items-end gap-3">
+            <!-- Filter by Member Name -->
+            <div class="filter-item">
+                <label for="memberNameFilter" class="form-label">Search by Member Name</label>
+                <input type="text" id="memberNameFilter" class="form-control" placeholder="Enter member name" data-bs-toggle="tooltip" title="Enter a member's full or partial name">
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactions Table -->
+    <section class="table-responsive">
+        <!-- Helper text for sorting -->
+        <div class="alert alert-info d-flex align-items-center py-2" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            Click on column headers to sort the table.
+        </div>
+
+        <table class="table custom-table" id="interactionTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)" class="sortable">Associated Members <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(1)" class="sortable">Interaction <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(2)" class="sortable">Date <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(3)" class="sortable">Contact <i class="fas fa-sort"></i></th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
                     <tr>
-                        <th onclick="sortTable(0)">Associated Members</th>
-                        <th onclick="sortTable(1)">Interaction</th>
-                        <th onclick="sortTable(2)">Date</th>
-                        <th onclick="sortTable(3)">Contact</th>
-                        <th class="text-center">Actions</th>
+                        <td class="member-name">
+                            @(item.InteractionMembers.Any()
+                                ? string.Join(", ", item.InteractionMembers
+                                .Where(im => im.Member != null)
+                                .Select(im => im.Member.MemberName))
+                                : "No Member Associated")
+                        </td>
+                        <td>@item.InteractionDetails</td>
+                        <td>@item.Date.ToString("yyyy-MM-dd")</td>
+                        <td>@item.Contact?.FullFormalName</td>
+                        <td class="text-center">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Edit interaction details">Edit</a>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="View interaction details">Details</a>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td class="member-name">
-                                @(item.InteractionMembers.Any()
-                                    ? string.Join(", ", item.InteractionMembers
-                                    .Where(im => im.Member != null)
-                                    .Select(im => im.Member.MemberName))
-                                    : "No Member Associated")
-                            </td>
-                            <td>@item.InteractionDetails</td>
-                            <td>@item.Date.ToString("yyyy-MM-dd")</td>
-                            <td>@item.Contact?.FullFormalName</td>
-                            <td class="text-center action-buttons">
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-edit">
-                                    Edit
-                                </a>
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-details">
-                                    Details
-                                </a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </section>
+                }
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Pagination Controls -->
+    <div class="row mt-4">
+        <!-- Records per page -->
+        <div class="col-md-4">
+            <label for="recordsPerPage">Records per page:</label>
+            <select id="recordsPerPage" class="form-control">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+            </select>
+        </div>
+        <!-- Pagination Controls -->
+        <div id="paginationControls" class="col-md-8 d-flex justify-content-end align-items-center gap-3">
+            <button id="prevPage" class="btn btn-primary pagination-btn">Previous</button>
+            <span id="pageInfo" class="pagination-info">Page 1 of 1 (0 records)</span>
+            <button id="nextPage" class="btn btn-primary pagination-btn">Next</button>
+        </div>
     </div>
 </div>
 
-<!-- JavaScript for Client-Side Filtering -->
 @section Scripts {
     <script>
-        // Sort table function
+        $(document).ready(function () {
+            var currentPage = 1;
+            var recordsPerPage = parseInt($('#recordsPerPage').val());
+
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Function to get visible rows (rows not hidden by filter)
+            function getVisibleRows() {
+                var memberNameFilter = $('#memberNameFilter').val().toLowerCase();
+
+                var visibleRows = $('#interactionTable tbody tr').filter(function () {
+                    var memberName = $(this).find('td:nth-child(1)').text().toLowerCase();
+                    return memberName.includes(memberNameFilter);
+                });
+
+                return visibleRows;
+            }
+
+            // Function to show the current page
+            function showPage(page) {
+                var visibleRows = getVisibleRows();
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
+
+                // Ensure currentPage is within valid range
+                if (page < 1) page = 1;
+                if (page > totalPages) page = totalPages;
+
+                var startIndex = (page - 1) * recordsPerPage;
+                var endIndex = startIndex + recordsPerPage;
+
+                // Hide all rows first
+                $('#interactionTable tbody tr').hide();
+
+                // Show only the rows for the current page
+                visibleRows.slice(startIndex, endIndex).show();
+
+                // Update page info
+                $('#pageInfo').text(`Page ${page} of ${totalPages} (${visibleRows.length} records)`);
+
+                // Enable/disable pagination buttons
+                $('#prevPage').prop('disabled', page === 1);
+                $('#nextPage').prop('disabled', page === totalPages || visibleRows.length === 0);
+            }
+
+            // Function to update pagination
+            function updatePagination() {
+                var visibleRows = getVisibleRows();
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
+
+                if (currentPage > totalPages) {
+                    currentPage = totalPages > 0 ? totalPages : 1;
+                }
+
+                showPage(currentPage);
+            }
+
+            // Event listener for records per page dropdown
+            $('#recordsPerPage').on('change', function () {
+                recordsPerPage = parseInt($(this).val());
+                currentPage = 1; // Reset to the first page
+                updatePagination();
+            });
+
+            // Event listener for previous page button
+            $('#prevPage').on('click', function () {
+                if (currentPage > 1) {
+                    currentPage--;
+                    showPage(currentPage);
+                }
+            });
+
+            // Event listener for next page button
+            $('#nextPage').on('click', function () {
+                var visibleRows = getVisibleRows();
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
+
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    showPage(currentPage);
+                }
+            });
+
+            // Filter function
+            function filterTable() {
+                currentPage = 1; // Reset to the first page
+                updatePagination();
+            }
+
+            // Attach filter function to input events
+            $('#memberNameFilter').on('input', filterTable);
+
+            // Initial page load
+            updatePagination();
+
+            // Initial sort on page load
+            sortTable(2, "asc");
+        });
+
+        // Sorting function
         function sortTable(columnIndex, initialDirection = "asc") {
             var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
             table = document.getElementById("interactionTable");
             switching = true;
-            dir = initialDirection;
+            dir = initialDirection; // Default sorting direction
 
             // Determine the current sorting direction
             if (table.rows[0].getElementsByTagName("th")[columnIndex].classList.contains("sorted-asc")) {
@@ -91,10 +216,27 @@
             // Add sorting class to the clicked header
             table.rows[0].getElementsByTagName("th")[columnIndex].classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
 
+            // Update sort icon for all headers
+            for (i = 0; i < 4; i++) { // Only for sortable columns (0-3)
+                if (i !== columnIndex) {
+                    var iconElement = table.rows[0].getElementsByTagName("th")[i].querySelector(".fas");
+                    if (iconElement) {
+                        iconElement.className = "fas fa-sort";
+                    }
+                }
+            }
+
+            // Update the icon for the sorted column
+            var sortedIconElement = table.rows[0].getElementsByTagName("th")[columnIndex].querySelector(".fas");
+            if (sortedIconElement) {
+                sortedIconElement.className = dir === "asc" ? "fas fa-sort-up" : "fas fa-sort-down";
+            }
+
             // Perform sorting
             while (switching) {
                 switching = false;
                 rows = table.rows;
+
                 for (i = 1; i < (rows.length - 1); i++) {
                     shouldSwitch = false;
                     x = rows[i].getElementsByTagName("td")[columnIndex];
@@ -117,52 +259,80 @@
                     rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
                     switching = true;
                     switchcount++;
-                } else if (switchcount === 0 && dir === "asc") {
-                    dir = "desc";
-                    switching = true;
-                }
-            }
-        }
-
-        // Filter table function
-        function filterTable() {
-            var searchFilter = document.getElementById('memberNameFilter').value.toLowerCase();
-
-            var table = document.getElementById("interactionTable");
-            var tr = table.getElementsByTagName("tr");
-
-            for (var i = 1; i < tr.length; i++) {
-                var td = tr[i].getElementsByTagName("td")[0]; // Associated Members column
-                if (td) {
-                    var txtValue = td.textContent || td.innerText;
-                    if (txtValue.toLowerCase().includes(searchFilter)) {
-                        tr[i].style.display = "";
-                    } else {
-                        tr[i].style.display = "none";
+                } else {
+                    if (switchcount === 0 && dir === "asc") {
+                        dir = "desc";
+                        switching = true;
                     }
                 }
             }
+
+            // Update pagination after sorting
+            $(document).ready(function() {
+                updatePagination();
+            });
+        }
+    </script>
+
+    <style>
+        /* Styling for sortable columns */
+        .sortable {
+            position: relative;
+            cursor: pointer;
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            // Initialize Bootstrap Tooltips
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        });
-    </script>
-    <style>
+            .sortable:hover {
+                background-color: #f5f5f5;
+            }
+
+            .sortable .fas {
+                margin-left: 5px;
+                color: #aaa;
+            }
+
+        .sorted-asc .fa-sort-up,
+        .sorted-desc .fa-sort-down {
+            color: #333;
+        }
+
+        /* Table header styling */
         th {
             cursor: pointer;
         }
 
             th.sorted-asc::after {
-                content: " ▲";
+                content: ""; /* Removed as we're using Font Awesome icons now */
             }
 
             th.sorted-desc::after {
-                content: " ▼";
+                content: ""; /* Removed as we're using Font Awesome icons now */
             }
+
+        /* Pagination button styling */
+        .pagination-btn {
+            min-width: 100px;
+            width: 100px;
+            height: 38px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.375rem 0.75rem;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: #6c757d;
+            padding: 0 10px;
+        }
+
+        /* Custom alert styling to match the design */
+        .alert-info {
+            background-color: #e8f4ff;
+            border: none;
+            color: #2c5282;
+            font-size: 14px;
+            border-radius: 4px;
+        }
     </style>
 }

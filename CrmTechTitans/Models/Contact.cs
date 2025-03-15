@@ -1,4 +1,5 @@
 ﻿using CrmTechTitans.Models.JoinTables;
+using CrmTechTitans.Models.Enumerations;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -36,6 +37,10 @@ namespace CrmTechTitans.Models
         [Display(Name = "Linkedin")]
         [StringLength(100, ErrorMessage = "Linkedin can't be longer than 100 characters")]
         public string? Linkedin { get; set; }
+
+        // Contact Type property
+        [Display(Name = "Contact Type")]
+        public ContactType? ContactType { get; set; }
 
         public ContactPhoto? ContactPhoto { get; set; }
         public ContactThumbnail? ContactThumbnail { get; set; }

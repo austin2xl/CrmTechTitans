@@ -136,93 +136,118 @@ namespace CrmTechTitans.Controllers
         {
             if (ModelState.IsValid)
             {
-                await AddMemberPicture(model, memberPicture);
-                // Create Member
-                var member = new Member
+                try
                 {
-                    MemberName = model.MemberName,
-                    ContactedBy = model.ContactedBy,
-                    CompanySize = model.CompanySize,
-                    CompanyWebsite = model.CompanyWebsite,
-                    MemberSince = model.MemberSince,
-                    LastContactDate = model.LastContactDate,
-                    Notes = model.Notes,
-                    MemberPhoto = model.MemberPhoto,
-                    MemberThumbnail = model.MemberThumbnail
-
-                };
-
-                // Add Addresses
-                foreach (var addressModel in model.Addresses)
-                {
-                    var address = new Address
+                    await AddMemberPicture(model, memberPicture);
+                    // Create Member
+                    var member = new Member
                     {
-                        Street = addressModel.Street,
-                        City = addressModel.City,
-                        Province = addressModel.Province,
-                        PostalCode = addressModel.PostalCode
+                        MemberName = model.MemberName,
+                        ContactedBy = model.ContactedBy,
+                        CompanySize = model.CompanySize,
+                        CompanyWebsite = model.CompanyWebsite,
+                        MemberSince = model.MemberSince,
+                        LastContactDate = model.LastContactDate,
+                        Notes = model.Notes,
+                        MemberPhoto = model.MemberPhoto,
+                        MemberThumbnail = model.MemberThumbnail
                     };
-                    member.MemberAddresses.Add(new MemberAddress { Address = address, AddressType = addressModel.AddressType });
-                }
 
-                // Assign multiple membership types
-                foreach (var membershipTypeID in model.SelectedMembershipTypeIDs)
-                {
-                    member.MemberMembershipTypes.Add(new MemberMembershipType
+                    // Add Addresses
+                    foreach (var addressModel in model.Addresses)
                     {
-                        MembershipTypeID = membershipTypeID
-                    });
-                }
+                        var address = new Address
+                        {
+                            Street = addressModel.Street,
+                            City = addressModel.City,
+                            Province = addressModel.Province,
+                            PostalCode = addressModel.PostalCode
+                        };
+                        member.MemberAddresses.Add(new MemberAddress { Address = address, AddressType = addressModel.AddressType });
+                    }
 
-                // Add Contacts
-                foreach (var contactModel in model.Contacts)
-                {
-                    await AddContactPicture(contactModel, contactPicture);
-                    var contact = new Contact
+                    // Assign multiple membership types
+                    foreach (var membershipTypeID in model.SelectedMembershipTypeIDs)
                     {
-                        FirstName = contactModel.FirstName,
-                        LastName = contactModel.LastName,
-                        Email = contactModel.Email,
-                        Phone = contactModel.Phone,
-                        ContactPhoto = contactModel.ContactPhoto,
-                        ContactThumbnail = contactModel.ContactThumbnail
-                    };
-                    member.MemberContacts.Add(new MemberContact { Contact = contact, ContactType = contactModel.ContactType });
-                }
+                        member.MemberMembershipTypes.Add(new MemberMembershipType
+                        {
+                            MembershipTypeID = membershipTypeID
+                        });
+                    }
 
-                // Add Selected Industries
-                foreach (var industryId in model.SelectedIndustryIds)
-                {
-                    var industry = await _context.Industries.FindAsync(industryId);
-                    if (industry != null)
+                    // Add Contacts
+                    foreach (var contactModel in model.Contacts)
                     {
-                        member.IndustryMembers.Add(new MemberIndustry { Industry = industry });
+                        await AddContactPicture(contactModel, contactPicture);
+                        var contact = new Contact
+                        {
+                            FirstName = contactModel.FirstName,
+                            LastName = contactModel.LastName,
+                            Email = contactModel.Email,
+                            Phone = contactModel.Phone,
+                            ContactPhoto = contactModel.ContactPhoto,
+                            ContactThumbnail = contactModel.ContactThumbnail
+                        };
+                        member.MemberContacts.Add(new MemberContact { Contact = contact, ContactType = contactModel.ContactType });
+                    }
+
+                    // Add Selected Industries
+                    foreach (var industryId in model.SelectedIndustryIds)
+                    {
+                        var industry = await _context.Industries.FindAsync(industryId);
+                        if (industry != null)
+                        {
+                            member.IndustryMembers.Add(new MemberIndustry { Industry = industry });
+                        }
+                    }
+
+                    // Save to Database
+                    _context.Members.Add(member);
+                    await _context.SaveChangesAsync();
+                    
+                    TempData["success"] = "Member created successfully!";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"Error creating member: {ex.Message}");
+                    // Log the exception
+                    Console.WriteLine($"Error creating member: {ex.Message}");
+                }
+            }
+            else
+            {
+                // Log validation errors for debugging
+                foreach (var modelState in ModelState.Values)
+                {
+                    foreach (var error in modelState.Errors)
+                    {
+                        Console.WriteLine($"Validation error: {error.ErrorMessage}");
                     }
                 }
-
-                // Save to Database
-                _context.Members.Add(member);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index));
             }
 
-            // If the model is invalid, repopulate available industries
+            // If we get here, something failed, redisplay form
+            // Repopulate available industries
             model.AvailableIndustries = _context.Industries
-            .Select(industry => new IndustryViewModel
-            {
-                ID = industry.ID,
-                Name = industry.Name,
-                NAICS = industry.NAICS
-            }).ToList(); // Convert Industry entities to IndustryViewModels
+                .Select(industry => new IndustryViewModel
+                {
+                    ID = industry.ID,
+                    Name = industry.Name,
+                    NAICS = industry.NAICS
+                }).ToList();
 
-            // Reload membership types in case of validation failure
+            // Reload membership types
             model.AvailableMembershipTypes = _context.MembershipTypes
                 .Select(m => new MembershipTypeViewModel
                 {
                     ID = m.ID,
                     Name = m.Name
                 }).ToList();
+                
+            // Add a flag to indicate validation errors
+            ViewBag.HasValidationErrors = true;
+            
             return View(model);
         }
 
@@ -403,6 +428,13 @@ namespace CrmTechTitans.Controllers
                         var existingContact = member.MemberContacts.FirstOrDefault(c => c.Contact.ID == contactModel.ID);
                         if (existingContact != null)
                         {
+                            // Check for duplicate contact info excluding the current contact
+                            if (ContactExists(contactModel.Email, contactModel.Phone, contactModel.ID))
+                            {
+                                ModelState.AddModelError("", "A contact with the same email or phone number already exists.");
+                                return View(model);
+                            }
+
                             existingContact.Contact.FirstName = contactModel.FirstName;
                             existingContact.Contact.LastName = contactModel.LastName;
                             existingContact.Contact.Email = contactModel.Email;
@@ -411,6 +443,13 @@ namespace CrmTechTitans.Controllers
                         }
                         else
                         {
+                            // Check for duplicate contact info for new contacts
+                            if (ContactExists(contactModel.Email, contactModel.Phone))
+                            {
+                                ModelState.AddModelError("", "A contact with the same email or phone number already exists.");
+                                return View(model);
+                            }
+
                             member.MemberContacts.Add(new MemberContact
                             {
                                 Contact = new Contact
@@ -486,6 +525,18 @@ namespace CrmTechTitans.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        private bool ContactExists(string email, string phone, int? excludeContactId = null)
+        {
+            var query = _context.Contacts.AsQueryable();
+
+            if (excludeContactId.HasValue)
+            {
+                query = query.Where(c => c.ID != excludeContactId.Value);
+            }
+
+            return query.Any(c => c.Email == email || c.Phone == phone);
         }
 
         private bool MemberExists(int id)

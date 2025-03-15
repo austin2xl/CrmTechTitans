@@ -4,91 +4,80 @@
 @{
     ViewData["Title"] = "Create Opportunity";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var hasValidationErrors = ViewBag.HasValidationErrors ?? false;
 }
 
-<style>
-    .required-asterisk {
-        color: red;
-    }
-</style>
+<link rel="stylesheet" href="~/css/multi-step-form.css" />
 
-<div class="main-content">
-    <header class="page-header">
-        <h1>Create Opportunity</h1>
-        <p class="text-muted">Fill in the details below to add a new Opportunity to the database.</p>
-    </header>
-
-    <div class="member-card">
-        <div class="member-card-header">
-            <div class="member-avatar">
-                <i class="fas fa-lightbulb"></i>
-            </div>
-            <div class="member-info">
-                <h2 class="member-name">New Opportunity</h2>
+<div class="container py-4">
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-primary text-white p-4">
+            <div class="d-flex align-items-center">
+                <div class="me-3 bg-primary bg-opacity-25 rounded-circle p-3">
+                    <i class="fas fa-lightbulb fa-2x"></i>
+                </div>
+                <div>
+                    <h1 class="h3 mb-1">Create Opportunity</h1>
+                    <p class="mb-0">Fill in the details below to add a new opportunity to the database.</p>
+                </div>
             </div>
         </div>
-        <form asp-action="Create" method="post" id="multiStepForm" enctype="multipart/form-data">
-            <div class="member-card-content">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <p class="text-muted"><span class="required-asterisk">*</span> Indicates a required field.</p>
 
-                <div class="member-detail">
-                    <i class="fas fa-heading"></i>
-                    <div class="form-group">
-                        <label asp-for="Title" class="control-label">
-                            Title <span class="required-asterisk">*</span>
-                        </label>
-                        <input asp-for="Title" class="form-control" placeholder="Enter opportunity title" />
+        <div class="card-body p-4">
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                <p class="text-muted small mb-4"><span class="text-danger">*</span> Indicates a required field.</p>
+
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label asp-for="Title" class="form-label">Title <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-heading"></i></span>
+                            <input asp-for="Title" class="form-control" placeholder="Enter opportunity title" />
+                        </div>
                         <span asp-validation-for="Title" class="text-danger"></span>
                     </div>
-                </div>
 
-                <div class="member-detail">
-                    <i class="fas fa-tasks"></i>
-                    <div class="form-group">
-                        <label asp-for="Status" class="control-label">
-                            Status <span class="required-asterisk">*</span>
-                        </label>
-                        <select asp-for="Status" class="form-control" asp-items="Html.GetEnumSelectList<Status>()">
+                    <div class="col-md-6">
+                        <label asp-for="Status" class="form-label">Status <span class="text-danger">*</span></label>
+                        <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<Status>()">
                             <option value="">Select Status</option>
                         </select>
                         <span asp-validation-for="Status" class="text-danger"></span>
                     </div>
                 </div>
 
-                <div class="member-detail">
-                    <i class="fas fa-align-left"></i>
-                    <div class="form-group">
-                        <label asp-for="Description" class="control-label">
-                            Description <span class="required-asterisk">*</span>
-                        </label>
-                        <textarea asp-for="Description" class="form-control" rows="4" placeholder="Enter opportunity description"></textarea>
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <label asp-for="Description" class="form-label">Description <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Enter opportunity description"></textarea>
+                        </div>
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
                 </div>
 
-                <div class="member-detail">
-                    <i class="fas fa-flag"></i>
-                    <div class="form-group">
-                        <label asp-for="Priority" class="control-label">
-                            Priority <span class="required-asterisk">*</span>
-                        </label>
-                        <select asp-for="Priority" class="form-control" asp-items="Html.GetEnumSelectList<PriorityType>()">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="Priority" class="form-label">Priority <span class="text-danger">*</span></label>
+                        <select asp-for="Priority" class="form-select" asp-items="Html.GetEnumSelectList<PriorityType>()">
                             <option value="">Select Priority</option>
                         </select>
                         <span asp-validation-for="Priority" class="text-danger"></span>
                     </div>
                 </div>
-            </div>
-            <div class="member-card-footer">
-                <button type="submit" class="button-1">
-                    <i class="fas fa-save"></i> Create
-                </button>
-                <a asp-action="Index" class="button-2">
-                    <i class="fas fa-arrow-left"></i> Back to Opportunities
-                </a>
-            </div>
-        </form>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Opportunities
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-1"></i> Create
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -96,4 +85,12 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+}
+
+@section Styles {
+    <style>
+        .bg-primary {
+            background-color: #6c757d !important;
+        }
+    </style>
 }
