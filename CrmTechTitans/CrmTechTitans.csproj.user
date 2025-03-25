@@ -12,7 +12,7 @@
     <WebStackScaffolding_DbContextTypeFullName>CrmTechTitans.Data.CrmContext</WebStackScaffolding_DbContextTypeFullName>
     <WebStackScaffolding_IsAsyncSelected>False</WebStackScaffolding_IsAsyncSelected>
     <WebStackScaffolding_IsViewGenerationSelected>True</WebStackScaffolding_IsViewGenerationSelected>
-    <NameOfLastUsedPublishProfile>C:\Users\brayd\Source\Repos\CrmTechTitans01-24\.github\workflows\NIA-3.yml</NameOfLastUsedPublishProfile>
+    <NameOfLastUsedPublishProfile>C:\Users\brayd\crmtechlatest\CrmTechTitans\CrmTechTitans\Properties\PublishProfiles\CrmTechTitans20250303042431 - Web Deploy.pubxml</NameOfLastUsedPublishProfile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
