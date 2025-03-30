@@ -443,23 +443,24 @@
         </div>
     </div>
 
-    <!-- Membership Distribution Chart -->
+    <!-- Municipality Distribution Chart -->
     <div class="col-md-12 col-lg-4">
         <div class="chart-container">
-            <h3>Membership Distribution</h3>
-            <canvas id="membershipDistributionChart" class="chart-canvas"></canvas>
+            <h6 class="m-0 font-weight-bold text-primary">Members by Municipality</h6>
+            <canvas id="municipalityChart"></canvas>
         </div>
     </div>
 
-    <!-- Opportunity Status Chart -->
+    <!-- Industry Status Chart -->
     <div class="col-md-12 col-lg-4">
         <div class="chart-container">
-            <h3>Opportunity Status</h3>
-            <canvas id="opportunityStatusChart" class="chart-canvas"></canvas>
+            <h6 class="m-0 font-weight-bold text-primary">Members by Industry</h6>
+            <canvas id="industryChart"></canvas>
         </div>
     </div>
 </div>
-</div>
+
+
 
 <!-- Include Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
@@ -653,10 +654,9 @@
             console.warn("No member data available for charts");
         }
 
-        // Initialize Membership Distribution Chart
-        const membershipDistributionCtx = document.getElementById('membershipDistributionChart')?.getContext('2d');
-        if (membershipDistributionCtx) {
-            // Use the allMembershipTypes dictionary if available
+        // Initialize industry  Chart
+        const industryDistributionCtx = document.getElementById('industryChart')?.getContext('2d');
+        if (industryDistributionCtx) {
             const labels = [];
             const data = [];
             const backgroundColors = [
@@ -672,79 +672,36 @@
                 'rgba(100, 116, 139, 0.8)'   // Slate
             ];
             const borderColors = [
-                'rgba(59, 130, 246, 1)',     // Blue
-                'rgba(139, 92, 246, 1)',     // Purple
-                'rgba(16, 185, 129, 1)',     // Green
-                'rgba(245, 158, 11, 1)',     // Orange
-                'rgba(239, 68, 68, 1)',      // Red
-                'rgba(14, 165, 233, 1)',     // Sky Blue
-                'rgba(236, 72, 153, 1)',     // Pink
-                'rgba(168, 85, 247, 1)',     // Violet
-                'rgba(234, 179, 8, 1)',      // Yellow
-                'rgba(100, 116, 139, 1)'     // Slate
+                'rgba(59, 130, 246, 1)',
+                'rgba(139, 92, 246, 1)',
+                'rgba(16, 185, 129, 1)',
+                'rgba(245, 158, 11, 1)',
+                'rgba(239, 68, 68, 1)',
+                'rgba(14, 165, 233, 1)',
+                'rgba(236, 72, 153, 1)',
+                'rgba(168, 85, 247, 1)',
+                'rgba(234, 179, 8, 1)',
+                'rgba(100, 116, 139, 1)'
             ];
 
             const bgColors = [];
             const bdrColors = [];
 
-            if (window.allMembershipTypes && Object.keys(window.allMembershipTypes).length > 0) {
-                // Use all membership types from the dictionary
+            const industryData = @Html.Raw(Json.Serialize(Model.MembersByIndustry ?? new Dictionary<string, int>()));
+
+            if (Object.keys(industryData).length > 0) {
                 let colorIndex = 0;
-                for (const [typeName, count] of Object.entries(window.allMembershipTypes)) {
+                for (const [industry, count] of Object.entries(industryData)) {
                     if (count > 0) {
-                        labels.push(typeName);
+                        labels.push(industry);
                         data.push(count);
                         bgColors.push(backgroundColors[colorIndex % backgroundColors.length]);
                         bdrColors.push(borderColors[colorIndex % borderColors.length]);
                         colorIndex++;
                     }
                 }
-            } else {
-                // Fallback to the old method
-                if (window.membershipTypeSummary.associateCount > 0) {
-                    labels.push('Associate');
-                    data.push(window.membershipTypeSummary.associateCount);
-                    bgColors.push(backgroundColors[0]);
-                    bdrColors.push(borderColors[0]);
-                }
-
-                if (window.membershipTypeSummary.chamberAssociateCount > 0) {
-                    labels.push('Chamber');
-                    data.push(window.membershipTypeSummary.chamberAssociateCount);
-                    bgColors.push(backgroundColors[1]);
-                    bdrColors.push(borderColors[1]);
-                }
-
-                if (window.membershipTypeSummary.nonLocalIndustrialCount > 0) {
-                    labels.push('Non-Local');
-                    data.push(window.membershipTypeSummary.nonLocalIndustrialCount);
-                    bgColors.push(backgroundColors[2]);
-                    bdrColors.push(borderColors[2]);
-                }
-
-                if (window.membershipTypeSummary.governmentAssociationCount > 0) {
-                    labels.push('Gov Assoc');
-                    data.push(window.membershipTypeSummary.governmentAssociationCount);
-                    bgColors.push(backgroundColors[3]);
-                    bdrColors.push(borderColors[3]);
-                }
-
-                if (window.membershipTypeSummary.localCount > 0) {
-                    labels.push('Local');
-                    data.push(window.membershipTypeSummary.localCount);
-                    bgColors.push(backgroundColors[4]);
-                    bdrColors.push(borderColors[4]);
-                }
-
-                if (window.membershipTypeSummary.otherCount > 0) {
-                    labels.push('Others');
-                    data.push(window.membershipTypeSummary.otherCount);
-                    bgColors.push(backgroundColors[5]);
-                    bdrColors.push(borderColors[5]);
-                }
             }
 
-            // If no data, add a placeholder
             if (data.length === 0) {
                 labels.push('No Data');
                 data.push(1);
@@ -752,7 +709,7 @@
                 bdrColors.push('rgba(203, 213, 225, 1)');
             }
 
-            const membershipDistributionChart = new Chart(membershipDistributionCtx, {
+            const industryDistributionChart = new Chart(industryDistributionCtx, {
                 type: 'doughnut',
                 data: {
                     labels: labels,
@@ -791,7 +748,7 @@
                                 size: 12
                             },
                             callbacks: {
-                                label: function(context) {
+                                label: function (context) {
                                     if (context.label === 'No Data') return 'No data available';
 
                                     const label = context.label || '';
@@ -806,47 +763,37 @@
                 }
             });
         } else {
-            console.warn("Canvas element 'membershipDistributionChart' not found");
+            console.warn("Canvas element 'industryChart' not found");
         }
 
-        // Initialize Opportunity Status Chart
-        const opportunityStatusCtx = document.getElementById('opportunityStatusChart')?.getContext('2d');
-        if (opportunityStatusCtx) {
-            // Filter out zero values for better visualization
+        // Initialize muncipality Status Chart
+        const municipalityCtx = document.getElementById('municipalityChart')?.getContext('2d');
+        if (municipalityCtx) {
             const labels = [];
             const data = [];
             const bgColors = [];
             const borderColors = [];
 
-            if (window.opportunityCountSummary.qualificationCount > 0) {
-                labels.push('Qualification');
-                data.push(window.opportunityCountSummary.qualificationCount);
-                bgColors.push('rgba(59, 130, 246, 0.8)');
-                borderColors.push('rgba(59, 130, 246, 1)');
+            const municipalityData = @Html.Raw(Json.Serialize(Model.MembersByMunicipality ?? new Dictionary<string, int>()));
+
+            for (const [municipality, count] of Object.entries(municipalityData)) {
+                if (count > 0) {
+                    labels.push(municipality);
+                    data.push(count);
+
+                    // Apply repeating color theme (matching your palette)
+                    const colorSet = [
+                        { bg: 'rgba(23, 135, 109, 0.7)', border: 'rgba(23, 135, 109, 1)' },
+                        { bg: 'rgba(3, 34, 33, 0.7)', border: 'rgba(3, 34, 33, 1)' },
+                        { bg: 'rgba(170, 203, 202, 0.7)', border: 'rgba(170, 203, 202, 1)' }
+                    ];
+                    const color = colorSet[labels.length % colorSet.length];
+                    bgColors.push(color.bg);
+                    borderColors.push(color.border);
+                }
             }
 
-            if (window.opportunityCountSummary.negotiationCount > 0) {
-                labels.push('Negotiating');
-                data.push(window.opportunityCountSummary.negotiationCount);
-                bgColors.push('rgba(245, 158, 11, 0.8)');
-                borderColors.push('rgba(245, 158, 11, 1)');
-            }
-
-            if (window.opportunityCountSummary.closedNewMembersCount > 0) {
-                labels.push('Closed - New');
-                data.push(window.opportunityCountSummary.closedNewMembersCount);
-                bgColors.push('rgba(16, 185, 129, 0.8)');
-                borderColors.push('rgba(16, 185, 129, 1)');
-            }
-
-            if (window.opportunityCountSummary.closedNotInterestedCount > 0) {
-                labels.push('Closed - Not Int.');
-                data.push(window.opportunityCountSummary.closedNotInterestedCount);
-                bgColors.push('rgba(239, 68, 68, 0.8)');
-                borderColors.push('rgba(239, 68, 68, 1)');
-            }
-
-            // If no data, add a placeholder
+            // If no data, show placeholder
             if (data.length === 0) {
                 labels.push('No Data');
                 data.push(1);
@@ -854,12 +801,12 @@
                 borderColors.push('rgba(203, 213, 225, 1)');
             }
 
-            const opportunityStatusChart = new Chart(opportunityStatusCtx, {
+            const municipalityChart = new Chart(municipalityCtx, {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Opportunities',
+                        label: 'Members',
                         data: data,
                         backgroundColor: bgColors,
                         borderColor: borderColors,
@@ -887,7 +834,7 @@
                                 size: 12
                             },
                             callbacks: {
-                                label: function(context) {
+                                label: function (context) {
                                     if (context.label === 'No Data') return 'No data available';
                                     return `Count: ${context.raw}`;
                                 }
@@ -921,7 +868,7 @@
                 }
             });
         } else {
-            console.warn("Canvas element 'opportunityStatusChart' not found");
+            console.warn("Canvas element 'municipalityChart' not found");
         }
     });
 </script>

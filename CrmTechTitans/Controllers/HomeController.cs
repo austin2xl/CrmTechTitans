@@ -54,6 +54,23 @@ namespace CrmTechTitans.Controllers
                     .ThenInclude(mmt => mmt.MembershipType)
                     .ToListAsync();
 
+                // Get members by industry
+                var membersByIndustry = await _context.Industries
+                    .Include(i => i.IndustryMembers)
+                    .ThenInclude(mi => mi.Member)
+                    .ToDictionaryAsync(
+                        i => i.Name,
+                        i => i.IndustryMembers.Count
+                    );
+
+                // Get members by municipality (city from member addresses)
+                var membersByMunicipality = await _context.MemberAddresses
+                    .Include(ma => ma.Address)
+                    .Include(ma => ma.Member)
+                    .Where(ma => ma.AddressType == AddressType.Office && ma.Address != null)
+                    .GroupBy(ma => ma.Address!.City)
+                    .ToDictionaryAsync(g => g.Key ?? "Unknown", g => g.Select(ma => ma.MemberID).Distinct().Count());
+
                 // Create a dictionary to count members by membership type
                 var membershipTypeCounts = new Dictionary<string, int>();
                 
@@ -157,7 +174,9 @@ namespace CrmTechTitans.Controllers
                     MemberCountSummary = memberSummary,
                     MembershipTypeSummary = membershipSummary,
                     OpportunityCountSummary = opportunitySummary,
-                    MemberCountOverTime = memberCountOverTime
+                    MemberCountOverTime = memberCountOverTime,
+                    MembersByIndustry = membersByIndustry,
+                    MembersByMunicipality = membersByMunicipality
                 };
 
                 _logger.LogInformation("Dashboard data loaded successfully");
