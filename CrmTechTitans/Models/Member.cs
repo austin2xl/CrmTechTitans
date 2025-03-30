@@ -25,7 +25,6 @@ namespace CrmTechTitans.Models
         public CompanySize CompanySize { get; set; } // Changed to enum
 
         [Display(Name = "Website")]
-        [Url]
         [StringLength(255)]
         public string? CompanyWebsite { get; set; }
 
@@ -52,6 +51,7 @@ namespace CrmTechTitans.Models
         [Display(Name = "Membership Type")]
         public ICollection<MemberMembershipType> MemberMembershipTypes { get; set; } = new HashSet<MemberMembershipType>();
 
+        public string Reason { get; set; } = string.Empty;
 
         public ICollection<MemberIndustry> IndustryMembers { get; set; } = new HashSet<MemberIndustry>();
         public ICollection<MemberAddress> MemberAddresses { get; set; } = new HashSet<MemberAddress>(); // Added relationship -Braydon Pew 01-22-2025

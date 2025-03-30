@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<CrmTechTitans.Models.Industry>
+@using CrmTechTitans.Models.Enumerations
 
 @{
     ViewData["Title"] = "All Industries";
@@ -7,90 +8,125 @@
 
 <partial name="_Notification" />
 
-<div class="crm-container">
-    <!-- Main Content -->
-    <div class="crm-container">
-        <div class="main-content">
-            <header class="page-header">
-                <h1>All Industries</h1>
-                <div class="d-flex align-items-center gap-3">
-                    <a asp-action="Create" class="btn btn-danger" data-bs-toggle="tooltip" title="Add a new Industry to the system">
-                        <i class="fas fa-user-plus"></i> Create New Industry
-                    </a>
-                </div>
-            </header>
+<div class="container-fluid">
+    <header class="page-header d-flex justify-content-between align-items-center mb-4">
+        <h1>All Industries</h1>
+        <div class="d-flex align-items-center gap-3">
+                    @if (Context.User.IsInRole(UserRoles.Administrator) || Context.User.IsInRole(UserRoles.Editor))
+                    {
+                <a asp-action="Create" class="btn btn-primary" data-bs-toggle="tooltip" title="Add a new Industry to the system">
+                    <i class="fas fa-plus-circle"></i> Create New Industry
+                </a>
+                    }
+        </div>
+    </header>
 
-            <!-- Filter Section -->
-            <div class="filter-container">
-                <div class="col-md-4">
-                    <label for="SearchString" class="filter-label">Search Industry Name:</label>
-                    <input type="text" id="SearchString" class="form-control search-input" placeholder="Enter industry name">
-                </div>
-                <div class="col-md-4">
-                    <label for="NAICSCode" class="filter-label">Filter by NAICS Code:</label>
-                    @Html.DropDownList("NAICSCode", ViewBag.NAICSCodeList as SelectList, "-- Select NAICS Code --", new { @class = "form-control filter-select" })
+    <!-- Filter Section -->
+    <section class="filter-container bg-light p-3 rounded mb-4">
+        <div class="row">
+            <!-- Filters on the left -->
+            <div class="col-md-8">
+                <div class="d-flex flex-column flex-md-row gap-3">
+                    <!-- Filter by Industry Name -->
+                    <div class="filter-item flex-grow-1">
+                        <label for="SearchString" class="form-label">Search Industry Name</label>
+                        <input type="text" id="SearchString" class="form-control" placeholder="Enter industry name" data-bs-toggle="tooltip" title="Enter an industry's full or partial name">
+                    </div>
+
+                    <!-- Filter by NAICS Code -->
+                    <div class="filter-item flex-grow-1">
+                        <label for="NAICSCode" class="form-label">Filter by NAICS Code</label>
+                        @Html.DropDownList("NAICSCode", ViewBag.NAICSCodeList as SelectList, "-- Select NAICS Code --", new { @class = "form-select" })
+                    </div>
                 </div>
             </div>
-
-            <!-- Table View for Industries -->
-            <section class="members-table-container">
-                <table class="table custom-table" id="industriesTable">
-                    <thead>
-                        <tr>
-                            <th onclick="sortTable(0)">Industry Name</th>
-                            <th onclick="sortTable(1)">NAICS Code</th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td>@item.Name</td>
-                                <td>@item.NAICS</td>
-                                <td class="text-center action-buttons">
-                                    <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-edit">Edit</a>
-                                    <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-details">Details</a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-                <div class="col-md-4">
-                    <label for="recordsPerPage">Records per page:</label>
-                    <select id="recordsPerPage" class="form-control">
-                        <option value="5">5</option>
-                        <option value="10">10</option>
-                        <option value="15">15</option>
-                        <option value="20">20</option>
-                    </select>
+            
+            <!-- Filtered By Indicator on the right -->
+            <div class="col-md-4 d-flex align-items-end justify-content-end">
+                <div id="filterStatus" class="mt-md-0 mt-3">
+                    <span class="text-secondary fs-6">
+                        <i class="fas fa-filter me-1"></i> Filtered by: <span id="activeFilters">No filters</span>
+                    </span>
                 </div>
+            </div>
+        </div>
+    </section>
 
-                <div id="paginationControls" class="pagination">
-                    <button id="prevPage" class="btn btn-primary">Previous</button>
-                    <span id="pageInfo"></span>
-                    <button id="nextPage" class="btn btn-primary">Next</button>
-                </div>
+    <!-- Industries Table -->
+    <section class="table-responsive">
+        <!-- Helper text for sorting -->
+        <div class="alert alert-info d-flex align-items-center py-2" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            Click on column headers to sort the table.
+        </div>
 
-            </section>
+        <table class="table custom-table" id="industryTable">
+            <thead>
+                <tr>
+                    <th class="sortable">Industry <i class="fas fa-sort"></i></th>
+                    <th class="sortable">NAICS Code <i class="fas fa-sort"></i></th>
+                    <th class="sortable">Associated Members <i class="fas fa-sort"></i></th>
+                    <th class="text-center actions-column">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td data-bs-toggle="tooltip" title="@item.Name">@item.Name</td>
+                        <td>@item.NAICS</td>
+                        <td>@item.IndustryMembers.Count</td>
+                        <td class="text-center actions-column">
+                            <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Edit industry details">Edit</a>
+                            <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="View industry details">Details</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Pagination Controls -->
+    <div class="row mt-4">
+        <!-- Records per page -->
+        <div class="col-md-4">
+            <label for="recordsPerPage">Records per page:</label>
+            <select id="recordsPerPage" class="form-control">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+            </select>
+        </div>
+        <!-- Pagination Controls -->
+        <div id="paginationControls" class="col-md-8 d-flex justify-content-end align-items-center gap-3">
+            <button id="prevPage" class="btn btn-primary pagination-btn">Previous</button>
+            <span id="pageInfo" class="pagination-info">Page 1 of 1 (0 records)</span>
+            <button id="nextPage" class="btn btn-primary pagination-btn">Next</button>
         </div>
     </div>
-
 </div>
+
 @section Scripts {
     <script>
         $(document).ready(function () {
             var currentPage = 1;
             var recordsPerPage = parseInt($('#recordsPerPage').val());
 
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
             // Function to get visible rows (rows not hidden by filter)
             function getVisibleRows() {
                 var nameFilter = $('#SearchString').val().toLowerCase();
                 var naicsFilter = $('#NAICSCode').val();
 
-                var visibleRows = $('#industriesTable tbody tr').filter(function () {
-                    var nameText = $(this).find('td:nth-child(1)').text().toLowerCase();
-                    var naicsText = $(this).find('td:nth-child(2)').text();
+                var visibleRows = $('#industryTable tbody tr').filter(function () {
+                    var nameText = $(this).find('td:nth-child(2)').text().toLowerCase();
+                    var naicsText = $(this).find('td:nth-child(3)').text();
 
                     var nameMatch = nameFilter === "" || nameText.includes(nameFilter);
                     var naicsMatch = naicsFilter === "" || naicsText === naicsFilter;
@@ -104,7 +140,7 @@
             // Function to show the current page
             function showPage(page) {
                 var visibleRows = getVisibleRows();
-                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
 
                 // Ensure currentPage is within valid range
                 if (page < 1) page = 1;
@@ -114,23 +150,23 @@
                 var endIndex = startIndex + recordsPerPage;
 
                 // Hide all rows first
-                $('#industriesTable tbody tr').hide();
+                $('#industryTable tbody tr').hide();
 
                 // Show only the rows for the current page
                 visibleRows.slice(startIndex, endIndex).show();
 
                 // Update page info
-                $('#pageInfo').text(`Page ${page} of ${totalPages}`);
+                $('#pageInfo').text(`Page ${page} of ${totalPages} (${visibleRows.length} records)`);
 
                 // Enable/disable pagination buttons
                 $('#prevPage').prop('disabled', page === 1);
-                $('#nextPage').prop('disabled', page === totalPages);
+                $('#nextPage').prop('disabled', page === totalPages || visibleRows.length === 0);
             }
 
             // Function to update pagination
-            function updatePagination() {
+            window.updatePagination = function() {
                 var visibleRows = getVisibleRows();
-                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
 
                 if (currentPage > totalPages) {
                     currentPage = totalPages > 0 ? totalPages : 1;
@@ -157,7 +193,7 @@
             // Event listener for next page button
             $('#nextPage').on('click', function () {
                 var visibleRows = getVisibleRows();
-                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
 
                 if (currentPage < totalPages) {
                     currentPage++;
@@ -173,97 +209,111 @@
 
             // Attach filter function to input events
             $('#SearchString, #NAICSCode').on('input change', filterTable);
+            
+            // Update filter status indicators whenever filters change
+            function updateFilterStatus() {
+                var activeFilters = [];
+                
+                // Check if industry name filter is active
+                var nameFilter = $('#SearchString').val();
+                if (nameFilter && nameFilter.trim() !== '') {
+                    activeFilters.push('Industry Name: "' + nameFilter + '"');
+                }
+                
+                // Check if NAICS Code filter is active
+                var naicsFilter = $('#NAICSCode').val();
+                if (naicsFilter && naicsFilter !== '') {
+                    activeFilters.push('NAICS Code: "' + $('#NAICSCode option:selected').text() + '"');
+                }
+                
+                // Update the filter status display
+                if (activeFilters.length > 0) {
+                    $('#activeFilters').text(activeFilters.join(', '));
+                } else {
+                    $('#activeFilters').text('No filters');
+                }
+                $('#filterStatus').show();
+            }
+            
+            // Call updateFilterStatus whenever filters change
+            $('#SearchString').on('input', function() {
+                updateFilterStatus();
+            });
+            
+            $('#NAICSCode').on('change', function() {
+                updateFilterStatus();
+            });
+            
+            // Initialize filter status on page load
+            updateFilterStatus();
 
             // Initial page load
             updatePagination();
+            
+            // Listen for sort-complete event to update display
+            document.addEventListener('sort-complete', updatePagination);
         });
-         sortTable(0, "asc");
-
-        // Sorting function
-        function sortTable(columnIndex, initialDirection = "asc") {
-            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-            table = document.getElementById("industriesTable");
-            switching = true;
-            dir = initialDirection; // Default sorting direction
-
-            // Determine the current sorting direction
-            if (table.rows[0].getElementsByTagName("th")[columnIndex].classList.contains("sorted-asc")) {
-                dir = "desc";
-            } else if (table.rows[0].getElementsByTagName("th")[columnIndex].classList.contains("sorted-desc")) {
-                dir = "asc";
-            }
-
-            // Remove sorting classes from all headers
-            for (i = 0; i < table.rows[0].getElementsByTagName("th").length; i++) {
-                table.rows[0].getElementsByTagName("th")[i].classList.remove("sorted-asc", "sorted-desc");
-            }
-
-            // Add sorting class to the clicked header
-            table.rows[0].getElementsByTagName("th")[columnIndex].classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
-
-            // Perform sorting
-            while (switching) {
-                switching = false;
-                rows = table.rows;
-
-                for (i = 1; i < (rows.length - 1); i++) {
-                    shouldSwitch = false;
-                    x = rows[i].getElementsByTagName("td")[columnIndex];
-                    y = rows[i + 1].getElementsByTagName("td")[columnIndex];
-
-                    if (dir === "asc") {
-                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                            shouldSwitch = true;
-                            break;
-                        }
-                    } else if (dir === "desc") {
-                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                            shouldSwitch = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (shouldSwitch) {
-                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                    switching = true;
-                    switchcount++;
-                } else {
-                    if (switchcount === 0 && dir === "asc") {
-                        dir = "desc";
-                        switching = true;
-                    }
-                }
-            }
-        }
     </script>
 
+    <style>
+        /* Styling for sortable columns */
+        .sortable {
+            position: relative;
+            cursor: pointer;
+        }
 
-} <style>
-      th {
-          cursor: pointer;
-      }
+            .sortable:hover {
+                background-color: #f5f5f5;
+            }
 
-          th.sorted-asc::after {
-              content: " ▲";
-          }
+            .sortable .fas {
+                margin-left: 5px;
+                color: #aaa;
+            }
 
-          th.sorted-desc::after {
-              content: " ▼";
-          }
+        .sorted-asc .fa-sort-up,
+        .sorted-desc .fa-sort-down {
+            color: #333;
+        }
 
-      .pagination {
-          display: flex;
-          justify-content: center;
-          margin-top: 20px;
-      }
+        /* Table header styling */
+        th {
+            cursor: pointer;
+        }
 
-          .pagination button {
-              margin: 0 5px;
-          }
+            th.sorted-asc::after {
+                content: ""; /* Removed as we're using Font Awesome icons now */
+            }
 
-      #pageInfo {
-          margin: 0 10px;
-          line-height: 2;
-      }
-</style>
+            th.sorted-desc::after {
+                content: ""; /* Removed as we're using Font Awesome icons now */
+            }
+
+        /* Pagination button styling */
+        .pagination-btn {
+            min-width: 100px;
+            width: 100px;
+            height: 38px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.375rem 0.75rem;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: #6c757d;
+            padding: 0 10px;
+        }
+
+        /* Custom alert styling to match the design */
+        .alert-info {
+            background-color: #e8f4ff;
+            border: none;
+            color: #2c5282;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+    </style>
+}

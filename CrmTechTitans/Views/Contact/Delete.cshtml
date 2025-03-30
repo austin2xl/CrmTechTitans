@@ -5,67 +5,163 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="main-content">
-    <header class="page-header">
-        <h1>Delete Contact</h1>
-        <p class="text-danger">Are you sure you want to delete this contact? This action cannot be undone.</p>
-    </header>
+<div class="container py-3">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a asp-action="Index" class="text-decoration-none">Contact</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Delete</li>
+        </ol>
+    </nav>
 
-    <div class="member-card">
-        <div class="member-card-header">
-            <div class="member-avatar">
-                       @{
-        if (Model.ContactPhoto?.Content != null)
-        {
-            @:<div class="member-photo">
-                string imageBase64 = Convert.ToBase64String(Model.ContactPhoto.Content);
-                string imageSrc = string.Format("data:" + Model.ContactPhoto.MimeType + ";base64,{0}", imageBase64);
-                <img src="@imageSrc" alt="Profile Picture of @Model.FullFormalName" title="Profile Picture of @Model.FullFormalName" class="img-fluid rounded" />
-            @:</div><hr />
-					}
-					else
-					{
-						<i class="fas fa-user"></i>
-					}
-				}
-            </div>
-            <div class="member-info">
-                <h2 class="member-name">@Model.FirstName @Model.LastName</h2>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header text-white p-3" style="background-color: #6c757d;">
+            <div class="d-flex align-items-center">
+                <div class="me-3 rounded-circle p-2" style="background-color: rgba(108, 117, 125, 0.25);">
+                    <i class="fas fa-user fa-2x"></i>
+                </div>
+                <div>
+                    <h1 class="h3 mb-1">Delete Contact</h1>
+                </div>
             </div>
         </div>
-        <div class="member-card-content">
-            <div class="member-detail">
-                <i class="fas fa-envelope"></i>
-                <span>
-                    <strong>Email:</strong>
-                    @Html.DisplayFor(model => model.Email)
-                </span>
+
+        <div class="card-body p-4">
+            <div class="row mb-4">
+                <div class="col-md-2 col-sm-3 text-center mb-3 mb-md-0">
+                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto" style="width: 100px; height: 100px;">
+                        @if (Model.ContactPhoto?.Content != null)
+                        {
+                            string imageBase64 = Convert.ToBase64String(Model.ContactPhoto.Content);
+                            string imageSrc = string.Format("data:" + Model.ContactPhoto.MimeType + ";base64,{0}", imageBase64);
+                            <img src="@imageSrc" alt="Profile Picture of @Model.FullFormalName" class="img-fluid rounded-circle" />
+                        }
+                        else
+                        {
+                            <i class="fas fa-user fa-3x text-secondary"></i>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-10 col-sm-9">
+                    <h2 class="h4 mb-2">@Model.FirstName @Model.LastName</h2>
+
+                </div>
             </div>
-            <div class="member-detail">
-                <i class="fas fa-phone"></i>
-                <span>
-                    <strong>Phone:</strong>
-                    @Html.DisplayFor(model => model.Phone)
-                </span>
+
+            <div class="row g-4">
+                <!-- Contact Information Section -->
+                <div class="col-lg-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h3 class="h5 mb-0"><i class="fas fa-info-circle text-primary me-2"></i>Contact Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 me-3">
+                                            <i class="fas fa-envelope text-secondary"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Email</strong>
+                                            <p class="mb-0 mt-1">@Html.DisplayFor(model => model.Email)</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 me-3">
+                                            <i class="fas fa-phone text-secondary"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Phone</strong>
+                                            <p class="mb-0 mt-1">
+                                                @if (!string.IsNullOrEmpty(Model.Phone))
+                                                {
+                                                    <a href="tel:@Model.Phone" class="text-primary">@Model.Phone</a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Not provided</span>
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+                                </li>
+                                @if (!string.IsNullOrEmpty(Model.Linkedin))
+                                {
+                                    <li class="list-group-item px-0">
+                                        <div class="d-flex">
+                                            <div class="flex-shrink-0 me-3">
+                                                <i class="fab fa-linkedin text-secondary"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <strong>LinkedIn</strong>
+                                                <p class="mb-0 mt-1">
+                                                    <a href="@Model.Linkedin" target="_blank" rel="noopener noreferrer" class="text-primary">
+                                                        <i class="fas fa-external-link-alt me-1"></i>View Profile
+                                                    </a>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Associated Members Section -->
+                <div class="col-lg-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h3 class="h5 mb-0"><i class="fas fa-building text-primary me-2"></i>Associated Members</h3>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.MemberContacts.Any())
+                            {
+                                <div class="list-group list-group-flush">
+                                    @foreach (var memberContact in Model.MemberContacts)
+                                    {
+                                        <a href="/Member/Details/@memberContact.MemberID" class="list-group-item list-group-item-action px-0 border-0 border-bottom">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">@memberContact.Member.MemberName</h6>
+                                                    <small class="text-muted">@memberContact.ContactType</small>
+                                                </div>
+                                                <span class="badge bg-primary rounded-pill">
+                                                    <i class="fas fa-chevron-right"></i>
+                                                </span>
+                                            </div>
+                                        </a>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted mb-0">No associated members found.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+
             </div>
-            <div class="member-detail">
-                <i class="fab fa-linkedin"></i>
-                <span>
-                    <strong>LinkedIn:</strong>
-                    @Html.DisplayFor(model => model.Linkedin)
-                </span>
+
+            <p class="mb-0" style="color: #dc3545; margin-top: 30px;">Are you sure you want to delete this contact? This action cannot be undone.</p>
+
+            <div class="d-flex gap-2 mt-4">
+                <form asp-action="Delete">
+                    <input type="hidden" asp-for="ID" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash-alt me-1"></i> Delete Contacts
+                    </button>
+                </form>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Cancel
+                </a>
             </div>
-        </div>
-        <div class="member-card-footer">
-            <form asp-action="Delete">
-                <input type="hidden" asp-for="ID" />
-                <button type="submit" class="button-2">
-                    <i class="fas fa-trash-alt"></i> Delete
-                </button>
-            </form>
-            <a asp-action="Index" class="button-1">
-                <i class="fas fa-arrow-left"></i> Cancel
-            </a>
         </div>
     </div>
 </div>

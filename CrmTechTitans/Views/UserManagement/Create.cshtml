@@ -1,0 +1,88 @@
+@model CrmTechTitans.Models.ViewModels.CreateUserViewModel
+
+@{
+    ViewData["Title"] = "Create User";
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-xxl-6">
+            <!-- Page Header -->
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h1 class="h3 mb-0 text-dark fw-bold">Create User</h1>
+                    <p class="text-secondary mb-0">Add a new user to the system and assign a role.</p>
+                </div>
+            </div>
+
+            <!-- Create User Card -->
+            <div class="card shadow-sm border-0 mb-4 bg-white">
+                <div class="card-body p-lg-5">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="row g-4 mb-4">
+                            <!-- Email -->
+                            <div class="col-12">
+                                <div class="form-group mb-0">
+                                    <label asp-for="Email" class="form-label text-secondary"></label>
+                                    <input asp-for="Email" class="form-control bg-light border-secondary h-auto py-2" placeholder="Enter Email" />
+                                    <span asp-validation-for="Email" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-0">
+                                    <label asp-for="Password" class="form-label text-secondary"></label>
+                                    <input asp-for="Password" class="form-control bg-light border-secondary h-auto py-2" placeholder="Enter Password" />
+                                    <span asp-validation-for="Password" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-0">
+                                    <label asp-for="ConfirmPassword" class="form-label text-secondary"></label>
+                                    <input asp-for="ConfirmPassword" class="form-control bg-light border-secondary h-auto py-2" placeholder="Confirm Password" />
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <!-- Role -->
+                            <div class="col-12">
+                                <div class="form-group mb-0">
+                                    <label asp-for="SelectedRole" class="form-label text-secondary"></label>
+                                    <select asp-for="SelectedRole" class="form-select bg-light border-secondary h-auto py-2">
+                                        <option value="">Select Role</option>
+                                        @foreach (var role in Model.AvailableRoles)
+                                        {
+                                            <option value="@role">@role</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="SelectedRole" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2">
+                                <i class="fas fa-arrow-left me-2"></i> Back to List
+                            </a>
+                            <button type="submit" class="btn btn-dark px-4 py-2">
+                                <i class="fas fa-save me-2"></i> Create User
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+} 

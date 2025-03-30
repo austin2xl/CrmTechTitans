@@ -8,9 +8,12 @@ using Microsoft.EntityFrameworkCore;
 using CrmTechTitans.Data;
 using CrmTechTitans.Models;
 using Microsoft.AspNetCore.Components.QuickGrid;
+using Microsoft.AspNetCore.Authorization;
+using CrmTechTitans.Models.Enumerations;
 
 namespace CrmTechTitans.Controllers
 {
+    [Authorize]
     public class IndustryController : Controller
     {
         private readonly CrmContext _context;
@@ -28,7 +31,9 @@ namespace CrmTechTitans.Controllers
             int numberFilters = 0;
 
             // Start querying Industries
-            var industries = _context.Industries.AsNoTracking();
+            var industries = _context.Industries
+                .Include(i => i.IndustryMembers)
+                .AsNoTracking();
 
             // Filter by Industry Name
             if (!String.IsNullOrEmpty(SearchString))
@@ -86,6 +91,7 @@ namespace CrmTechTitans.Controllers
         }
 
         // GET: Industry/Create
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public IActionResult Create()
         {
             return View();
@@ -96,18 +102,23 @@ namespace CrmTechTitans.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> Create([Bind("ID,Name,NAICS")] Industry industry)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(industry);
                 await _context.SaveChangesAsync();
+                TempData["success"] = "Industry created successfully!";
+                TempData["message"] = "Industry created successfully!";
+
                 return RedirectToAction(nameof(Index));
             }
             return View(industry);
         }
 
         // GET: Industry/Edit/5
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -128,6 +139,7 @@ namespace CrmTechTitans.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,NAICS")] Industry industry)
         {
             if (id != industry.ID)
@@ -141,12 +153,12 @@ namespace CrmTechTitans.Controllers
                 {
                     _context.Update(industry);
                     await _context.SaveChangesAsync();
-                    TempData["message"] = "Industry edited successfully";
-
+                    TempData["success"] = "Industry updated successfully!";
+                    TempData["message"] = "Industry updated successfully!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    TempData["errMessage"] = "An error occured. Failed to edit the industry.";
+                    TempData["error"] = "Failed to edit industry. Please try again.";
                     if (!IndustryExists(industry.ID))
                     {
                         return NotFound();
@@ -162,6 +174,7 @@ namespace CrmTechTitans.Controllers
         }
 
         // GET: Industry/Delete/5
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -182,6 +195,7 @@ namespace CrmTechTitans.Controllers
         // POST: Industry/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var industry = await _context.Industries.FindAsync(id);
@@ -191,6 +205,7 @@ namespace CrmTechTitans.Controllers
             }
 
             await _context.SaveChangesAsync();
+            TempData["success"] = "Industry deleted successfully!";
             return RedirectToAction(nameof(Index));
         }
 

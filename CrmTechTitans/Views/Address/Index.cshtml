@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<CrmTechTitans.Models.Address>
+@using CrmTechTitans.Models.Enumerations
 
 @{
     ViewData["Title"] = "All Addresses";
@@ -7,62 +8,88 @@
 
 <partial name="_Notification" />
 
-<div class="crm-container">
-    <div class="main-content">
-        <header class="page-header">
-            <h1>All Municipalities</h1>
-        </header>
-        <p></p>
+<div class="container-fluid">
+    <header class="page-header d-flex justify-content-between align-items-center mb-4">
+        <h1>All Municipalities</h1>
+        <div class="d-flex align-items-center gap-3">
+            @if (Context.User.IsInRole(UserRoles.Administrator) || Context.User.IsInRole(UserRoles.Editor))
+            {
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="fas fa-plus-circle me-2"></i> Create New Municipality
+                </a>
+            }
+        </div>
+    </header>
 
-        <!-- Filter Section -->
-        <div class="filter-container">
-            <!-- Filter by Municipality -->
-            <div class="col-md-4">
-                <label for="municipalityFilter" class="filter-label">Search by Municipality:</label>
-                <input type="text" id="municipalityFilter" class="form-control search-input" placeholder="Enter municipality name">
+    <!-- Filter Section -->
+    <section class="filter-container bg-light p-3 rounded mb-4">
+        <div class="row">
+            <!-- Filters on the left -->
+            <div class="col-md-8">
+                <div class="d-flex flex-column flex-md-row gap-3">
+                    <!-- Filter by Municipality -->
+                    <div class="filter-item flex-grow-1">
+                        <label for="municipalityFilter" class="form-label">Search by Municipality</label>
+                        <input type="text" id="municipalityFilter" class="form-control" placeholder="Enter municipality name">
+                    </div>
+
+                    <!-- Filter by Province -->
+                    <div class="filter-item flex-grow-1">
+                        <label for="provinceFilter" class="form-label">Search by Province</label>
+                        <input type="text" id="provinceFilter" class="form-control" placeholder="Enter province">
+                    </div>
+                </div>
             </div>
-
-            <!-- Filter by Province -->
-            <div class="col-md-4">
-                <label for="provinceFilter" class="filter-label">Search by Province:</label>
-                <input type="text" id="provinceFilter" class="form-control search-input" placeholder="Enter province name">
+            
+            <!-- Filtered By Indicator on the right -->
+            <div class="col-md-4 d-flex align-items-end justify-content-end">
+                <div id="filterStatus" class="mt-md-0 mt-3">
+                    <span class="text-secondary fs-6">
+                        <i class="fas fa-filter me-1"></i> Filtered by: <span id="activeFilters">No filters</span>
+                    </span>
+                </div>
             </div>
         </div>
+    </section>
 
-        <!-- Addresses Table -->
-        <section class="members-table-container">
-            <table class="table custom-table" id="addressTable">
-                <thead>
+    <!-- Addresses Table -->
+    <section class="table-responsive">
+        <!-- Helper text for sorting -->
+        <div class="alert alert-info d-flex align-items-center py-2" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            Click on column headers to sort the table.
+        </div>
+
+        <table class="table custom-table" id="addressTable">
+            <thead>
+                <tr>
+                    <th class="sortable">Members <i class="fas fa-sort"></i></th>
+                    <th class="sortable">Municipality <i class="fas fa-sort"></i></th>
+                    <th class="sortable">Province <i class="fas fa-sort"></i></th>
+                    <th class="text-center actions-column">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
                     <tr>
-                        <th onclick="sortTable(0)">Members</th>
-                        <th onclick="sortTable(1)">Municipality</th>
-                        <th onclick="sortTable(2)">Province</th>
-                        <th class="text-center">Actions</th>
+                        <td data-bs-toggle="tooltip" title="@(item.MemberAddresses.Any() ? string.Join(", ", item.MemberAddresses.Where(ma => ma.Member != null).Select(ma => ma.Member.MemberName)) : "None")">
+                            @(item.MemberAddresses.Any() ? string.Join(", ", item.MemberAddresses.Where(ma => ma.Member != null).Select(ma => ma.Member.MemberName)) : "None")
+                        </td>
+                        <td data-bs-toggle="tooltip" title="@item.City">@item.City</td>
+                        <td>@item.Province</td>
+                        <td class="text-center actions-column">
+                            <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Edit municipality details">Edit</a>
+                            <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="View municipality details">Details</a>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>
-                                @(item.MemberAddresses.Any()
-                                    ? string.Join(", ", item.MemberAddresses
-                                    .Where(ma => ma.Member != null)
-                                    .Select(ma => ma.Member.MemberName))
-                                    : "No Member Associated")
-                            </td>
-                            <td>@item.City</td>
-                            <td>@item.Province</td>
-                            <td class="text-center action-buttons">
-                                <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-edit">Edit</a>
-                                <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-details">Details</a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </section>
+                }
+            </tbody>
+        </table>
+    </section>
 
+    <!-- Pagination Controls -->
+    <div class="row mt-4">
         <!-- Records per page -->
         <div class="col-md-4">
             <label for="recordsPerPage">Records per page:</label>
@@ -73,12 +100,11 @@
                 <option value="20">20</option>
             </select>
         </div>
-
         <!-- Pagination Controls -->
-        <div id="paginationControls" class="pagination">
-            <button id="prevPage" class="btn btn-primary">Previous</button>
-            <span id="pageInfo"></span>
-            <button id="nextPage" class="btn btn-primary">Next</button>
+        <div id="paginationControls" class="col-md-8 d-flex justify-content-end align-items-center gap-3">
+            <button id="prevPage" class="btn btn-primary pagination-btn">Previous</button>
+            <span id="pageInfo" class="pagination-info">Page 1 of 1 (0 records)</span>
+            <button id="nextPage" class="btn btn-primary pagination-btn">Next</button>
         </div>
     </div>
 </div>
@@ -88,6 +114,12 @@
         $(document).ready(function () {
             var currentPage = 1;
             var recordsPerPage = parseInt($('#recordsPerPage').val());
+
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
 
             // Function to get visible rows (rows not hidden by filter)
             function getVisibleRows() {
@@ -110,7 +142,7 @@
             // Function to show the current page
             function showPage(page) {
                 var visibleRows = getVisibleRows();
-                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
 
                 // Ensure currentPage is within valid range
                 if (page < 1) page = 1;
@@ -126,17 +158,17 @@
                 visibleRows.slice(startIndex, endIndex).show();
 
                 // Update page info
-                $('#pageInfo').text(`Page ${page} of ${totalPages}`);
+                $('#pageInfo').text(`Page ${page} of ${totalPages} (${visibleRows.length} records)`);
 
                 // Enable/disable pagination buttons
                 $('#prevPage').prop('disabled', page === 1);
-                $('#nextPage').prop('disabled', page === totalPages);
+                $('#nextPage').prop('disabled', page === totalPages || visibleRows.length === 0);
             }
 
             // Function to update pagination
-            function updatePagination() {
+            window.updatePagination = function() {
                 var visibleRows = getVisibleRows();
-                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
 
                 if (currentPage > totalPages) {
                     currentPage = totalPages > 0 ? totalPages : 1;
@@ -163,7 +195,7 @@
             // Event listener for next page button
             $('#nextPage').on('click', function () {
                 var visibleRows = getVisibleRows();
-                var totalPages = Math.ceil(visibleRows.length / recordsPerPage);
+                var totalPages = Math.ceil(visibleRows.length / recordsPerPage) || 1;
 
                 if (currentPage < totalPages) {
                     currentPage++;
@@ -178,132 +210,70 @@
             }
 
             // Attach filter function to input events
-            $('#municipalityFilter, #provinceFilter').on('input', filterTable);
+            $('#municipalityFilter, #provinceFilter').on('input', function() {
+                filterTable();
+                updateFilterStatus();
+            });
+
+            // Function to update filter status
+            function updateFilterStatus() {
+                var municipalityFilter = $('#municipalityFilter').val().trim();
+                var provinceFilter = $('#provinceFilter').val().trim();
+                
+                var hasActiveFilters = municipalityFilter !== '' || provinceFilter !== '';
+                var activeFiltersText = [];
+                
+                if (municipalityFilter !== '') {
+                    activeFiltersText.push('Municipality: ' + municipalityFilter);
+                }
+                
+                if (provinceFilter !== '') {
+                    activeFiltersText.push('Province: ' + provinceFilter);
+                }
+                
+                if (hasActiveFilters) {
+                    $('#activeFilters').text(activeFiltersText.join(', '));
+                } else {
+                    $('#activeFilters').text('No filters');
+                }
+                $('#filterStatus').show();
+            }
 
             // Initial page load
             updatePagination();
+            updateFilterStatus();
+            
+            // Listen for sort-complete event to update display
+            document.addEventListener('sort-complete', updatePagination);
         });
-         sortTable(1, "asc");
-
-        // Sorting function
-        function sortTable(columnIndex, initialDirection = "asc") {
-            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-            table = document.getElementById("addressTable");
-            switching = true;
-            dir = initialDirection; // Default sorting direction
-
-            // Determine the current sorting direction
-            if (table.rows[0].getElementsByTagName("th")[columnIndex].classList.contains("sorted-asc")) {
-                dir = "desc";
-            } else if (table.rows[0].getElementsByTagName("th")[columnIndex].classList.contains("sorted-desc")) {
-                dir = "asc";
-            }
-
-            // Remove sorting classes from all headers
-            for (i = 0; i < table.rows[0].getElementsByTagName("th").length; i++) {
-                table.rows[0].getElementsByTagName("th")[i].classList.remove("sorted-asc", "sorted-desc");
-            }
-
-            // Add sorting class to the clicked header
-            table.rows[0].getElementsByTagName("th")[columnIndex].classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
-
-            // Perform sorting
-            while (switching) {
-                switching = false;
-                rows = table.rows;
-
-                for (i = 1; i < (rows.length - 1); i++) {
-                    shouldSwitch = false;
-                    x = rows[i].getElementsByTagName("td")[columnIndex];
-                    y = rows[i + 1].getElementsByTagName("td")[columnIndex];
-
-                    if (dir === "asc") {
-                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                            shouldSwitch = true;
-                            break;
-                        }
-                    } else if (dir === "desc") {
-                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                            shouldSwitch = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (shouldSwitch) {
-                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                    switching = true;
-                    switchcount++;
-                } else {
-                    if (switchcount === 0 && dir === "asc") {
-                        dir = "desc";
-                        switching = true;
-                    }
-                }
-            }
-        }
     </script>
 
     <style>
-        th {
-            cursor: pointer;
-        }
-
-            th.sorted-asc::after {
-                content: " ▲";
-            }
-
-            th.sorted-desc::after {
-                content: " ▼";
-            }
-
-        .pagination {
-            display: flex;
+        /* Pagination button styling */
+        .pagination-btn {
+            min-width: 100px;
+            width: 100px;
+            height: 38px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
-            margin-top: 20px;
-            list-style: none; /* Ensures a clean list-style reset */
-            padding: 0; /* Removes default padding on list */
+            padding: 0.375rem 0.75rem;
         }
 
-            .pagination li {
-                margin: 0 5px; /* Space between page links */
-            }
+        .pagination-info {
+            font-size: 14px;
+            color: #6c757d;
+            padding: 0 10px;
+        }
 
-                .pagination li a,
-                .pagination li span {
-                    /* Base link styling */
-                    display: inline-block;
-                    padding: 6px 12px;
-                    color: #6c757d; /* Gray text */
-                    background-color: #f8f9fa; /* Light gray background */
-                    border: 1px solid #d1d1d1; /* Subtle border */
-                    border-radius: 4px;
-                    text-decoration: none;
-                    transition: background-color 0.2s ease;
-                }
-
-                    .pagination li a:hover {
-                        background-color: #e2e3e5; /* Slightly darker hover background */
-                        text-decoration: none;
-                    }
-
-                .pagination li.active a,
-                .pagination li.active span {
-                    /* Active page styling */
-                    background-color: #6c757d; /* Darker gray */
-                    color: #fff; /* White text */
-                    border-color: #6c757d; /* Match background */
-                    cursor: default; /* Doesn’t look clickable */
-                }
-
-
-            .pagination button {
-                margin: 0 5px;
-            }
-
-        #pageInfo {
-            margin: 0 10px;
-            line-height: 2;
+        /* Custom alert styling to match the design */
+        .alert-info {
+            background-color: #e8f4ff;
+            border: none;
+            color: #2c5282;
+            font-size: 14px;
+            border-radius: 4px;
         }
     </style>
 }

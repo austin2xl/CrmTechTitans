@@ -1,11 +1,13 @@
 ﻿using CrmTechTitans.Data;
 using CrmTechTitans.Models;
 using CrmTechTitans.Models.Enumerations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrmTechTitans.Controllers
 {
+    [Authorize]
     public class OpportunityController : Controller
     {
         private readonly CrmContext _context;
@@ -61,6 +63,7 @@ namespace CrmTechTitans.Controllers
         }
 
         // GET: Opportunity/Create
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public IActionResult Create()
         {
             return View();
@@ -71,18 +74,22 @@ namespace CrmTechTitans.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> Create([Bind("ID,Title,Status,Description,Priority")] Opportunity opportunity)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(opportunity);
                 await _context.SaveChangesAsync();
+                TempData["success"] = "Opportunity created successfully!";
+                TempData["message"] = "Opportunity created successfully!";
                 return RedirectToAction(nameof(Index));
             }
             return View(opportunity);
         }
 
         // GET: Opportunity/Edit/5
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -103,6 +110,7 @@ namespace CrmTechTitans.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Title,Status,Description,Priority")] Opportunity opportunity)
         {
             if (id != opportunity.ID)
@@ -116,11 +124,12 @@ namespace CrmTechTitans.Controllers
                 {
                     _context.Update(opportunity);
                     await _context.SaveChangesAsync();
-                    TempData["message"] = "Opportunity edited successfully";
+                    TempData["success"] = "Opportunity updated successfully!";
+                    TempData["message"] = "Opportunity updated successfully!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    TempData["errMessage"] = "Opportunity edited failed";
+                    TempData["error"] = "Failed to edit opportunity. Please try again.";
 
                     if (!OpportunityExists(opportunity.ID))
                     {
@@ -138,6 +147,7 @@ namespace CrmTechTitans.Controllers
         }
 
         // GET: Opportunity/Delete/5
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -158,6 +168,7 @@ namespace CrmTechTitans.Controllers
         // POST: Opportunity/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var opportunity = await _context.Opportunities.FindAsync(id);
@@ -167,6 +178,7 @@ namespace CrmTechTitans.Controllers
             }
 
             await _context.SaveChangesAsync();
+            TempData["success"] = "Opportunity deleted successfully!";
             return RedirectToAction(nameof(Index));
         }
 

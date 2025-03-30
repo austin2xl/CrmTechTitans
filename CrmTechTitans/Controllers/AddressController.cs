@@ -1,11 +1,15 @@
 ﻿using CrmTechTitans.Data;
 using CrmTechTitans.Models;
+using CrmTechTitans.Models.Enumerations;
+using CrmTechTitans.Models.JoinTables;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 //Braydon Pew added 01.22.25
 namespace CrmTechTitans.Controllers
 {
+    [Authorize]
     public class AddressController : Controller
     {
         private readonly CrmContext _context;
@@ -42,8 +46,11 @@ namespace CrmTechTitans.Controllers
         }
 
         // GET: Address/Create
-        public IActionResult Create()
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
+        public IActionResult Create(int? memberId, string? returnUrl)
         {
+            ViewBag.MemberId = memberId;
+            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
@@ -52,19 +59,46 @@ namespace CrmTechTitans.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Street,City,Province,PostalCode")] Address address)
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
+        public async Task<IActionResult> Create([Bind("ID,Street,City,Province,PostalCode,AddressType")] Address address, int? memberId, string? returnUrl)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(address);
                 await _context.SaveChangesAsync();
+
+                // If memberId is provided, create the relationship with the member
+                if (memberId.HasValue)
+                {
+                    var memberAddress = new MemberAddress
+                    {
+                        MemberID = memberId.Value,
+                        AddressID = address.ID,
+                        AddressType = address.AddressType ?? AddressType.Billing
+                    };
+                    _context.MemberAddresses.Add(memberAddress);
+                    await _context.SaveChangesAsync();
+                }
+
+                TempData["success"] = "Address created successfully!";
+                TempData["message"] = "Address created successfully!";
+
+                // Return to the specified URL or default to the Address Index
+                if (!string.IsNullOrEmpty(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
                 return RedirectToAction(nameof(Index));
             }
+            
+            ViewBag.MemberId = memberId;
+            ViewBag.ReturnUrl = returnUrl;
             return View(address);
         }
 
         // GET: Address/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
+        public async Task<IActionResult> Edit(int? id, string? returnUrl)
         {
             if (id == null)
             {
@@ -76,6 +110,8 @@ namespace CrmTechTitans.Controllers
             {
                 return NotFound();
             }
+            
+            ViewBag.ReturnUrl = returnUrl;
             return View(address);
         }
 
@@ -84,7 +120,8 @@ namespace CrmTechTitans.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Street,City,Province,PostalCode")] Address address)
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Street,City,Province,PostalCode,AddressType")] Address address, string? returnUrl)
         {
             if (id != address.ID)
             {
@@ -97,13 +134,19 @@ namespace CrmTechTitans.Controllers
                 {
                     _context.Update(address);
                     await _context.SaveChangesAsync();
-                    TempData["message"] = "Municipality edited successfully";
+                    
+                    TempData["success"] = "Address updated successfully!";
+                    TempData["message"] = "Address updated successfully!";
 
+                    // Return to the specified URL or default to the Address Index
+                    if (!string.IsNullOrEmpty(returnUrl))
+                    {
+                        return Redirect(returnUrl);
+                    }
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    TempData["errMessage"] = "An error occured. Failed to edit the Municipality.";
-
                     if (!AddressExists(address.ID))
                     {
                         return NotFound();
@@ -113,12 +156,14 @@ namespace CrmTechTitans.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
+            
+            ViewBag.ReturnUrl = returnUrl;
             return View(address);
         }
 
         // GET: Address/Delete/5
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -139,6 +184,7 @@ namespace CrmTechTitans.Controllers
         // POST: Address/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var address = await _context.Addresses.FindAsync(id);
@@ -148,6 +194,7 @@ namespace CrmTechTitans.Controllers
             }
 
             await _context.SaveChangesAsync();
+            TempData["success"] = "Address deleted successfully!";
             return RedirectToAction(nameof(Index));
         }
 

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrmTechTitans.Data.CrmMigrations
 {
     [DbContext(typeof(CrmContext))]
-    [Migration("20250224074040_02-24")]
-    partial class _0224
+    [Migration("20250319200943_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,9 @@ namespace CrmTechTitans.Data.CrmMigrations
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("AddressType")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("City")
@@ -52,6 +55,9 @@ namespace CrmTechTitans.Data.CrmMigrations
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ContactType")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Email")
@@ -306,6 +312,10 @@ namespace CrmTechTitans.Data.CrmMigrations
 
                     b.Property<string>("Notes")
                         .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");

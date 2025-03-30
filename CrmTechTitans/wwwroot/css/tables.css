@@ -76,50 +76,94 @@ body {
 
 /* === Table Styling === */
 .table.custom-table {
+    table-layout: fixed;
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    background: white;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1rem;
+    background-color: transparent;
+    border-collapse: collapse;
 }
 
-    .table.custom-table thead {
-        background-color: #f7f7f7;
-    }
+.table.custom-table th,
+.table.custom-table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border-top: 1px solid #dee2e6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
-    .table.custom-table th {
-        padding: 14px;
-        text-align: left;
-        font-weight: 600;
-        font-size: 0.9rem;
-        color: #333;
-        letter-spacing: 0.5px;
-        border-bottom: 2px solid #ddd;
-    }
+/* Make first column auto width */
+.table.custom-table th:first-child,
+.table.custom-table td:first-child {
+    width: auto;
+    min-width: 200px;
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
-    .table.custom-table td {
-        padding: 12px;
-        font-size: 0.9rem;
-        color: #6c757d;
-        border-bottom: 1px solid #eee;
-    }
+/* Actions column fixed width */
+.table.custom-table th.actions-column,
+.table.custom-table td.actions-column {
+    width: 250px;
+    min-width: 250px;
+    text-align: center;
+    white-space: nowrap;
+    padding: 0.5rem;
+}
 
-    .table.custom-table tbody tr:hover {
-        background: rgba(0, 0, 0, 0.03);
-        transition: background 0.2s ease-in-out;
-    }
+/* Tooltip styling */
+.tooltip {
+    position: absolute;
+    z-index: 1070;
+    display: block;
+    margin: 0;
+    font-family: inherit;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: left;
+    text-decoration: none;
+    text-shadow: none;
+    text-transform: none;
+    letter-spacing: normal;
+    word-break: normal;
+    word-spacing: normal;
+    white-space: normal;
+    line-break: auto;
+    font-size: 0.875rem;
+    word-wrap: break-word;
+    opacity: 0;
+}
 
-    .table.custom-table tr:last-child td {
-        border-bottom: none;
-    }
+.tooltip.show {
+    opacity: 0.9;
+}
+
+.tooltip .tooltip-inner {
+    max-width: 300px;
+    padding: 0.5rem 0.75rem;
+    color: #fff;
+    text-align: center;
+    background-color: #000;
+    border-radius: 0.25rem;
+}
 
 /* === Action Buttons Styling === */
 .action-buttons {
     display: flex;
     justify-content: center;
     gap: 8px;
+    flex-wrap: nowrap;
+}
+
+.text-center .btn-sm {
+    margin: 0 2px;
+    min-width: 70px; /* Minimum width for all buttons */
+    width: 70px; /* Fixed width for consistency */
+    white-space: nowrap;
 }
 
 .btn-sm {
@@ -131,14 +175,49 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 90px;
+    min-width: 70px;
+    width: 70px; /* Fixed width for all buttons */
     transition: all 0.3s ease-in-out;
     border: none;
 }
 
-    .btn-sm:hover {
-        background-color: #5a6268;
-    }
+.btn-sm:hover {
+    background-color: #5a6268;
+}
+
+.actions-column .btn-sm {
+    margin: 0 2px;
+    min-width: 70px; /* Consistent width for action buttons */
+    width: 70px; /* Fixed width for action buttons */
+    padding: 6px 8px; /* Slightly smaller padding for action buttons */
+}
+
+/* Special styling for archive button */
+.archive-btn {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 90px; /* Fixed width for both Archive and Unarchive buttons */
+    min-width: 90px;
+    text-align: center;
+    justify-content: center;
+}
+
+.archive-btn.btn-danger {
+    background-color: #dc3545;
+}
+
+.archive-btn.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.archive-btn.btn-success {
+    background-color: #28a745;
+}
+
+.archive-btn.btn-success:hover {
+    background-color: #218838;
+}
 
 /* === Edit & Details Button Styling === */
 .btn-edit, .btn-details {
@@ -149,6 +228,11 @@ body {
     text-decoration: none;
     transition: all 0.2s ease;
     font-size: 0.85rem;
+    min-width: 70px;
+    width: 70px; /* Fixed width for consistency */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
     .btn-edit:hover, .btn-details:hover {
@@ -164,48 +248,78 @@ body {
     }
 
 /* === Sorting Indicators === */
+.sortable {
+    position: relative;
+    cursor: pointer;
+}
+
+.sortable:hover {
+    background-color: #f5f5f5;
+}
+
+.sortable .fas {
+    margin-left: 5px;
+    color: #aaa;
+}
+
+/* Updated styling for sort indicators */
+.sortable .fa-sort {
+    margin-left: 5px;
+    color: #aaa;
+}
+
+.sortable .fa-sort-up,
+.sortable .fa-sort-down {
+    margin-left: 5px;
+    color: #333;
+}
+
+th.sorted-asc .fa-sort-up,
+th.sorted-desc .fa-sort-down {
+    color: #333;
+}
+
+/* Remove conflicting styles */
 th.sorted-asc::after,
 th.sorted-desc::after {
-    font-size: 0.75rem;
-    color: #666;
-}
-
-th.sorted-asc::after {
-    content: " ▲";
-}
-
-th.sorted-desc::after {
-    content: " ▼";
+    content: "" !important;
 }
 
 /* === Responsive Styling === */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .table.custom-table {
         display: block;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+        table-layout: auto; /* Revert to auto layout for small screens */
+        width: 100%;
     }
 
-    .filter-container {
-        flex-direction: column;
-        justify-content: center;
+    .table.custom-table th:first-child {
+        width: 60px; /* Slightly smaller on mobile */
+    }
+    
+    .table.custom-table th.actions-column,
+    .table.custom-table td.actions-column {
+        width: 230px; /* Slightly smaller on mobile but still large enough for 3 buttons */
+        min-width: 230px;
     }
 
-        .filter-container .form-control,
-        .filter-container .search-input,
-        .filter-container .filter-select {
-            max-width: 100%;
-            margin-bottom: 10px;
-        }
+    .table.custom-table th,
+    .table.custom-table td {
+        white-space: nowrap;
+    }
 
-    .btn-sm {
+    .text-center {
+        white-space: nowrap;
+    }
+
+    .text-center .btn-sm {
         padding: 5px 8px;
+        margin: 0 1px;
         font-size: 0.8rem;
+        min-width: auto;
     }
-
-        .btn-sm:hover {
-            background-color: #5a6268;
-        }
 }
 
 /* === Input Field Styling === */

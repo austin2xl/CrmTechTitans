@@ -4,9 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CrmTechTitans.Data;
 using CrmTechTitans.Models;
+using CrmTechTitans.Models.Enumerations;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CrmTechTitans.Controllers
 {
+    [Authorize]
     public class InteractionController : Controller
     {
         private readonly CrmContext _context;
@@ -49,6 +52,7 @@ namespace CrmTechTitans.Controllers
         }
 
         // GET: Interaction/Create
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> Create()
         {
             ViewBag.Contacts = await _context.Contacts
@@ -61,12 +65,15 @@ namespace CrmTechTitans.Controllers
         // POST: Interaction/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> Create([Bind("Id,InteractionDetails,Date,ContactId")] Interaction interaction)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(interaction);
                 await _context.SaveChangesAsync();
+                TempData["success"] = "Interaction created successfully!";
+                TempData["message"] = "Interaction created successfully!";
                 return RedirectToAction(nameof(Index));
             }
             ViewBag.Contacts = await _context.Contacts.ToListAsync();
@@ -74,6 +81,7 @@ namespace CrmTechTitans.Controllers
         }
 
         // GET: Interaction/Edit/5
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -96,6 +104,7 @@ namespace CrmTechTitans.Controllers
         // POST: Interaction/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> Edit(int id, [Bind("Id,InteractionDetails,Date,ContactId")] Interaction interaction)
         {
             if (id != interaction.Id)
@@ -109,11 +118,12 @@ namespace CrmTechTitans.Controllers
                 {
                     _context.Update(interaction);
                     await _context.SaveChangesAsync();
-                    TempData["message"] = "Interaction edited successfully";
+                    TempData["success"] = "Interaction updated successfully!";
+                    TempData["message"] = "Interaction updated successfully!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    TempData["errMessage"] = "An error occurred. Failed to edit the interaction.";
+                    TempData["error"] = "Failed to edit interaction. Please try again.";
                     if (!InteractionExists(interaction.Id))
                     {
                         return NotFound();
@@ -130,6 +140,7 @@ namespace CrmTechTitans.Controllers
         }
 
         // GET: Interaction/Delete/5
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -148,10 +159,10 @@ namespace CrmTechTitans.Controllers
             return View(interaction);
         }
 
-
         // POST: Interaction/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = UserRoles.Administrator + "," + UserRoles.Editor)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var interaction = await _context.Interactions.FindAsync(id);
@@ -161,6 +172,7 @@ namespace CrmTechTitans.Controllers
             }
 
             await _context.SaveChangesAsync();
+            TempData["success"] = "Interaction deleted successfully!";
             return RedirectToAction(nameof(Index));
         }
 

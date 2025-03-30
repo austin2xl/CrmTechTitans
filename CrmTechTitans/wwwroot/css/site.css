@@ -212,3 +212,26 @@ th.sorted-desc::after {
 .tooltip-arrow::before {
     border-top-color: #333; /* Arrow color */
 }
+
+
+/*Breadcrumbs*/
+.breadcrumb {
+    background: none;
+    padding: 10px 0;
+    font-size: 30px;
+}
+
+.breadcrumb-item a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.breadcrumb-item.active {
+    font-weight: bold;
+    color: #6c757d;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: " > ";
+}
+

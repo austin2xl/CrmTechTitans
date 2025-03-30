@@ -7,7 +7,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             toastr.options = {
-                "closeButton": false,
+                "closeButton": true,
                 "debug": false,
                 "newestOnTop": false,
                 "progressBar": false,
@@ -24,38 +24,26 @@
                 "hideMethod": "fadeOut"
             };
 
-            toastr.success('@TempData["message"]');
-        });
-    </script>
-}
+        // Show notifications based on TempData
+        @if (TempData["success"] != null)
+        {
+            <text>toastr.success('@TempData["success"]', 'Success');</text>
+        }
 
-@if (TempData["errMessage"] != null)
-{
+        @if (TempData["error"] != null)
+        {
+            <text>toastr.error('@TempData["error"]', 'Error');</text>
+        }
 
-    <script src="/lib/jquery//dist/jquery.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+        @if (TempData["info"] != null)
+        {
+            <text>toastr.info('@TempData["info"]', 'Information');</text>
+        }
 
-    <script type="text/javascript">
-        $(document).ready(function () {
-            toastr.options = {
-                "closeButton": false,
-                "debug": false,
-                "newestOnTop": false,
-                "progressBar": false,
-                "positionClass": "toast-top-center",
-                "preventDuplicates": false,
-                "onclick": null,
-                "showDuration": "300",
-                "hideDuration": "1000",
-                "timeOut": "5000",
-                "extendedTimeOut": "1000",
-                "showEasing": "swing",
-                "hideEasing": "linear",
-                "showMethod": "fadeIn",
-                "hideMethod": "fadeOut"
-            };
-
-            toastr.error('@TempData["errMessage"]');
-        });
-    </script>
+        @if (TempData["warning"] != null)
+        {
+            <text>toastr.warning('@TempData["warning"]', 'Warning');</text>
+        }
+    });
+</script>
 }

@@ -1,0 +1,70 @@
+@model List<CrmTechTitans.Models.ViewModels.UserViewModel>
+
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-xxl-8">
+            <!-- Page Header -->
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h1 class="h3 mb-0 text-dark fw-bold">User Management</h1>
+                    <p class="text-secondary mb-0">Manage user accounts and their roles in the system.</p>
+                </div>
+                <a asp-action="Create" class="btn btn-dark">
+                    <i class="fas fa-plus-circle me-2"></i> Create New User
+                </a>
+            </div>
+
+            <!-- User List Card -->
+            <div class="card shadow-sm border-0 mb-4 bg-white">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 ps-4">Username</th>
+                                    <th class="border-0">Email</th>
+                                    <th class="border-0">Roles</th>
+                                    <th class="border-0 text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in Model)
+                                {
+                                    <tr>
+                                        <td class="ps-4">@user.UserName</td>
+                                        <td>@user.Email</td>
+                                        <td>
+                                            @if (user.Roles.Any())
+                                            {
+                                                foreach (var role in user.Roles)
+                                                {
+                                                    <span class="badge bg-primary me-1">@role</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">No roles assigned</span>
+                                            }
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary me-1">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash-alt"></i> Delete
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

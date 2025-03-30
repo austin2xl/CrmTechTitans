@@ -1,0 +1,90 @@
+@model CrmTechTitans.Models.ViewModels.EditUserViewModel
+
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-xxl-6">
+            <!-- Page Header -->
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h1 class="h3 mb-0 text-dark fw-bold">Edit User</h1>
+                    <p class="text-secondary mb-0">Modify user details and role assignments.</p>
+                </div>
+            </div>
+
+            <!-- Edit User Card -->
+            <div class="card shadow-sm border-0 mb-4 bg-white">
+                <div class="card-body p-lg-5">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="UserName" />
+
+                        <div class="row g-4 mb-4">
+                            <!-- Email -->
+                            <div class="col-12">
+                                <div class="form-group mb-0">
+                                    <label asp-for="Email" class="form-label text-secondary"></label>
+                                    <input asp-for="Email" class="form-control bg-light border-secondary h-auto py-2" placeholder="Enter Email" />
+                                    <span asp-validation-for="Email" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <!-- New Password (Optional) -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-0">
+                                    <label asp-for="NewPassword" class="form-label text-secondary"></label>
+                                    <input asp-for="NewPassword" class="form-control bg-light border-secondary h-auto py-2" placeholder="Enter New Password" />
+                                    <span asp-validation-for="NewPassword" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <!-- Confirm New Password -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-0">
+                                    <label asp-for="ConfirmNewPassword" class="form-label text-secondary"></label>
+                                    <input asp-for="ConfirmNewPassword" class="form-control bg-light border-secondary h-auto py-2" placeholder="Confirm New Password" />
+                                    <span asp-validation-for="ConfirmNewPassword" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <!-- Role -->
+                            <div class="col-12">
+                                <div class="form-group mb-0">
+                                    <label asp-for="SelectedRole" class="form-label text-secondary"></label>
+                                    <select asp-for="SelectedRole" class="form-select bg-light border-secondary h-auto py-2">
+                                        <option value="">Select Role</option>
+                                        @foreach (var role in Model.AvailableRoles)
+                                        {
+                                            <option value="@role">@role</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="SelectedRole" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2">
+                                <i class="fas fa-arrow-left me-2"></i> Back to List
+                            </a>
+                            <button type="submit" class="btn btn-dark px-4 py-2">
+                                <i class="fas fa-save me-2"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+} 
