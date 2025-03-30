@@ -302,21 +302,21 @@ namespace CrmTechTitans.Controllers
                         }
 
                         // Check for duplicate contacts
-                        var existingContact = await _context.Contacts
-                            .FirstOrDefaultAsync(c => 
-                                c.FirstName.ToLower() == contactModel.FirstName.ToLower() && 
-                                c.LastName.ToLower() == contactModel.LastName.ToLower() &&
-                                (string.IsNullOrEmpty(c.Email) ? string.IsNullOrEmpty(contactModel.Email) : 
-                                 c.Email.ToLower() == (contactModel.Email == null ? "" : contactModel.Email.ToLower())));
-                                 
-                        if (existingContact != null)
+                        if (!string.IsNullOrEmpty(contactModel.Email) || !string.IsNullOrEmpty(contactModel.Phone))
                         {
-                            // If contact exists, use the existing one instead of creating a new one
-                            member.MemberContacts.Add(new MemberContact { 
-                                Contact = existingContact,
-                                ContactType = contactModel.ContactType
-                            });
-                            continue;
+                            var duplicateExists = _context.Contacts.Any(c =>
+                                c.FirstName.ToLower() == contactModel.FirstName.ToLower() &&
+                                c.LastName.ToLower() == contactModel.LastName.ToLower() &&
+                                (c.Email.ToLower() == contactModel.Email.ToLower() || c.Phone == contactModel.Phone));
+
+                            if (duplicateExists)
+                            {
+                                ModelState.AddModelError("Contacts", $"The contact {contactModel.FirstName} {contactModel.LastName} already exists. Please enter a new one.");
+                                TempData["error"] = $"The contact {contactModel.FirstName} {contactModel.LastName} already exists. Please enter a new one.";
+                                model.AvailableIndustries = _context.Industries.Select(i => new IndustryViewModel { ID = i.ID, Name = i.Name, NAICS = i.NAICS }).ToList();
+                                model.AvailableMembershipTypes = _context.MembershipTypes.Select(mt => new MembershipTypeViewModel { ID = mt.ID, Name = mt.Name }).ToList();
+                                return View(model);
+                            }
                         }
 
                         await AddContactPicture(contactModel, contactPicture);
